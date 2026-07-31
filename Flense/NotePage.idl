@@ -1,8 +1,12 @@
+import "Note.idl";
+
 namespace Flense
 {
     [default_interface]
     runtimeclass NotePage : Microsoft.UI.Xaml.Controls.Page
     {
         NotePage();
+
+        Flense.Note Note { get; };
     }
 }

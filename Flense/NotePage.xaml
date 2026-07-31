@@ -6,7 +6,6 @@
     xmlns:local="using:Flense"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Loaded="Loaded"
     mc:Ignorable="d">
 
     <Grid Padding="16" RowSpacing="8">
@@ -21,6 +20,7 @@
         </Grid.ColumnDefinitions>
 
         <TextBox x:Name="NoteEditor"
+         Text="{x:Bind Note.Text, Mode=TwoWay}"
          AcceptsReturn="True"
          TextWrapping="Wrap"
          PlaceholderText="Enter your note"

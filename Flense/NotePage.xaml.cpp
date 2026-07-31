@@ -1,5 +1,4 @@
 #include "pch.h"
-#include <iostream>
 #include "NotePage.xaml.h"
 #if __has_include("NotePage.g.cpp")
 #include "NotePage.g.cpp"
@@ -13,38 +12,18 @@ using namespace Microsoft::UI::Xaml;
 
 namespace winrt::Flense::implementation
 {
-	void NotePage::InitializeComponent()
+	NotePage::NotePage() 
 	{
-		NotePageT::InitializeComponent();
+		m_note = winrt::make<::winrt::Flense::implementation::Note>();
 	}
 
-	winrt::fire_and_forget NotePage::Loaded(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args)
+	winrt::fire_and_forget NotePage::SaveButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
 	{
-		m_noteFile = (co_await m_storageFolder.TryGetItemAsync(m_fileName)).as<Windows::Storage::IStorageFile>();
-		if (m_noteFile) 
-		{
-			winrt::hstring text = co_await Windows::Storage::FileIO::ReadTextAsync(m_noteFile);
-			NoteEditor().Text(text);
-		}
-	}
-}
-
-winrt::fire_and_forget winrt::Flense::implementation::NotePage::SaveButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
-{
-	if (!m_noteFile) 
-	{
-		m_noteFile = co_await m_storageFolder.CreateFileAsync(m_fileName, Windows::Storage::CreationCollisionOption::ReplaceExisting);
+		co_await m_note.SaveAsync();
 	}
 
-	co_await winrt::Windows::Storage::FileIO::WriteTextAsync(m_noteFile, NoteEditor().Text());
-}
-
-winrt::fire_and_forget winrt::Flense::implementation::NotePage::DeleteButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
-{
-	if (m_noteFile) 
+	winrt::fire_and_forget NotePage::DeleteButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
 	{
-		co_await m_noteFile.DeleteAsync();
-		m_noteFile = nullptr;
-		NoteEditor().Text(L"");
+		co_await m_note.DeleteAsync();
 	}
 }

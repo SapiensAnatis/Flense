@@ -1,0 +1,12 @@
+namespace Flense
+{
+    runtimeclass Note : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        Note();
+
+        String Text;
+
+        Windows.Foundation.IAsyncAction SaveAsync();
+        Windows.Foundation.IAsyncAction DeleteAsync();
+    }
+}
