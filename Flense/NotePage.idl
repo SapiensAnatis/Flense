@@ -1,0 +1,8 @@
+namespace Flense
+{
+    [default_interface]
+    runtimeclass NotePage : Microsoft.UI.Xaml.Controls.Page
+    {
+        NotePage();
+    }
+}

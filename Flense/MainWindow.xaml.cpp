@@ -26,5 +26,6 @@ namespace winrt::Flense::implementation
     {
         MainWindowT::InitializeComponent();
         ExtendsContentIntoTitleBar(true);
+        SetTitleBar(AppTitleBar());
     }
 }
