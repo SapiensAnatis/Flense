@@ -9,6 +9,10 @@
     mc:Ignorable="d"
     Title="Flense">
 
+    <Window.SystemBackdrop>
+        <MicaBackdrop Kind="Base" />
+    </Window.SystemBackdrop>
+
     <Grid>
 
     </Grid>

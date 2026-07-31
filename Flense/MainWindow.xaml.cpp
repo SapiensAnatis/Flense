@@ -21,4 +21,10 @@ namespace winrt::Flense::implementation
     {
         throw hresult_not_implemented();
     }
+
+    void MainWindow::InitializeComponent()
+    {
+        MainWindowT::InitializeComponent();
+        ExtendsContentIntoTitleBar(true);
+    }
 }

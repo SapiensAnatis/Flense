@@ -14,6 +14,7 @@ namespace winrt::Flense::implementation
 
         int32_t MyProperty();
         void MyProperty(int32_t value);
+        void InitializeComponent();
     };
 }
 
