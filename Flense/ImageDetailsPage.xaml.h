@@ -12,8 +12,13 @@ namespace winrt::Flense::implementation
             // See https://github.com/microsoft/cppwinrt/tree/master/nuget#initializecomponent
         }
 
-        int32_t MyProperty();
-        void MyProperty(int32_t value);
+        winrt::Windows::Storage::StorageFile ImageFile();
+        void ImageFile(winrt::Windows::Storage::StorageFile const& value);
+
+        void OnNavigatedTo(winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
+
+      private:
+        winrt::Windows::Storage::StorageFile m_imageFile{ nullptr };
     };
 }
 

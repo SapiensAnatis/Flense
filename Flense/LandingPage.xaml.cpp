@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "ImageDetailsPage.xaml.h"
 #include "LandingPage.xaml.h"
 
 #if __has_include("LandingPage.g.cpp")
@@ -11,8 +12,10 @@
 #include <winrt/Microsoft.UI.Interop.h>
 #include <winrt/Microsoft.UI.Windowing.h>
 #include <winrt/Windows.Storage.Pickers.h>
+#include <winrt/Windows.UI.Xaml.Interop.h>
 
 using namespace winrt;
+using namespace Microsoft::UI;
 using namespace Microsoft::UI::Xaml;
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Storage;
@@ -32,8 +35,7 @@ namespace winrt::Flense::implementation
             auto picker = FileOpenPicker();
 
             auto initializeWithWindow = picker.as<::IInitializeWithWindow>();
-            HWND hwnd =
-                winrt::Microsoft::UI::GetWindowFromWindowId(button.XamlRoot().ContentIslandEnvironment().AppWindowId());
+            HWND hwnd = GetWindowFromWindowId(button.XamlRoot().ContentIslandEnvironment().AppWindowId());
             initializeWithWindow->Initialize(hwnd);
 
             picker.CommitButtonText(L"Upload Image");
@@ -44,6 +46,11 @@ namespace winrt::Flense::implementation
             StorageFile file = co_await picker.PickSingleFileAsync();
 
             button.IsEnabled(true);
+
+            if (file)
+            {
+                Frame().Navigate(xaml_typename<Flense::ImageDetailsPage>(), file);
+            }
         }
     }
 } // namespace winrt::Flense::implementation
