@@ -29,7 +29,7 @@ namespace winrt::Flense::implementation
     {
         if (auto imageFile = e.Parameter().try_as<StorageFile>())
         {
-            m_imageFile = imageFile;
+            ImageFile(imageFile);
             MessageTextBlock().Text(L"I am going to open file at " + m_imageFile.Path());
         }
         else
