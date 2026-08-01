@@ -12,29 +12,11 @@ using namespace Microsoft::UI::Xaml;
 
 namespace winrt::Flense::implementation
 {
-    int32_t MainWindow::MyProperty()
-    {
-        throw hresult_not_implemented();
-    }
-
-    void MainWindow::MyProperty(int32_t /* value */)
-    {
-        throw hresult_not_implemented();
-    }
-
     void MainWindow::InitializeComponent()
     {
         MainWindowT::InitializeComponent();
         ExtendsContentIntoTitleBar(true);
         SetTitleBar(AppTitleBar());
-    }
-
-    void MainWindow::AppTitleBar_BackRequested(winrt::Microsoft::UI::Xaml::Controls::TitleBar const& sender, winrt::Windows::Foundation::IInspectable const& args)
-    {
-        if (rootFrame().CanGoBack())
-        {
-            rootFrame().GoBack();
-        }
     }
 }
 

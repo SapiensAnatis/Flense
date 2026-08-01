@@ -124,19 +124,6 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Models\AllNotes.h">
-      <DependentUpon>Models\AllNotes.idl</DependentUpon>
-      <SubType>Code</SubType>
-    </ClInclude>
-    <ClInclude Include="Models\Note.h" />
-    <ClInclude Include="Views\AllNotesPage.xaml.h">
-      <DependentUpon>Views\AllNotesPage.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </ClInclude>
-    <ClInclude Include="Views\NotePage.xaml.h">
-      <DependentUpon>Views\NotePage.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </ClInclude>
     <ClInclude Include="pch.h" />
     <ClInclude Include="App.xaml.h">
       <DependentUpon>App.xaml</DependentUpon>
@@ -147,28 +134,9 @@
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
-    <Page Include="Views\AllNotesPage.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\NotePage.xaml">
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="MainWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Models\AllNotes.cpp">
-      <DependentUpon>Models\AllNotes.idl</DependentUpon>
-      <SubType>Code</SubType>
-    </ClCompile>
-    <ClCompile Include="Models\Note.cpp" />
-    <ClCompile Include="Views\AllNotesPage.xaml.cpp">
-      <DependentUpon>Views\AllNotesPage.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </ClCompile>
-    <ClCompile Include="Views\NotePage.xaml.cpp">
-      <DependentUpon>Views\NotePage.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -181,18 +149,6 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="Models\AllNotes.idl">
-      <SubType>Designer</SubType>
-    </Midl>
-    <Midl Include="Models\Note.idl" />
-    <Midl Include="Views\AllNotesPage.idl">
-      <DependentUpon>Views\AllNotesPage.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Midl>
-    <Midl Include="Views\NotePage.idl">
-      <DependentUpon>Views\NotePage.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Midl>
     <Midl Include="MainWindow.idl">
       <SubType>Code</SubType>
       <DependentUpon>MainWindow.xaml</DependentUpon>

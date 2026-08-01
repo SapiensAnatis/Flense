@@ -13,7 +13,6 @@
         <MicaBackdrop Kind="Base" />
     </Window.SystemBackdrop>
 
-
     <Grid>
         <Grid.RowDefinitions>
             <!-- Title Bar -->
@@ -22,16 +21,13 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TitleBar x:Name="AppTitleBar"
-                  Title="WinUI Notes"
-                  IsBackButtonVisible="True"
-                  IsBackButtonEnabled="{x:Bind rootFrame.CanGoBack, Mode=OneWay}"
-                  BackRequested="AppTitleBar_BackRequested">
+                  Title="Flense">
             <TitleBar.IconSource>
                 <FontIconSource Glyph="&#xF4AA;"/>
             </TitleBar.IconSource>
         </TitleBar>
 
         <!-- App content -->
-        <Frame x:Name="rootFrame" Grid.Row="1" SourcePageType="local:AllNotesPage"/>
+        <Frame x:Name="rootFrame" Grid.Row="1"/>
     </Grid>
 </Window>
