@@ -15,6 +15,7 @@ namespace winrt::Flense::implementation
         int32_t MyProperty();
         void MyProperty(int32_t value);
         void InitializeComponent();
+        void AppTitleBar_BackRequested(winrt::Microsoft::UI::Xaml::Controls::TitleBar const& sender, winrt::Windows::Foundation::IInspectable const& args);
     };
 }
 

@@ -16,6 +16,8 @@ namespace winrt::Flense::implementation
 
     private:
         winrt::Flense::Models::AllNotes m_notesModel{ nullptr };
+    public:
+        void ItemsView_ItemInvoked(winrt::Microsoft::UI::Xaml::Controls::ItemsView const& sender, winrt::Microsoft::UI::Xaml::Controls::ItemsViewItemInvokedEventArgs const& args);
     };
 }
 

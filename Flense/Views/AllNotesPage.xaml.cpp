@@ -28,6 +28,13 @@ namespace winrt::Flense::implementation
     {
 		Frame().Navigate(xaml_typename<Flense::NotePage>());
     }
+
+    void AllNotesPage::ItemsView_ItemInvoked(winrt::Microsoft::UI::Xaml::Controls::ItemsView const& sender, winrt::Microsoft::UI::Xaml::Controls::ItemsViewItemInvokedEventArgs const& args)
+    {
+        Frame().Navigate(xaml_typename<Flense::NotePage>(), args.InvokedItem());
+    }
 }
+
+
 
 

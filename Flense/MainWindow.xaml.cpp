@@ -28,4 +28,14 @@ namespace winrt::Flense::implementation
         ExtendsContentIntoTitleBar(true);
         SetTitleBar(AppTitleBar());
     }
+
+    void MainWindow::AppTitleBar_BackRequested(winrt::Microsoft::UI::Xaml::Controls::TitleBar const& sender, winrt::Windows::Foundation::IInspectable const& args)
+    {
+        if (rootFrame().CanGoBack())
+        {
+            rootFrame().GoBack();
+        }
+    }
 }
+
+

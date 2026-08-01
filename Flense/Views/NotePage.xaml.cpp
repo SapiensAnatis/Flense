@@ -20,19 +20,39 @@ namespace winrt::Flense::implementation
 
 	void NotePage::OnNavigatedTo(winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e)
 	{
-		long long msEpoch = std::chrono::duration_cast<std::chrono::milliseconds>(winrt::clock::now().time_since_epoch()).count();
-		std::wstring name = L"note-" + std::to_wstring(msEpoch) + L".txt";
+		NotePageT::OnNavigatedTo(e);
 
-		m_note = winrt::make<::winrt::Flense::Models::implementation::Note>(winrt::hstring(name), L"", winrt::clock::now());
+		if (auto note = e.Parameter().try_as<Flense::Models::Note>())
+		{
+			m_note = note;
+		}
+		else 
+		{
+			long long msEpoch = std::chrono::duration_cast<std::chrono::milliseconds>(winrt::clock::now().time_since_epoch()).count();
+			std::wstring name = L"note-" + std::to_wstring(msEpoch) + L".txt";
+
+			m_note = winrt::make<::winrt::Flense::Models::implementation::Note>(winrt::hstring(name), L"", winrt::clock::now());
+		}
 	}
 
 	winrt::fire_and_forget NotePage::SaveButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
 	{
-		co_await m_note.SaveAsync();
+		if (m_note)
+		{
+			co_await m_note.SaveAsync();
+		}
 	}
 
 	winrt::fire_and_forget NotePage::DeleteButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
 	{
-		co_await m_note.DeleteAsync();
+		if (m_note)
+		{
+			co_await m_note.DeleteAsync();
+		}
+
+		if (Frame().CanGoBack()) 
+		{
+			Frame().GoBack();
+		}
 	}
 }
