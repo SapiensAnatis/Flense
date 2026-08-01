@@ -1,0 +1,11 @@
+import "Models/AllNotes.idl";
+
+namespace Flense
+{
+    [default_interface]
+    runtimeclass AllNotesPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        AllNotesPage();
+        AllNotes NotesModel{ get; };
+    }
+}

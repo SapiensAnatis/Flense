@@ -7,10 +7,10 @@ namespace winrt::Flense::implementation
 	struct Note : NoteT<Note>
 	{
 	public:
-		Note()
+		Note(const winrt::hstring& filename, const winrt::hstring& text)
 		{
-			auto epochMs = std::chrono::duration_cast<std::chrono::milliseconds>(m_date.time_since_epoch()).count();
-			m_filename =  L"notes" + std::to_wstring(epochMs) + L".txt";
+			m_filename = filename;
+			m_text = text;
 		}
 
 		winrt::Windows::Foundation::IAsyncAction SaveAsync();

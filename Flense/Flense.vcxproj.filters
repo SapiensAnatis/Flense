@@ -6,10 +6,12 @@
   <ItemGroup>
     <Page Include="MainWindow.xaml" />
     <Page Include="Views\NotePage.xaml" />
+    <Page Include="Views\AllNotesPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />
     <Midl Include="Models\Note.idl" />
+    <Midl Include="Models\AllNotes.idl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

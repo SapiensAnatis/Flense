@@ -2,7 +2,7 @@ namespace Flense
 {
     runtimeclass Note : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
     {
-        Note();
+        Note(String filename, String text);
 
         String Text;
         String DisplayDate{ get; };
