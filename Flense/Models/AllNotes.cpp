@@ -31,13 +31,10 @@ namespace winrt::Flense::Models::implementation
 
 	void AllNotes::RemoveNote(const winrt::Flense::Models::Note& note)
 	{
-		for (uint32_t i = 0; i < m_notes.Size(); ++i)
+		uint32_t index{};
+		if (m_notes.IndexOf(note, index))
 		{
-			if (m_notes.GetAt(i).Filename() == note.Filename())
-			{
-				m_notes.RemoveAt(i);
-				break;
-			}
+			m_notes.RemoveAt(index);
 		}
 	}
 

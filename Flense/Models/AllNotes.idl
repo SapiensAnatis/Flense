@@ -6,5 +6,8 @@ namespace Flense.Models
     {
         AllNotes();
         IObservableVector<Note> Notes{ get; };
+
+        void AddNote(Flense.Models.Note note);
+        void RemoveNote(Flense.Models.Note note);
     }
 }
