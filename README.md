@@ -45,11 +45,12 @@ want to use CMake or Bazel to build this library and their own native GUIs.
 - **OS:** Windows 11 (Windows App SDK / WinUI 3 desktop app)
 - **IDE/toolchain:** Visual Studio 2026 with the C++ desktop and Windows App SDK workloads
 - **Language:** C++20 built with MSVC
-- **Solution:** `Flense.slnx` — contains `Flense.vcxproj` (the app) and `Flense.Core.vcxproj` (the core library)
 - **Formatting:** `.clang-format` at the repo root
 - **Building:** open `Flense.slnx` in Visual Studio and build, or from the command line:
+
   ```
   msbuild Flense.slnx /p:Configuration=Debug /p:Platform=x64
   ```
+
 - **Running:** Flense is an MSIX-packaged app (`Package.appxmanifest`, `AppxPackage=true`) — run it via Visual Studio (F5/deploy) rather than 
-- launching the `.exe` directly. Requires Developer Mode enabled to sideload/debug locally.
+  launching the `.exe` directly. Requires Developer Mode enabled to sideload/debug locally.
