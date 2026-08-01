@@ -1,11 +1,11 @@
 #pragma once
 
-#include <array>
 #include <concepts>
 #include <coroutine>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <span>
 #include <stop_token>
 
@@ -29,7 +29,9 @@ namespace Flense::Core
     template <typename Awaitable, ByteSource TSource>
     Awaitable ProcessArchive(TSource& source, std::function<void(double)> onProgress, std::stop_token stopToken)
     {
-        static std::array<std::byte, 64 * 1024> buffer;
+        constexpr size_t chunkSize = 64 * 1024;
+        auto const buffer = std::make_unique<std::byte[]>(chunkSize);
+        std::span<std::byte> const bufferSpan(buffer.get(), chunkSize);
 
         uint64_t const totalSize = source.Size();
         uint64_t bytesRead = 0;
@@ -37,7 +39,7 @@ namespace Flense::Core
 
         while (!stopToken.stop_requested())
         {
-            size_t const bytesReadThisChunk = co_await source.Read(buffer);
+            size_t const bytesReadThisChunk = co_await source.Read(bufferSpan);
             if (bytesReadThisChunk == 0)
             {
                 break;
