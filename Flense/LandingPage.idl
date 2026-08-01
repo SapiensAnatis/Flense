@@ -1,0 +1,8 @@
+namespace Flense
+{
+    [default_interface]
+    runtimeclass LandingPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        LandingPage();
+    }
+}
