@@ -24,6 +24,23 @@ namespace winrt::Flense::Models::implementation
         return m_notes; 
     }
 
+	void AllNotes::AddNote(const winrt::Flense::Models::Note& note)
+	{
+		m_notes.InsertAt(0, note);
+	}
+
+	void AllNotes::RemoveNote(const winrt::Flense::Models::Note& note)
+	{
+		for (uint32_t i = 0; i < m_notes.Size(); ++i)
+		{
+			if (m_notes.GetAt(i).Filename() == note.Filename())
+			{
+				m_notes.RemoveAt(i);
+				break;
+			}
+		}
+	}
+
     winrt::fire_and_forget AllNotes::LoadNotesAsync()
     {
         m_notes.Clear();
@@ -48,7 +65,7 @@ namespace winrt::Flense::Models::implementation
 				StorageFile file = item.as<StorageFile>();
 				winrt::hstring text = co_await FileIO::ReadTextAsync(file);
 
-				winrt::Flense::Models::Note note = winrt::make<winrt::Flense::Models::implementation::Note>(file.Name(), text, file.DateCreated());
+				winrt::Flense::Models::Note note = winrt::make<winrt::Flense::Models::implementation::Note>(file.Name(), text, file.DateCreated(), NoteState::Saved);
 				m_notes.Append(note);
 			}
 		}
