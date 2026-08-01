@@ -18,6 +18,8 @@ namespace winrt::Flense::implementation
         void OnNavigatedTo(winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
 
       private:
+        winrt::fire_and_forget ProcessFileAsync();
+
         winrt::Windows::Storage::StorageFile m_imageFile{ nullptr };
     };
 }
