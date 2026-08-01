@@ -14,8 +14,8 @@ me memes about the Win32 API. I needed to write a WinUI 3 C++/WinRT app.
 
 Part of me feels like I'm offering this app as a heartfelt apology for the war crimes committed in my tenure thus far as a software
 engineer. I've written code you people wouldn't believe. React GUIs claiming the JavaScript heap as their birthright. C# code 
-calling the database so often that MSSQL filed a restraining order. I watched C++ threads fight over mutexes like a train door in rush 
-hour at Shinjuku station.
+calling the database so often that MSSQL filed a restraining order. I watched C++ threads fight for a mutex like commuters for a 
+train door at Shinjuku station.
 
 This project, if I ever actually finish it, will be a love letter to deeply-integrated and fluid native apps. Perhaps I've over-corrected 
 in not using Avalonia, or Qt, or even just CsWinRT, but I want it all. Every efficiency saving, every opportunity to look as native as possible.
