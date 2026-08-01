@@ -7,7 +7,8 @@
     xmlns:models="using:Flense.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    NavigationCacheMode="Enabled">
     <Page.Resources>
         <DataTemplate x:Key="NoteItemTemplate" 
                   x:DataType="models:Note">
@@ -20,7 +21,7 @@
                         <RowDefinition Height="120"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Text="{x:Bind Text}" Margin="12,8"
+                    <TextBlock Text="{x:Bind Text, Mode=OneWay}" Margin="12,8"
                            TextWrapping="Wrap"
                            TextTrimming="WordEllipsis"/>
                     <Border Grid.Row="1" Padding="8,6,0,6"
