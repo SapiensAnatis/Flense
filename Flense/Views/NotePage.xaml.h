@@ -2,7 +2,7 @@
 
 #include "NotePage.g.h"
 
-#include "Models/Note.h"
+#include "Models.Note.g.h"
 
 namespace winrt::Flense::implementation
 {
@@ -13,13 +13,13 @@ namespace winrt::Flense::implementation
         winrt::fire_and_forget SaveButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e);
         winrt::fire_and_forget DeleteButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e);
 
-        Flense::Note Note()
+        Flense::Models::Note Note()
         {
             return m_note;
         }
 
     private:
-        Flense::Note m_note{ nullptr };
+        Flense::Models::Note m_note{ nullptr };
     };
 }
 

@@ -4,6 +4,8 @@
 #include "NotePage.g.cpp"
 #endif
 
+#include "Models/Note.h"
+
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 
@@ -14,7 +16,7 @@ namespace winrt::Flense::implementation
 {
 	NotePage::NotePage() 
 	{
-		m_note = winrt::make<::winrt::Flense::implementation::Note>(L"note.txt", L"Note content");
+		m_note = winrt::make<::winrt::Flense::Models::implementation::Note>(L"note.txt", L"Note content");
 	}
 
 	winrt::fire_and_forget NotePage::SaveButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)

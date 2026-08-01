@@ -1,4 +1,4 @@
-namespace Flense
+namespace Flense.Models
 {
     runtimeclass Note : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
     {

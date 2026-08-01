@@ -2,7 +2,7 @@
 
 #include "AllNotesPage.g.h"
 
-#include "Models/AllNotes.h"
+#include "Models.AllNotes.g.h"
 
 namespace winrt::Flense::implementation
 {
@@ -10,10 +10,10 @@ namespace winrt::Flense::implementation
     {
         AllNotesPage();
 
-        winrt::Flense::AllNotes NotesModel();
+        winrt::Flense::Models::AllNotes NotesModel();
 
     private:
-        winrt::Flense::AllNotes m_notesModel{ nullptr };
+        winrt::Flense::Models::AllNotes m_notesModel{ nullptr };
     };
 }
 

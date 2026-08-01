@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Note.g.h"
+#include "Models.Note.g.h"
 
-namespace winrt::Flense::implementation
+namespace winrt::Flense::Models::implementation
 {
 	struct Note : NoteT<Note>
 	{
@@ -34,7 +34,7 @@ namespace winrt::Flense::implementation
 	};
 }
 
-namespace winrt::Flense::factory_implementation
+namespace winrt::Flense::Models::factory_implementation
 {
 	struct Note : NoteT<Note, implementation::Note>
 	{

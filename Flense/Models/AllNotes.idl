@@ -1,6 +1,6 @@
 import "Models/Note.idl";
 
-namespace Flense
+namespace Flense.Models
 {
     runtimeclass AllNotes 
     {

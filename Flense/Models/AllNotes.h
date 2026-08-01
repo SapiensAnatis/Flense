@@ -1,24 +1,24 @@
 ﻿#pragma once
 
-#include "AllNotes.g.h"
+#include "Models.AllNotes.g.h"
 
-namespace winrt::Flense::implementation
+namespace winrt::Flense::Models::implementation
 {
     struct AllNotes : AllNotesT<AllNotes>
     {
         AllNotes();
 
-		winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::Note> Notes();
+		winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::Models::Note> Notes();
 
     private:
 		winrt::fire_and_forget LoadNotesAsync();
         winrt::Windows::Foundation::IAsyncAction GetFilesInFolderAsync(const winrt::Windows::Storage::StorageFolder& folder);
 
-        winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::Note> m_notes;
+        winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::Models::Note> m_notes;
     };
 }
 
-namespace winrt::Flense::factory_implementation
+namespace winrt::Flense::Models::factory_implementation
 {
     struct AllNotes : AllNotesT<AllNotes, implementation::AllNotes>
     {

@@ -1,7 +1,8 @@
 #include "pch.h"
-
 #include "Note.h"
-#include "Note.g.cpp"
+#if __has_include("Models.Note.g.cpp")
+#include "Models.Note.g.cpp"
+#endif
 
 #include <winrt/Windows.Globalization.DateTimeFormatting.h>
 
@@ -9,7 +10,7 @@
 
 using namespace winrt::Windows::Foundation;
 
-namespace winrt::Flense::implementation 
+namespace winrt::Flense::Models::implementation 
 {
 	namespace 
 	{

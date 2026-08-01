@@ -6,6 +6,6 @@ namespace Flense
     runtimeclass AllNotesPage : Microsoft.UI.Xaml.Controls.Page
     {
         AllNotesPage();
-        AllNotes NotesModel{ get; };
+        Flense.Models.AllNotes NotesModel{ get; };
     }
 }

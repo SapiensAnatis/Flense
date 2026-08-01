@@ -4,6 +4,8 @@
 #include "AllNotesPage.g.cpp"
 #endif
 
+#include "Models/AllNotes.h"
+
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 
@@ -14,10 +16,10 @@ namespace winrt::Flense::implementation
 {
     AllNotesPage::AllNotesPage()
     {
-		m_notesModel = winrt::make<winrt::Flense::implementation::AllNotes>();
+		m_notesModel = winrt::make<winrt::Flense::Models::implementation::AllNotes>();
     }
 
-    winrt::Flense::AllNotes AllNotesPage::NotesModel()
+    winrt::Flense::Models::AllNotes AllNotesPage::NotesModel()
     {
         return m_notesModel;
     }
