@@ -9,7 +9,16 @@
     mc:Ignorable="d"
     NavigationCacheMode="Enabled">
 
-    <Grid>
-        <TextBlock x:Name="MessageTextBlock" Margin="16" TextWrapping="Wrap" />
+    <Grid Padding="36">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="1" Spacing="16">
+            <TextBlock x:Name="MessageTextBlock" Margin="16" TextWrapping="Wrap" HorizontalAlignment="Center" />
+            <ProgressBar x:Name="LoadingProgressBar" Margin="16" Minimum="0" Maximum="100" Visibility="Collapsed" />
+        </StackPanel>
     </Grid>
 </Page>
