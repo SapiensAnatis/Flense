@@ -2,7 +2,7 @@
 
 #include "NotePage.g.h"
 
-#include "Note.h"
+#include "Models/Note.h"
 
 namespace winrt::Flense::implementation
 {

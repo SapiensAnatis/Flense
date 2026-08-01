@@ -1,4 +1,4 @@
-import "Note.idl";
+import "Models/Note.idl";
 
 namespace Flense
 {

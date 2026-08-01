@@ -102,6 +102,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir);$(GeneratedFilesDir);$(GeneratedFilesDir)\Views;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
@@ -122,9 +123,9 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Note.h" />
-    <ClInclude Include="NotePage.xaml.h">
-      <DependentUpon>NotePage.xaml</DependentUpon>
+    <ClInclude Include="Models\Note.h" />
+    <ClInclude Include="Views\NotePage.xaml.h">
+      <DependentUpon>Views\NotePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="pch.h" />
@@ -137,15 +138,15 @@
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
-    <Page Include="NotePage.xaml">
+    <Page Include="Views\NotePage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Note.cpp" />
-    <ClCompile Include="NotePage.xaml.cpp">
-      <DependentUpon>NotePage.xaml</DependentUpon>
+    <ClCompile Include="Models\Note.cpp" />
+    <ClCompile Include="Views\NotePage.xaml.cpp">
+      <DependentUpon>Views\NotePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="pch.cpp">
@@ -160,9 +161,9 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="Note.idl" />
-    <Midl Include="NotePage.idl">
-      <DependentUpon>NotePage.xaml</DependentUpon>
+    <Midl Include="Models\Note.idl" />
+    <Midl Include="Views\NotePage.idl">
+      <DependentUpon>Views\NotePage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="MainWindow.idl">
