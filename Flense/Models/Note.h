@@ -7,10 +7,9 @@ namespace winrt::Flense::Models::implementation
 	struct Note : NoteT<Note>
 	{
 	public:
-		Note(const winrt::hstring& filename, const winrt::hstring& text)
+		Note(const winrt::hstring& filename, const winrt::hstring& text, const winrt::Windows::Foundation::DateTime& date)
+			: m_filename(filename), m_text(text), m_date(date)
 		{
-			m_filename = filename;
-			m_text = text;
 		}
 
 		winrt::Windows::Foundation::IAsyncAction SaveAsync();
@@ -28,7 +27,7 @@ namespace winrt::Flense::Models::implementation
 		winrt::hstring m_filename;
 		winrt::hstring m_text;
 		winrt::Windows::Storage::StorageFolder m_storageFolder{ Windows::Storage::ApplicationData::Current().LocalFolder() };
-		winrt::Windows::Foundation::DateTime m_date{ winrt::clock::now() };
+		winrt::Windows::Foundation::DateTime m_date;
 
 		winrt::event<Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
 	};

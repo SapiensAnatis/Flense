@@ -48,7 +48,7 @@ namespace winrt::Flense::Models::implementation
 				StorageFile file = item.as<StorageFile>();
 				winrt::hstring text = co_await FileIO::ReadTextAsync(file);
 
-				winrt::Flense::Models::Note note = winrt::make<winrt::Flense::Models::implementation::Note>(file.Name(), text);
+				winrt::Flense::Models::Note note = winrt::make<winrt::Flense::Models::implementation::Note>(file.Name(), text, file.DateCreated());
 				m_notes.Append(note);
 			}
 		}
