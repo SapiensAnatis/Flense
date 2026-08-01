@@ -124,6 +124,10 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ImageDetailsPage.xaml.h">
+      <DependentUpon>ImageDetailsPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="LandingPage.xaml.h">
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -138,12 +142,19 @@
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
+    <Page Include="ImageDetailsPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="LandingPage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ImageDetailsPage.xaml.cpp">
+      <DependentUpon>ImageDetailsPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="LandingPage.xaml.cpp">
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -160,6 +171,10 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="ImageDetailsPage.idl">
+      <DependentUpon>ImageDetailsPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
     <Midl Include="LandingPage.idl">
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>

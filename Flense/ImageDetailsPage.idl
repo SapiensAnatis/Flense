@@ -4,6 +4,6 @@ namespace Flense
     runtimeclass ImageDetailsPage : Microsoft.UI.Xaml.Controls.Page
     {
         ImageDetailsPage();
-        Int32 MyProperty;
+        Windows.Storage.StorageFile ImageFile;
     }
 }
