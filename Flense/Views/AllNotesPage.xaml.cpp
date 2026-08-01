@@ -19,6 +19,28 @@ namespace winrt::Flense::implementation
 		m_notesModel = winrt::make<winrt::Flense::Models::implementation::AllNotes>();
     }
 
+    void AllNotesPage::OnNavigatedTo(winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e)
+    {
+		if (auto note = e.Parameter().try_as<Flense::Models::Note>())
+		{
+			if (note.State() == Flense::Models::NoteState::Deleted)
+			{
+				m_notesModel.RemoveNote(note);
+			}
+            else 
+            {
+                uint32_t index{};
+                if (!m_notesModel.Notes().IndexOf(note, index))
+                {
+                    m_notesModel.AddNote(note);
+                }
+            }
+
+            // This navigation should be treated like a back navigation, so clear the backstack.
+            Frame().BackStack().Clear();
+		}
+    }
+
     winrt::Flense::Models::AllNotes AllNotesPage::NotesModel()
     {
         return m_notesModel;

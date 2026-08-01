@@ -82,12 +82,30 @@ namespace winrt::Flense::implementation
 	{
 		if (m_note)
 		{
-			co_await m_note.DeleteAsync();
+			if (m_note.State() == Flense::Models::NoteState::Unset)
+			{
+				// If the note has no edits and has just been created, do not pass the model back.
+				if (Frame().CanGoBack())
+				{
+					Frame().GoBack();
+				}
+			}
+			else
+			{
+				// If the note has been saved before, then delete it and navigate back to the AllNotesPage passing the m_noteModel with its Deleted state.
+				co_await m_note.DeleteAsync();
+				Frame().Navigate(xaml_typename<Flense::AllNotesPage>(), m_note);
+			}
 		}
+	}
 
-		if (Frame().CanGoBack()) 
+	winrt::fire_and_forget NotePage::SaveCloseButton_Click(SplitButton const& sender, SplitButtonClickEventArgs const& args)
+	{
+		if (m_note)
 		{
-			Frame().GoBack();
+			co_await m_note.SaveAsync();
+			Frame().Navigate(xaml_typename<Flense::AllNotesPage>(), m_note);
 		}
 	}
 }
+
