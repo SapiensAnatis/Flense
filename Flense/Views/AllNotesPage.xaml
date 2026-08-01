@@ -11,8 +11,11 @@
     <Page.Resources>
         <DataTemplate x:Key="NoteItemTemplate" 
                   x:DataType="models:Note">
-            <ItemContainer>
-                <Grid Background="LightGray">
+            <ItemContainer CornerRadius="{StaticResource OverlayCornerRadius}">
+                <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                      BorderThickness="1" 
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                      CornerRadius="{StaticResource OverlayCornerRadius}">      
                     <Grid.RowDefinitions>
                         <RowDefinition Height="120"/>
                         <RowDefinition Height="Auto"/>
@@ -21,9 +24,10 @@
                            TextWrapping="Wrap"
                            TextTrimming="WordEllipsis"/>
                     <Border Grid.Row="1" Padding="8,6,0,6"
-                        Background="Gray">
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}">
                         <TextBlock Text="{x:Bind DisplayDate}"
-                               Foreground="White"/>
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                     </Border>
                 </Grid>
             </ItemContainer>
