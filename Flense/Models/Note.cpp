@@ -26,6 +26,7 @@ namespace winrt::Flense::Models::implementation
 		}
 
 		co_await winrt::Windows::Storage::FileIO::WriteTextAsync(noteFile, m_text);
+		State(NoteState::Saved);
 	}
 
 	IAsyncAction Note::DeleteAsync()
@@ -36,6 +37,8 @@ namespace winrt::Flense::Models::implementation
 		{
 			co_await noteFile.DeleteAsync();
 		}
+		m_filename = L"";
+		State(NoteState::Deleted);
 	}
 
 	winrt::hstring Note::Text()
@@ -48,13 +51,33 @@ namespace winrt::Flense::Models::implementation
 		if (m_text != value) 
 		{
 			m_text = value;
+			State(NoteState::Unsaved);
 			m_propertyChanged(*this, Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{ L"Text" });
 		}
+	}
+
+	winrt::hstring implementation::Note::Filename()
+	{
+		return m_filename;
 	}
 
 	winrt::hstring Note::DisplayDate()
 	{
 		return fmt.Format(m_date);
+	}
+
+	NoteState implementation::Note::State()
+	{
+		return m_state;
+	}
+
+	void implementation::Note::State(NoteState const& value)
+	{
+		if (m_state != value)
+		{
+			m_state = value;
+			m_propertyChanged(*this, Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{ L"State" });
+		}
 	}
 
 	winrt::event_token Note::PropertyChanged(Microsoft::UI::Xaml::Data::PropertyChangedEventHandler const& handler)
