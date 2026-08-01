@@ -14,11 +14,11 @@ namespace winrt::Flense::implementation
 
         void InitializeComponent();
     };
-}
+} // namespace winrt::Flense::implementation
 
 namespace winrt::Flense::factory_implementation
 {
     struct MainWindow : MainWindowT<MainWindow, implementation::MainWindow>
     {
     };
-}
+} // namespace winrt::Flense::factory_implementation

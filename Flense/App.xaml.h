@@ -10,7 +10,7 @@ namespace winrt::Flense::implementation
 
         void OnLaunched(Microsoft::UI::Xaml::LaunchActivatedEventArgs const&);
 
-    private:
-        winrt::Microsoft::UI::Xaml::Window window{ nullptr };
+      private:
+        winrt::Microsoft::UI::Xaml::Window window{nullptr};
     };
-}
+} // namespace winrt::Flense::implementation

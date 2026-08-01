@@ -1,4 +1,5 @@
 #include "pch.h"
+
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
 
@@ -20,8 +21,7 @@ namespace winrt::Flense::implementation
         // See https://github.com/microsoft/cppwinrt/tree/master/nuget#initializecomponent
 
 #if defined _DEBUG && !defined DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION
-        UnhandledException([](IInspectable const&, UnhandledExceptionEventArgs const& e)
-        {
+        UnhandledException([](IInspectable const&, UnhandledExceptionEventArgs const& e) {
             if (IsDebuggerPresent())
             {
                 auto errorMessage = e.Message();
@@ -40,4 +40,4 @@ namespace winrt::Flense::implementation
         window = make<MainWindow>();
         window.Activate();
     }
-}
+} // namespace winrt::Flense::implementation
