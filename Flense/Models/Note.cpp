@@ -3,10 +3,19 @@
 #include "Note.h"
 #include "Note.g.cpp"
 
+#include <winrt/Windows.Globalization.DateTimeFormatting.h>
+
+#include <format>
+
 using namespace winrt::Windows::Foundation;
 
 namespace winrt::Flense::implementation 
 {
+	namespace 
+	{
+		Windows::Globalization::DateTimeFormatting::DateTimeFormatter fmt{ L"shortdate" };
+	}
+
 	IAsyncAction Note::SaveAsync()
 	{
 		auto noteFile = (co_await m_storageFolder.TryGetItemAsync(m_filename)).as<winrt::Windows::Storage::IStorageFile>();
@@ -40,6 +49,11 @@ namespace winrt::Flense::implementation
 			m_text = value;
 			m_propertyChanged(*this, Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{ L"Text" });
 		}
+	}
+
+	winrt::hstring Note::DisplayDate()
+	{
+		return fmt.Format(m_date);
 	}
 
 	winrt::event_token Note::PropertyChanged(Microsoft::UI::Xaml::Data::PropertyChangedEventHandler const& handler)

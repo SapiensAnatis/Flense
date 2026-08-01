@@ -24,7 +24,7 @@
          AcceptsReturn="True"
          TextWrapping="Wrap"
          PlaceholderText="Enter your note"
-         Header="New note"
+         Header="{x:Bind Note.DisplayDate, Mode=OneWay}"
          ScrollViewer.VerticalScrollBarVisibility="Auto"
          Width="400"
          Grid.Column="1"/>

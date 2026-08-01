@@ -7,17 +7,19 @@ namespace winrt::Flense::implementation
 	struct Note : NoteT<Note>
 	{
 	public:
-		Note() 
+		Note()
 		{
-			m_filename =  L"notes" + std::to_wstring(m_date.time_since_epoch().count()) + L".txt";
+			auto epochMs = std::chrono::duration_cast<std::chrono::milliseconds>(m_date.time_since_epoch()).count();
+			m_filename =  L"notes" + std::to_wstring(epochMs) + L".txt";
 		}
 
 		winrt::Windows::Foundation::IAsyncAction SaveAsync();
 		winrt::Windows::Foundation::IAsyncAction DeleteAsync();
 
-		
 		winrt::hstring Text();
 		void Text(winrt::hstring const& value);
+
+		winrt::hstring DisplayDate();
 
 		winrt::event_token PropertyChanged(Microsoft::UI::Xaml::Data::PropertyChangedEventHandler const& value);
 		void PropertyChanged(winrt::event_token const& token);

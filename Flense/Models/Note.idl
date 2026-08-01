@@ -5,6 +5,7 @@ namespace Flense
         Note();
 
         String Text;
+        String DisplayDate{ get; };
 
         Windows.Foundation.IAsyncAction SaveAsync();
         Windows.Foundation.IAsyncAction DeleteAsync();
