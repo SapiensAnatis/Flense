@@ -16,7 +16,14 @@ namespace winrt::Flense::implementation
 {
 	NotePage::NotePage() 
 	{
-		m_note = winrt::make<::winrt::Flense::Models::implementation::Note>(L"note.txt", L"Note content", winrt::clock::now());
+	}
+
+	void NotePage::OnNavigatedTo(winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e)
+	{
+		long long msEpoch = std::chrono::duration_cast<std::chrono::milliseconds>(winrt::clock::now().time_since_epoch()).count();
+		std::wstring name = L"note-" + std::to_wstring(msEpoch) + L".txt";
+
+		m_note = winrt::make<::winrt::Flense::Models::implementation::Note>(winrt::hstring(name), L"", winrt::clock::now());
 	}
 
 	winrt::fire_and_forget NotePage::SaveButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)

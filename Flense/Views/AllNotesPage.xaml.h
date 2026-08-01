@@ -12,6 +12,8 @@ namespace winrt::Flense::implementation
 
         winrt::Flense::Models::AllNotes NotesModel();
 
+        void NewNoteButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e);
+
     private:
         winrt::Flense::Models::AllNotes m_notesModel{ nullptr };
     };

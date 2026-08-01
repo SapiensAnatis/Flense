@@ -23,4 +23,11 @@ namespace winrt::Flense::implementation
     {
         return m_notesModel;
     }
+
+    void AllNotesPage::NewNoteButton_Click(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e)
+    {
+		Frame().Navigate(xaml_typename<Flense::NotePage>());
+    }
 }
+
+
