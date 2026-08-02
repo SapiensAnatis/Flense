@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ImageDetailsPage.g.h"
-
 #include "ImageDetailsViewModel.h"
 
 namespace winrt::Flense::implementation
@@ -16,18 +15,16 @@ namespace winrt::Flense::implementation
 
         winrt::Flense::ImageDetailsViewModel ViewModel();
 
-        void OnNavigatedTo(winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
+        winrt::fire_and_forget OnNavigatedTo(winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
 
       private:
-        winrt::fire_and_forget ProcessFileAsync();
-
-        winrt::Flense::ImageDetailsViewModel m_viewModel{ winrt::make<implementation::ImageDetailsViewModel>() };
+        winrt::Flense::ImageDetailsViewModel m_viewModel;
     };
-}
+} // namespace winrt::Flense::implementation
 
 namespace winrt::Flense::factory_implementation
 {
     struct ImageDetailsPage : ImageDetailsPageT<ImageDetailsPage, implementation::ImageDetailsPage>
     {
     };
-}
+} // namespace winrt::Flense::factory_implementation
