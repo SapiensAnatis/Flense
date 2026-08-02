@@ -27,14 +27,10 @@
             </Grid>
         </UserControl>
         <UserControl Name="ImageDetails" Visibility="{x:Bind ViewModel.IsLoaded, Mode=OneWay}">
-            <ItemsView ItemsSource="{x:Bind ViewModel.Filenames}">
-                <ItemsView.Layout>
-                    <UniformGridLayout MinItemWidth="200"
-                               MinColumnSpacing="12"
-                               MinRowSpacing="12"
-                               ItemsJustification="Start"/>
-                </ItemsView.Layout>
-            </ItemsView>
+            <NavigationView IsBackButtonVisible="Collapsed" IsSettingsVisible="False" IsPaneToggleButtonVisible="False"
+                            MenuItemsSource="{x:Bind ViewModel.Filenames}">
+                <Frame x:Name="ContentFrame"/>
+            </NavigationView>
         </UserControl>
     </Grid>
 </Page>
