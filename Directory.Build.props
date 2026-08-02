@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+    <VcpkgManifestRoot>$(MSBuildThisFileDirectory)</VcpkgManifestRoot>
+  </PropertyGroup>
+</Project>
