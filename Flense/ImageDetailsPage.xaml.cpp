@@ -5,7 +5,7 @@
 #include "ImageDetailsPage.g.cpp"
 #endif
 
-#include "ProcessArchive.h"
+#include "ArchiveReader.h"
 #include "WinRtByteStream.h"
 
 #include <stop_token>
@@ -21,22 +21,18 @@ using namespace Microsoft::UI::Xaml::Navigation;
 
 namespace winrt::Flense::implementation
 {
-    StorageFile ImageDetailsPage::ImageFile()
+    Flense::ImageDetailsViewModel ImageDetailsPage::ViewModel()
     {
-        return m_imageFile;
-    }
-
-    void ImageDetailsPage::ImageFile(StorageFile const& value)
-    {
-        m_imageFile = value;
+        return m_viewModel;
     }
 
     void ImageDetailsPage::OnNavigatedTo(NavigationEventArgs const& e)
     {
         if (auto imageFile = e.Parameter().try_as<StorageFile>())
         {
-            ImageFile(imageFile);
-            MessageTextBlock().Text(L"Loading image: " + m_imageFile.Name());
+            m_viewModel.ImageFile(imageFile);
+            m_viewModel.FileName(imageFile.Name());
+            MessageTextBlock().Text(L"Loading image: " + imageFile.Name());
             ProcessFileAsync();
         }
         else
@@ -50,7 +46,7 @@ namespace winrt::Flense::implementation
         auto lifetime = get_strong();
         auto dispatcher = DispatcherQueue();
 
-        auto rawStream = co_await m_imageFile.OpenReadAsync();
+        auto rawStream = co_await m_viewModel.ImageFile().OpenReadAsync();
         WinRtByteStream stream{rawStream};
 
         LoadingProgressBar().Visibility(Visibility::Visible);
@@ -58,7 +54,11 @@ namespace winrt::Flense::implementation
 
         std::stop_source stopSource;
 
-        co_await ::Flense::Core::ProcessArchive<IAsyncAction>(
+        ::Flense::Core::ArchiveReader reader;
+
+        co_await winrt::resume_background();
+
+        reader.ProcessArchive(
             stream,
             [dispatcher, weak = get_weak()](double percent) {
                 dispatcher.TryEnqueue([weak, percent] {
@@ -69,6 +69,8 @@ namespace winrt::Flense::implementation
                 });
             },
             stopSource.get_token());
+
+        co_await wil::resume_foreground(dispatcher);
 
         LoadingProgressBar().Visibility(Visibility::Collapsed);
     }

@@ -1,9 +1,11 @@
+import "ImageDetailsViewModel.idl";
+
 namespace Flense
 {
     [default_interface]
     runtimeclass ImageDetailsPage : Microsoft.UI.Xaml.Controls.Page
     {
         ImageDetailsPage();
-        Windows.Storage.StorageFile ImageFile;
+        ImageDetailsViewModel ViewModel{ get; };
     }
 }

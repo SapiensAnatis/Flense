@@ -2,6 +2,8 @@
 
 #include "ImageDetailsPage.g.h"
 
+#include "ImageDetailsViewModel.h"
+
 namespace winrt::Flense::implementation
 {
     struct ImageDetailsPage : ImageDetailsPageT<ImageDetailsPage>
@@ -12,15 +14,14 @@ namespace winrt::Flense::implementation
             // See https://github.com/microsoft/cppwinrt/tree/master/nuget#initializecomponent
         }
 
-        winrt::Windows::Storage::StorageFile ImageFile();
-        void ImageFile(winrt::Windows::Storage::StorageFile const& value);
+        winrt::Flense::ImageDetailsViewModel ViewModel();
 
         void OnNavigatedTo(winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
 
       private:
         winrt::fire_and_forget ProcessFileAsync();
 
-        winrt::Windows::Storage::StorageFile m_imageFile{ nullptr };
+        winrt::Flense::ImageDetailsViewModel m_viewModel{ winrt::make<implementation::ImageDetailsViewModel>() };
     };
 }
 

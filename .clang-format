@@ -12,5 +12,7 @@ IncludeCategories:
     Priority: 0
   - Regex: '^".*"$'
     Priority: 1
-  - Regex: '^<.*>$'
+  - Regex: '^<.*\.h>$' # Third-party library headers
     Priority: 2
+  - Regex: '^<.*>$'    # STL headers
+    Priority: 3

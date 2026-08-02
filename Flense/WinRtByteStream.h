@@ -3,24 +3,28 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Storage.Streams.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <span>
 
 namespace winrt::Flense::implementation
 {
-    // Wraps a WinRT random-access stream so it satisfies Flense::Core::ByteSource:
-    // Read() returns a genuinely async, non-blocking WinRT operation (backed by
-    // I/O completion ports, not a blocked thread), rather than a synchronous call.
+    // Wraps a WinRT random-access stream so it satisfies Flense::Core::LibArchiveSource.
+    // All methods block the calling thread (via .get() on the underlying WinRT async
+    // operations), so instances must only be driven from a background thread - never
+    // from a UI/STA thread.
     class WinRtByteStream
     {
     public:
         explicit WinRtByteStream(winrt::Windows::Storage::Streams::IRandomAccessStream stream);
 
-        winrt::Windows::Foundation::IAsyncOperation<uint32_t> Read(std::span<std::byte> buffer);
+        size_t ReadSync(std::span<std::byte> buffer);
+        int64_t Skip(int64_t request);
         uint64_t Size() const;
 
     private:
         winrt::Windows::Storage::Streams::IRandomAccessStream m_stream;
         winrt::Windows::Storage::Streams::DataReader m_reader;
+        uint64_t m_position{0};
     };
 } // namespace winrt::Flense::implementation
