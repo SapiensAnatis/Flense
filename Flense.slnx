@@ -7,6 +7,8 @@
   <Folder Name="/Solution Items/">
     <File Path=".clang-format" />
     <File Path="README.md" />
+    <File Path="THIRD-PARTY-NOTICES.md" />
+    <File Path="vcpkg.json" />
   </Folder>
   <Project Path="Flense.Core/Flense.Core.vcxproj" Id="257839dd-36da-47d5-b884-9118c972f916">
     <Platform Solution="*|ARM64" Project="x64" />

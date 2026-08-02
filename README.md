@@ -46,6 +46,9 @@ want to use CMake or Bazel to build this library and their own native GUIs.
 - **IDE/toolchain:** Visual Studio 2026 with the C++ desktop and Windows App SDK workloads
 - **Language:** C++20 built with MSVC
 - **Formatting:** `.clang-format` at the repo root
+- **Third-party C++ dependencies:** [vcpkg](https://github.com/microsoft/vcpkg), in manifest mode. Install it anywhere (e.g. `X:\vcpkg`), bootstrap 
+  it (`bootstrap-vcpkg.bat`), and run `vcpkg integrate install` once for machine-wide MSBuild integration. `vcpkg.json` at the repo root declares 
+  dependencies; `Directory.Build.props` points both projects at it via `VcpkgManifestRoot`.
 - **Building:** open `Flense.slnx` in Visual Studio and build, or from the command line:
 
   ```

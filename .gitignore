@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Some debugger artefact
 enc_temp_folder/
+
+# vcpkg manifest-mode install output
+vcpkg_installed/
