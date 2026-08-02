@@ -14,15 +14,24 @@
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />
+    <Midl Include="ImageDetailsViewModel.idl">
+      <Filter>Features\ImageDetails</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="WinRtByteStream.cpp" />
+    <ClCompile Include="ImageDetailsViewModel.cpp">
+      <Filter>Features\ImageDetails</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="WinRtByteStream.h" />
+    <ClInclude Include="ImageDetailsViewModel.h">
+      <Filter>Features\ImageDetails</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">

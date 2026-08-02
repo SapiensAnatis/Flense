@@ -1,0 +1,12 @@
+namespace Flense
+{
+    [default_interface]
+    runtimeclass ImageDetailsViewModel : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        ImageDetailsViewModel();
+
+        Windows.Storage.StorageFile ImageFile;
+        String FileName;
+        Windows.Foundation.Collections.IObservableVector<String> Filenames{ get; };
+    }
+}

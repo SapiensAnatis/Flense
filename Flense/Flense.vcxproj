@@ -132,6 +132,7 @@
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="ImageDetailsViewModel.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="WinRtByteStream.h" />
     <ClInclude Include="App.xaml.h">
@@ -160,6 +161,7 @@
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="ImageDetailsViewModel.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -179,6 +181,9 @@
     </Midl>
     <Midl Include="LandingPage.idl">
       <DependentUpon>LandingPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="ImageDetailsViewModel.idl">
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="MainWindow.idl">
