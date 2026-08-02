@@ -26,6 +26,7 @@ namespace Flense::Core
         { source.ReadSync(buffer) } -> std::convertible_to<size_t>;
         { source.Skip(requestedSkip) } -> std::convertible_to<int64_t>;
         { source.Size() } -> std::convertible_to<uint64_t>;
+        { source.Position() } -> std::convertible_to<uint64_t>;
     };
 
     struct ArchiveReader
@@ -41,7 +42,8 @@ namespace Flense::Core
          * @param stopToken The token to check for cancellation.
          */
         template <LibArchiveSource TSource>
-        void ProcessArchive(TSource& source, std::function<void(double)> onProgress, std::stop_token stopToken)
+        std::vector<std::string> ProcessArchive(TSource& source, std::function<void(double)> onProgress,
+                                                std::stop_token stopToken)
         {
             ReadContext<TSource> context{&source, &stopToken};
             archive_read_set_callback_data(m_archive.get(), &context);
@@ -49,37 +51,37 @@ namespace Flense::Core
             archive_read_set_skip_callback(m_archive.get(), &ArchiveSkipCallback<TSource>);
             archive_read_open1(m_archive.get());
 
+            std::vector<std::string> fileNames;
+
             uint64_t const totalSize = source.Size();
-            uint64_t bytesRead = 0;
             double lastReportedPercent = -1.0;
 
             archive_entry* entry;
             while (!stopToken.stop_requested() && archive_read_next_header(m_archive.get(), &entry) == ARCHIVE_OK)
             {
-                const void* block;
-                size_t blockSize;
-                la_int64_t offset;
-                while (!stopToken.stop_requested() &&
-                       archive_read_data_block(m_archive.get(), &block, &blockSize, &offset) == ARCHIVE_OK)
+                fileNames.emplace_back(archive_entry_pathname(entry));
+
+                // Skip the entry's body rather than reading it via archive_read_data_block -
+                // nothing currently needs the file contents, and skipping lets the source
+                // seek past the data instead of copying it through the read callback.
+                archive_read_data_skip(m_archive.get());
+
+                assert(totalSize > 0);
+                double const percent =
+                    static_cast<double>(source.Position()) / static_cast<double>(totalSize) * 100.0;
+
+                // Only report on meaningful (>=5%) changes - onProgress typically
+                // marshals to a UI thread, and posting on every entry (there can
+                // be thousands in a large archive) can flood it badly enough to
+                // look and behave like a hang.
+                if (percent - lastReportedPercent >= 5.0)
                 {
-                    archive_entry_pathname(entry);
-
-                    bytesRead += blockSize;
-
-                    assert(totalSize > 0);
-                    double const percent = static_cast<double>(bytesRead) / static_cast<double>(totalSize) * 100.0;
-
-                    // Only report on meaningful (>=5%) changes - onProgress typically
-                    // marshals to a UI thread, and posting on every block (there can
-                    // be thousands for a large file) can flood it badly enough to
-                    // look and behave like a hang.
-                    if (percent - lastReportedPercent >= 5.0)
-                    {
-                        lastReportedPercent = percent;
-                        onProgress(percent);
-                    }
+                    lastReportedPercent = percent;
+                    onProgress(percent);
                 }
             }
+
+            return fileNames;
         }
 
       private:
