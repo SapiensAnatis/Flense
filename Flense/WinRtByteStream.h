@@ -21,6 +21,7 @@ namespace winrt::Flense::implementation
         size_t ReadSync(std::span<std::byte> buffer);
         int64_t Skip(int64_t request);
         uint64_t Size() const;
+        uint64_t Position() const;
 
     private:
         winrt::Windows::Storage::Streams::IRandomAccessStream m_stream;

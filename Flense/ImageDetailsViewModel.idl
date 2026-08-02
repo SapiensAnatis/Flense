@@ -9,6 +9,7 @@ namespace Flense
         Windows.Foundation.Collections.IObservableVector<String> Filenames{ get; };
 
         Boolean IsLoading{ get; };
+        Boolean IsLoaded{ get; };
         Double LoadingProgress{ get; };
 
         Windows.Foundation.IAsyncAction LoadAsync();

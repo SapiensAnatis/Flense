@@ -49,7 +49,13 @@ namespace winrt::Flense::implementation
         {
             m_isLoading = value;
             m_propertyChanged(*this, PropertyChangedEventArgs{L"IsLoading"});
+            m_propertyChanged(*this, PropertyChangedEventArgs{L"IsLoaded"});
         }
+    }
+
+    bool ImageDetailsViewModel::IsLoaded()
+    {
+        return !m_isLoading;
     }
 
     double ImageDetailsViewModel::LoadingProgress()
@@ -85,7 +91,7 @@ namespace winrt::Flense::implementation
 
         co_await winrt::resume_background();
 
-        reader.ProcessArchive(
+        auto utf8Filenames = reader.ProcessArchive(
             stream,
             [dispatcher, weak = get_weak()](double percent) {
                 dispatcher.TryEnqueue([weak, percent] {
@@ -100,6 +106,12 @@ namespace winrt::Flense::implementation
         co_await wil::resume_foreground(dispatcher);
 
         LoadingProgress(100);
+
+        for (const auto& str : utf8Filenames)
+        {
+            Filenames().Append(winrt::to_hstring(str));
+        }
+
         IsLoading(false);
     }
 

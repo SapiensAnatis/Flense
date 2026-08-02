@@ -52,4 +52,9 @@ namespace winrt::Flense::implementation
     {
         return m_stream.Size();
     }
+
+    uint64_t WinRtByteStream::Position() const
+    {
+        return m_position;
+    }
 } // namespace winrt::Flense::implementation

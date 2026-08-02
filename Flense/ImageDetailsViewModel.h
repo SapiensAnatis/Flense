@@ -14,6 +14,7 @@ namespace winrt::Flense::implementation
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::hstring> Filenames();
 
         bool IsLoading();
+        bool IsLoaded();
         double LoadingProgress();
 
         winrt::Windows::Foundation::IAsyncAction LoadAsync();
