@@ -62,22 +62,21 @@ namespace Flense::Core
                 while (!stopToken.stop_requested() &&
                        archive_read_data_block(m_archive.get(), &block, &blockSize, &offset) == ARCHIVE_OK)
                 {
-                    ProcessTarBytes(std::span{static_cast<const std::byte*>(block), blockSize});
+                    archive_entry_pathname(entry);
+
                     bytesRead += blockSize;
 
-                    if (totalSize > 0)
+                    assert(totalSize > 0);
+                    double const percent = static_cast<double>(bytesRead) / static_cast<double>(totalSize) * 100.0;
+
+                    // Only report on meaningful (>=5%) changes - onProgress typically
+                    // marshals to a UI thread, and posting on every block (there can
+                    // be thousands for a large file) can flood it badly enough to
+                    // look and behave like a hang.
+                    if (percent - lastReportedPercent >= 5.0)
                     {
-                        // Only report on meaningful (>=5%) changes - onProgress typically
-                        // marshals to a UI thread, and posting on every block (there can
-                        // be thousands for a large file) can flood it badly enough to
-                        // look and behave like a hang.
-                        double const percent =
-                            static_cast<double>(bytesRead) / static_cast<double>(totalSize) * 100.0;
-                        if (percent - lastReportedPercent >= 5.0)
-                        {
-                            lastReportedPercent = percent;
-                            onProgress(percent);
-                        }
+                        lastReportedPercent = percent;
+                        onProgress(percent);
                     }
                 }
             }
@@ -96,8 +95,7 @@ namespace Flense::Core
 
         static constexpr size_t ChunkSize = 64 * 1024;
 
-        template <typename TSource>
-        struct ReadContext
+        template <typename TSource> struct ReadContext
         {
             TSource* source;
             std::stop_token* stopToken;

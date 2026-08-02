@@ -5,8 +5,7 @@ namespace Flense
     {
         ImageDetailsViewModel();
 
-        Windows.Storage.StorageFile ImageFile;
-        String FileName;
+        Windows.Storage.StorageFile ImageArchive;
         Windows.Foundation.Collections.IObservableVector<String> Filenames{ get; };
     }
 }

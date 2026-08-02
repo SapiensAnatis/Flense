@@ -28,11 +28,10 @@ namespace winrt::Flense::implementation
 
     void ImageDetailsPage::OnNavigatedTo(NavigationEventArgs const& e)
     {
-        if (auto imageFile = e.Parameter().try_as<StorageFile>())
+        if (auto imageArchive = e.Parameter().try_as<StorageFile>())
         {
-            m_viewModel.ImageFile(imageFile);
-            m_viewModel.FileName(imageFile.Name());
-            MessageTextBlock().Text(L"Loading image: " + imageFile.Name());
+            m_viewModel.ImageArchive(imageArchive);
+            MessageTextBlock().Text(L"Loading image: " + imageArchive.Name());
             ProcessFileAsync();
         }
         else
@@ -46,7 +45,9 @@ namespace winrt::Flense::implementation
         auto lifetime = get_strong();
         auto dispatcher = DispatcherQueue();
 
-        auto rawStream = co_await m_viewModel.ImageFile().OpenReadAsync();
+        auto archive = m_viewModel.ImageArchive();
+        auto rawStream = co_await archive.OpenReadAsync();
+
         WinRtByteStream stream{rawStream};
 
         LoadingProgressBar().Visibility(Visibility::Visible);
@@ -72,6 +73,6 @@ namespace winrt::Flense::implementation
 
         co_await wil::resume_foreground(dispatcher);
 
-        LoadingProgressBar().Visibility(Visibility::Collapsed);
+        LoadingProgressBar().Value(100);
     }
 } // namespace winrt::Flense::implementation
