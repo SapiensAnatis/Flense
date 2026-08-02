@@ -8,11 +8,8 @@ namespace winrt::Flense::implementation
     {
         ImageDetailsViewModel() = default;
 
-        winrt::Windows::Storage::StorageFile ImageFile();
-        void ImageFile(winrt::Windows::Storage::StorageFile const& value);
-
-        winrt::hstring FileName();
-        void FileName(winrt::hstring const& value);
+        winrt::Windows::Storage::StorageFile ImageArchive();
+        void ImageArchive(winrt::Windows::Storage::StorageFile const& value);
 
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::hstring> Filenames();
 
@@ -27,12 +24,11 @@ namespace winrt::Flense::implementation
             winrt::single_threaded_observable_vector<winrt::hstring>()};
         winrt::event<winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
     };
-}
+} // namespace winrt::Flense::implementation
 
 namespace winrt::Flense::factory_implementation
 {
-    struct ImageDetailsViewModel :
-        ImageDetailsViewModelT<ImageDetailsViewModel, implementation::ImageDetailsViewModel>
+    struct ImageDetailsViewModel : ImageDetailsViewModelT<ImageDetailsViewModel, implementation::ImageDetailsViewModel>
     {
     };
-}
+} // namespace winrt::Flense::factory_implementation

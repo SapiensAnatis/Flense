@@ -12,31 +12,17 @@ using namespace winrt::Windows::Storage;
 
 namespace winrt::Flense::implementation
 {
-    StorageFile ImageDetailsViewModel::ImageFile()
+    StorageFile ImageDetailsViewModel::ImageArchive()
     {
         return m_imageFile;
     }
 
-    void ImageDetailsViewModel::ImageFile(StorageFile const& value)
+    void ImageDetailsViewModel::ImageArchive(StorageFile const& value)
     {
         if (m_imageFile != value)
         {
             m_imageFile = value;
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"ImageFile"});
-        }
-    }
-
-    hstring ImageDetailsViewModel::FileName()
-    {
-        return m_fileName;
-    }
-
-    void ImageDetailsViewModel::FileName(hstring const& value)
-    {
-        if (m_fileName != value)
-        {
-            m_fileName = value;
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"FileName"});
+            m_propertyChanged(*this, PropertyChangedEventArgs{L"ImageArchive"});
         }
     }
 
