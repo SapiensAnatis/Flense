@@ -5,11 +5,6 @@
 #include "ImageDetailsPage.g.cpp"
 #endif
 
-#include "ArchiveReader.h"
-#include "WinRtByteStream.h"
-
-#include <stop_token>
-
 using namespace winrt;
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Storage;
@@ -26,53 +21,17 @@ namespace winrt::Flense::implementation
         return m_viewModel;
     }
 
-    void ImageDetailsPage::OnNavigatedTo(NavigationEventArgs const& e)
+    winrt::fire_and_forget ImageDetailsPage::OnNavigatedTo(NavigationEventArgs const& e)
     {
         if (auto imageArchive = e.Parameter().try_as<StorageFile>())
         {
             m_viewModel.ImageArchive(imageArchive);
             MessageTextBlock().Text(L"Loading image: " + imageArchive.Name());
-            ProcessFileAsync();
+            co_await m_viewModel.LoadAsync();
         }
         else
         {
             MessageTextBlock().Text(L"Invalid parameter passed to ImageDetailsPage.");
         }
-    }
-
-    fire_and_forget ImageDetailsPage::ProcessFileAsync()
-    {
-        auto lifetime = get_strong();
-        auto dispatcher = DispatcherQueue();
-
-        auto archive = m_viewModel.ImageArchive();
-        auto rawStream = co_await archive.OpenReadAsync();
-
-        WinRtByteStream stream{rawStream};
-
-        LoadingProgressBar().Visibility(Visibility::Visible);
-        LoadingProgressBar().Value(0);
-
-        std::stop_source stopSource;
-
-        ::Flense::Core::ArchiveReader reader;
-
-        co_await winrt::resume_background();
-
-        reader.ProcessArchive(
-            stream,
-            [dispatcher, weak = get_weak()](double percent) {
-                dispatcher.TryEnqueue([weak, percent] {
-                    if (auto self = weak.get())
-                    {
-                        self->LoadingProgressBar().Value(percent);
-                    }
-                });
-            },
-            stopSource.get_token());
-
-        co_await wil::resume_foreground(dispatcher);
-
-        LoadingProgressBar().Value(100);
     }
 } // namespace winrt::Flense::implementation

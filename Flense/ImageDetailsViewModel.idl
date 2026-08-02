@@ -7,5 +7,10 @@ namespace Flense
 
         Windows.Storage.StorageFile ImageArchive;
         Windows.Foundation.Collections.IObservableVector<String> Filenames{ get; };
+
+        Boolean IsLoading{ get; };
+        Double LoadingProgress{ get; };
+
+        Windows.Foundation.IAsyncAction LoadAsync();
     }
 }

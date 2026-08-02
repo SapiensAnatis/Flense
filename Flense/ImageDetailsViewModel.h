@@ -13,16 +13,26 @@ namespace winrt::Flense::implementation
 
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::hstring> Filenames();
 
+        bool IsLoading();
+        double LoadingProgress();
+
+        winrt::Windows::Foundation::IAsyncAction LoadAsync();
+
         winrt::event_token PropertyChanged(
             winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
         void PropertyChanged(winrt::event_token const& token) noexcept;
 
       private:
+        void IsLoading(bool value);
+        void LoadingProgress(double value);
+
         winrt::Windows::Storage::StorageFile m_imageFile{nullptr};
-        winrt::hstring m_fileName;
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::hstring> m_filenames{
             winrt::single_threaded_observable_vector<winrt::hstring>()};
         winrt::event<winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
+
+        bool m_isLoading{true};
+        double m_loadingProgress{0.0};
     };
 } // namespace winrt::Flense::implementation
 
