@@ -1,5 +1,6 @@
 namespace Flense
 {
+    [bindable]
     [default_interface]
     runtimeclass ImageDetailsViewModel : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
     {
