@@ -6,16 +6,16 @@
   <ItemGroup>
     <Page Include="MainWindow.xaml" />
     <Page Include="LandingPage.xaml">
-      <Filter>Features\Landing</Filter>
+      <Filter>Views</Filter>
     </Page>
     <Page Include="ImageDetailsPage.xaml">
-      <Filter>Features\ImageDetails</Filter>
+      <Filter>Views</Filter>
     </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />
     <Midl Include="ImageDetailsViewModel.idl">
-      <Filter>Features\ImageDetails</Filter>
+      <Filter>ViewModels</Filter>
     </Midl>
   </ItemGroup>
   <ItemGroup>
@@ -23,7 +23,7 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="WinRtByteStream.cpp" />
     <ClCompile Include="ImageDetailsViewModel.cpp">
-      <Filter>Features\ImageDetails</Filter>
+      <Filter>ViewModels</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -31,7 +31,7 @@
     <ClInclude Include="WinRtByteStream.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ImageDetailsViewModel.h">
-      <Filter>Features\ImageDetails</Filter>
+      <Filter>ViewModels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -61,14 +61,14 @@
     <Filter Include="Assets">
       <UniqueIdentifier>{52ed318b-9ba0-455b-b9e1-8e1b5b3c366d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Features">
-      <UniqueIdentifier>{1068d4d8-63ea-4e39-846c-ac5cebf67dbc}</UniqueIdentifier>
+    <Filter Include="ViewModels">
+      <UniqueIdentifier>{cf87ce66-88f3-4794-872c-4fddc29e3b9f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Features\Landing">
-      <UniqueIdentifier>{d48135e7-dc7b-41c3-b1e2-936a1eac0cb8}</UniqueIdentifier>
+    <Filter Include="Views">
+      <UniqueIdentifier>{3afcf29c-0a9c-46b5-aa7f-d60ef2087e24}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Features\ImageDetails">
-      <UniqueIdentifier>{1a72adcf-6dd5-4f2e-a92a-76b0d7a43fad}</UniqueIdentifier>
+    <Filter Include="Wrappers">
+      <UniqueIdentifier>{79376057-2cdd-42e1-89dc-77afd00fd05e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
