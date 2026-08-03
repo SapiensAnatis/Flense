@@ -87,11 +87,9 @@ namespace winrt::Flense::implementation
 
         std::stop_source stopSource;
 
-        ::Flense::Core::ArchiveReader reader;
-
         co_await winrt::resume_background();
 
-        auto utf8Filenames = reader.ProcessArchive(
+        auto reader = ::Flense::Core::ArchiveReader::CreateFromStream(
             stream,
             [dispatcher, weak = get_weak()](double percent) {
                 dispatcher.TryEnqueue([weak, percent] {
@@ -106,11 +104,6 @@ namespace winrt::Flense::implementation
         co_await wil::resume_foreground(dispatcher);
 
         LoadingProgress(100);
-
-        for (const auto& str : utf8Filenames)
-        {
-            Filenames().Append(winrt::to_hstring(str));
-        }
 
         IsLoading(false);
     }

@@ -7,12 +7,5 @@
 
 namespace Flense::Core
 {
-    ArchiveReader::ArchiveReader() : m_archive{archive_read_new()}
-    {
-        archive_read_support_format_tar(m_archive.get());
-    }
-
-    void ArchiveReader::ProcessTarBytes(std::span<const std::byte> bytes)
-    {
-    }
+    z
 } // namespace Flense::Core
