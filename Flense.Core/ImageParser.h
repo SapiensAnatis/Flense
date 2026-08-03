@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -42,24 +41,34 @@ namespace Flense::Core
     };
 
     /// <summary>
-    /// Accumulates OCI image manifest/config details from an archive's entries, fed one at a time -
-    /// e.g. alongside a caller-owned loop that's also driving ArchiveReader::Next() for progress
-    /// reporting, since only one consumer can call Next() on a given ArchiveReader.
+    /// Accumulates OCI image manifest/config details from an archive's entries, fed one at a time.
     /// </summary>
+    /// <remarks>
+    /// It is designed to parse an image in a single unordered pass, so has to allocate more than strictly necessarry -
+    /// e.g. in storing the contents of every JSON file encountered in case one of them turns out to be the "Config".
+    /// But these files are usually on the order of kilobytes in size so this is an acceptable compromise.
+    /// </remarks>
     class ImageParser
     {
       public:
+        /// <summary>
+        /// Processes an individual archive entry, and store it in the parser's internal state for a later Build() call.
+        /// </summary>
+        /// <param name="entry">The archive entry.</param>
         void ProcessEntry(const ArchiveEntry& entry);
 
         /// <summary>
-        /// Resolves everything accumulated so far into the image's layer list. Call once the
-        /// archive has been fully enumerated.
+        /// Assembles a vector of image layers once all archive entries have been handed to ProcessEntry().
         /// </summary>
+        /// <returns>A vector of image layers.</returns>
         std::vector<ImageLayer> Build() const;
 
       private:
-        std::optional<std::string> m_manifestDigest;
-        std::unordered_map<std::string, nlohmann::json> m_jsonBlobsByDigest;
+        std::optional<std::string> m_configPath;
+        std::vector<std::string> m_layerPaths;
+
+        // Raw, not-yet-parsed JSON text keyed by digest hashes
+        std::unordered_map<std::string, std::string> m_jsonBlobsByDigest;
     };
 
 } // namespace Flense::Core

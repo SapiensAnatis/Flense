@@ -21,14 +21,44 @@ namespace Flense::Core
 {
     namespace
     {
-        // OCI digests are "<algorithm>:<hex>" (e.g. "sha256:abcd..."); blob paths are
-        // "blobs/<algorithm>/<hex>". Only sha256 is supported for now.
-        std::string GetDigestHash(const std::string_view digest)
+        /// <summary>
+        /// Represents details parsed from manifest.json.
+        /// </summary>
+        struct ManifestDetails
         {
-            const auto colon = digest.find(':');
-            return std::string{colon == std::string_view::npos ? digest : digest.substr(colon + 1)};
-        }
+            std::string configPath;
+            std::vector<std::string> layerPaths;
+        };
 
+        /// <summary>
+        /// Represents the file contents of a JSON blob from blobs/sha256/.
+        /// </summary>
+        /// <remarks>
+        /// This could be the image config or something else entirely. Its role isn't known until
+        /// it's cross-referenced against ManifestDetails.
+        /// </remarks>
+        struct JsonBlobDetails
+        {
+            std::string digest;
+            std::string contents;
+        };
+
+        /// <summary>
+        /// A binary filesystem blob. Stub implementation.
+        /// </summary>
+        struct BlobFsDetails
+        {
+        };
+
+        using ParsedEntry = std::variant<std::monostate, ManifestDetails, JsonBlobDetails, BlobFsDetails>;
+
+        constexpr std::string_view BlobPrefix = "blobs/sha256/";
+
+        /// <summary>
+        /// Tests whether a blob could plausibly be JSON.
+        /// </summary>
+        /// <param name="prefix">The first few bytes of the blob.</param>
+        /// <returns>A value indicating whether the blob looks like JSON.</returns>
         bool LooksLikeJson(const std::string_view prefix)
         {
             const auto it =
@@ -36,59 +66,45 @@ namespace Flense::Core
             return it != prefix.end() && *it == '{';
         }
 
-        // index.json points at the (or, for multi-arch images, one of several) image manifest blob(s).
-        struct IndexDetails
+        /// <summary>
+        /// Parses a manifest.json file into a ManifestDetails struct.
+        /// </summary>
+        /// <param name="entry">The archive entry whose pathname has been identified as manifest.json.</param>
+        /// <returns>A ManifestDetails struct.</returns>
+        ManifestDetails ParseManifestJson(const ArchiveEntry& entry)
         {
-            std::string manifestDigest;
-        };
+            std::string contents;
+            contents.resize(entry.Size());
 
-        // Any JSON-shaped blob under blobs/sha256/ - could be the image manifest, the image config,
-        // or something else entirely. Its role isn't known until it's cross-referenced against
-        // IndexDetails/another manifest, so it's kept generic rather than guessed at here.
-        struct JsonBlobDetails
-        {
-            std::string digest;
-            nlohmann::json json;
-        };
+            std::span<char> const contentsSpan = std::span{contents};
+            size_t const bytesRead = entry.ReadInto(std::as_writable_bytes(contentsSpan));
+            contents.resize(bytesRead);
 
-        // A binary blob (almost certainly a layer). Stub for now - walking its contents (as a nested
-        // tar) to list files will come later.
-        struct BlobFsDetails
-        {
-        };
+            const nlohmann::json manifests = nlohmann::json::parse(contents);
 
-        using ParsedEntry = std::variant<std::monostate, IndexDetails, JsonBlobDetails, BlobFsDetails>;
+            // TODO: support archives containing multiple images (manifest.json is an array of them) -
+            // for now we just take the first one.
+            const nlohmann::json& manifest = manifests.at(0);
 
-        ParsedEntry ParseEntry(const ArchiveEntry& entry)
-        {
-            const std::string_view pathname = entry.Pathname();
-
-            if (pathname == "index.json")
+            std::vector<std::string> layerPaths;
+            for (const auto& layerPath : manifest.at("Layers"))
             {
-                std::string contents;
-                contents.resize(entry.Size());
-
-                std::span<char> const contentsSpan = std::span{contents};
-                size_t const bytesRead = entry.ReadInto(std::as_writable_bytes(contentsSpan));
-                contents.resize(bytesRead);
-
-                nlohmann::json const index = nlohmann::json::parse(contents);
-
-                // TODO: support multi-arch images (index.json can list manifests for multiple
-                // platforms) - for now we just take the first one.
-                return IndexDetails{
-                    .manifestDigest = GetDigestHash(index.at("manifests").at(0).at("digest").get<std::string>()),
-                };
+                layerPaths.push_back(layerPath.get<std::string>());
             }
 
-            constexpr std::string_view BlobPrefix = "blobs/sha256/";
-            if (!pathname.starts_with(BlobPrefix))
-            {
-                return std::monostate{};
-            }
+            return ManifestDetails{
+                .configPath = manifest.at("Config").get<std::string>(),
+                .layerPaths = std::move(layerPaths),
+            };
+        }
 
-            const std::string digest{pathname.substr(BlobPrefix.size())};
-
+        /// <summary>
+        /// Parses a blob found under sha256/blobs/.
+        /// </summary>
+        /// <param name="entry">The archive entry.</param>
+        /// <returns>A BlobFsDetails or JsonBlobDetails.</returns>
+        ParsedEntry ParseBlob(const ArchiveEntry& entry)
+        {
             // Sniff a small, bounded prefix first - large layer blobs must never be buffered in
             // full just to find out they're not JSON.
             std::array<char, 64> sniffBuffer{};
@@ -110,9 +126,29 @@ namespace Flense::Core
             const size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
             contents.resize(sniffed + read);
 
-            nlohmann::json json = nlohmann::json::parse(contents);
+            return JsonBlobDetails{.digest = std::string{entry.Pathname()}, .contents = std::move(contents)};
+        }
 
-            return JsonBlobDetails{.digest = digest, .json = std::move(json)};
+        /// <summary>
+        /// Parses an archive entry into one of a number of possible entry types.
+        /// </summary>
+        /// <param name="entry">The archive entry.</param>
+        /// <returns>A variant over the possible types.</returns>
+        ParsedEntry ParseEntry(const ArchiveEntry& entry)
+        {
+            const std::string_view pathname = entry.Pathname();
+
+            if (pathname == "manifest.json")
+            {
+                return ParseManifestJson(entry);
+            }
+
+            if (!pathname.starts_with(BlobPrefix))
+            {
+                return std::monostate{};
+            }
+
+            return ParseBlob(entry);
         }
     } // namespace
 
@@ -122,13 +158,14 @@ namespace Flense::Core
 
         std::visit(
             [&]<typename T>(T& value) {
-                if constexpr (std::is_same_v<T, IndexDetails>)
+                if constexpr (std::is_same_v<T, ManifestDetails>)
                 {
-                    m_manifestDigest = std::move(value.manifestDigest);
+                    m_configPath = std::move(value.configPath);
+                    m_layerPaths = std::move(value.layerPaths);
                 }
                 else if constexpr (std::is_same_v<T, JsonBlobDetails>)
                 {
-                    m_jsonBlobsByDigest.emplace(std::move(value.digest), std::move(value.json));
+                    m_jsonBlobsByDigest.emplace(std::move(value.digest), std::move(value.contents));
                 }
                 else if constexpr (std::is_same_v<T, BlobFsDetails> || std::is_same_v<T, std::monostate>)
                 {
@@ -144,21 +181,22 @@ namespace Flense::Core
 
     std::vector<ImageLayer> ImageParser::Build() const
     {
-        if (!m_manifestDigest)
-        {
-            return std::vector<ImageLayer>();
-        }
-
-        auto const manifestIt = m_jsonBlobsByDigest.find(*m_manifestDigest);
-        if (manifestIt == m_jsonBlobsByDigest.end())
-        {
-            return std::vector<ImageLayer>();
-        }
-
         std::vector<ImageLayer> layers;
-        for (auto const& layer : manifestIt->second.at("layers"))
+        for (const auto& layerPath : m_layerPaths)
         {
-            layers.emplace_back(GetDigestHash(layer.at("digest").get<std::string>()), layer.at("size").get<uint64_t>());
+            // TODO: populate ImageLayer::Size() once layer blob sizes are tracked.
+            layers.emplace_back(layerPath.substr(BlobPrefix.size()), 0);
+        }
+
+        if (m_configPath)
+        {
+            const auto configIt = m_jsonBlobsByDigest.find(*m_configPath);
+            if (configIt != m_jsonBlobsByDigest.end())
+            {
+                const nlohmann::json config = nlohmann::json::parse(configIt->second);
+
+                // TODO: populate ImageLayer::Command() from config's "history" array.
+            }
         }
 
         return layers;
