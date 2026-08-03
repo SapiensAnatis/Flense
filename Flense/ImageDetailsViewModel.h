@@ -1,6 +1,9 @@
 #pragma once
 
 #include "ImageDetailsViewModel.g.h"
+#include "ImageParser.h"
+
+#include <vector>
 
 namespace winrt::Flense::implementation
 {
@@ -34,6 +37,7 @@ namespace winrt::Flense::implementation
 
         bool m_isLoading{true};
         double m_loadingProgress{0.0};
+        std::vector<::Flense::Core::ImageLayer> m_layers;
     };
 } // namespace winrt::Flense::implementation
 

@@ -9,9 +9,11 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <span>
 #include <stop_token>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Flense::Core
@@ -33,68 +35,125 @@ namespace Flense::Core
     };
 
     /// <summary>
-    /// A class for interacting with .tar and .tar.gz archives.
+    /// A single entry (file, directory, etc.) within an archive, hiding the underlying libarchive
+    /// representation from callers.
     /// </summary>
-    struct ArchiveReader
+    /// <remarks>
+    /// Only valid until the owning ArchiveReader's Next() is called again - libarchive reuses/invalidates
+    /// the underlying archive_entry at that point. Read this entry's contents first if you need them.
+    /// </remarks>
+    class ArchiveEntry
     {
+      public:
+        std::string_view Pathname() const
+        {
+            return archive_entry_pathname(m_entry);
+        }
+
         /// <summary>
-        /// Loads an archive from a byte source, returning an ArchiveReader that can be used to enumerate the entries.
+        /// The total size of this entry's body, as recorded in the archive header.
+        /// </summary>
+        uint64_t Size() const
+        {
+            int64_t const size = archive_entry_size(m_entry);
+            return size > 0 ? static_cast<uint64_t>(size) : 0;
+        }
+
+        /// <summary>
+        /// Reads up to buffer.size() bytes into buffer, continuing from wherever this entry's read
+        /// position currently is - so repeated calls read successive chunks (e.g. sniff a small
+        /// stack-allocated prefix, then read the rest into a caller-sized buffer once it's known to
+        /// be worth reading in full). Must be called before the owning ArchiveReader's Next() is
+        /// called again, otherwise libarchive will already have moved past this entry's data.
+        /// </summary>
+        /// <returns>The number of bytes actually read, which is less than buffer.size() once this
+        /// entry's body is exhausted.</returns>
+        size_t ReadInto(std::span<std::byte> buffer) const
+        {
+            size_t totalRead = 0;
+            while (totalRead < buffer.size())
+            {
+                la_ssize_t const bytesRead =
+                    archive_read_data(m_archive, buffer.data() + totalRead, buffer.size() - totalRead);
+                if (bytesRead <= 0)
+                {
+                    break;
+                }
+
+                totalRead += static_cast<size_t>(bytesRead);
+            }
+
+            return totalRead;
+        }
+
+      private:
+        friend class ArchiveReader;
+
+        ArchiveEntry(archive_entry* entry, archive* archive) : m_entry(entry), m_archive(archive)
+        {
+        }
+
+        archive_entry* m_entry;
+        archive* m_archive;
+    };
+
+    /// <summary>
+    /// A thin, pull-based wrapper over libarchive for reading .tar and .tar.gz archives: call Next()
+    /// repeatedly to enumerate entries, optionally reading each one's contents before moving on.
+    /// </summary>
+    class ArchiveReader
+    {
+      public:
+        /// <summary>
+        /// Opens an archive from a byte source, returning an ArchiveReader that can be used to enumerate its entries.
         /// </summary>
         /// <remarks>
-        /// Blocking - must be called from a background thread.
+        /// Blocking - Next() and ArchiveEntry::ReadInto() must be called from a background thread.
         /// </remarks>
         /// <typeparam name="TSource">The type of the byte source.</typeparam>
-        /// <param name="source">The byte source to process.</param>
-        /// <param name="onProgress">The function to call with progress updates.</param>
+        /// <param name="source">The byte source to read from. Must outlive the returned ArchiveReader.</param>
         /// <param name="stopToken">The token to check for cancellation.</param>
         /// <returns>An ArchiveReader instance for enumerating the archive entries.</returns>
         template <LibArchiveSource TSource>
-        static ArchiveReader CreateFromStream(TSource& source, std::function<void(double)> onProgress,
-                                              std::stop_token stopToken)
+        static ArchiveReader CreateFromStream(TSource& source, std::stop_token stopToken)
         {
             ArchivePtr archive{archive_read_new()};
 
             archive_read_support_format_tar(archive.get());
             archive_read_support_filter_gzip(archive.get());
 
-            ReadContext<TSource> context{&source, &stopToken};
-            archive_read_set_callback_data(archive.get(), &context);
-            archive_read_set_read_callback(archive.get(), &ArchiveReadCallback<TSource>);
-            archive_read_set_skip_callback(archive.get(), &ArchiveSkipCallback<TSource>);
+            auto context = std::make_unique<Context>(Context{
+                .readSync = [&source](std::span<std::byte> buffer) { return source.ReadSync(buffer); },
+                .skip = [&source](int64_t request) { return source.Skip(request); },
+                .stopToken = std::move(stopToken),
+            });
+
+            archive_read_set_callback_data(archive.get(), context.get());
+            archive_read_set_read_callback(archive.get(), &ArchiveReadCallback);
+            archive_read_set_skip_callback(archive.get(), &ArchiveSkipCallback);
             archive_read_open1(archive.get());
 
-            std::vector<ArchiveEntryPtr> entries;
+            return ArchiveReader{std::move(archive), std::move(context)};
+        }
 
-            uint64_t const totalSize = source.Size();
-            double lastReportedPercent = -1.0;
-
+        /// <summary>
+        /// Advances to the next entry in the archive. Automatically skips any part of the previous
+        /// entry's data that wasn't consumed via ArchiveEntry::ReadInto(). Returns nullopt once
+        /// the archive is exhausted (or cancellation via the stop_token passed to CreateFromStream
+        /// stops the underlying read).
+        /// </summary>
+        std::optional<ArchiveEntry> Next()
+        {
             archive_entry* entry;
-            while (!stopToken.stop_requested() && archive_read_next_header(archive.get(), &entry) == ARCHIVE_OK)
+            if (m_context->stopToken.stop_requested() ||
+                archive_read_next_header(m_archive.get(), &entry) != ARCHIVE_OK)
             {
-                entries.emplace_back(ArchiveEntryPtr{entry});
-
-                // Skip the entry's body rather than reading it via archive_read_data_block -
-                // nothing currently needs the file contents, and skipping lets the source
-                // seek past the data instead of copying it through the read callback.
-                archive_read_data_skip(archive.get());
-
-                assert(totalSize > 0);
-                double const percent = static_cast<double>(source.Position()) / static_cast<double>(totalSize) * 100.0;
-
-                // Only report on meaningful (>=5%) changes - onProgress typically
-                // marshals to a UI thread, and posting on every entry (there can
-                // be thousands in a large archive) can flood it badly enough to
-                // look and behave like a hang.
-                if (percent - lastReportedPercent >= 5.0)
-                {
-                    lastReportedPercent = percent;
-                    onProgress(percent);
-                }
+                return std::nullopt;
             }
 
             // TODO: This always succeeds on paper, we are undoubtedly missing some error handling
 
-            return ArchiveReader{std::move(archive), std::move(entries)};
+            return ArchiveEntry{entry, m_archive.get()};
         }
 
       private:
@@ -108,58 +167,47 @@ namespace Flense::Core
 
         using ArchivePtr = std::unique_ptr<archive, ArchiveDeleter>;
 
-        struct ArchiveEntryDeleter
-        {
-            void operator()(archive_entry* e) const
-            {
-                archive_entry_free(e);
-            }
-        };
-
-        using ArchiveEntryPtr = std::unique_ptr<archive_entry, ArchiveEntryDeleter>;
-
         static constexpr size_t ChunkSize = 64 * 1024;
 
-        template <LibArchiveSource TSource> struct ReadContext
+        struct Context
         {
-            TSource* source;
-            std::stop_token* stopToken;
+            std::function<size_t(std::span<std::byte>)> readSync;
+            std::function<int64_t(int64_t)> skip;
+            std::stop_token stopToken;
             std::array<std::byte, ChunkSize> buffer;
         };
 
-        template <LibArchiveSource TSource>
         static la_ssize_t ArchiveReadCallback(archive*, void* clientData, const void** buffer)
         {
-            auto& context = *static_cast<ReadContext<TSource>*>(clientData);
-            if (context.stopToken->stop_requested())
+            auto& context = *static_cast<Context*>(clientData);
+            if (context.stopToken.stop_requested())
             {
                 return 0;
             }
 
-            size_t const bytesRead = context.source->ReadSync(std::span(context.buffer));
+            size_t const bytesRead = context.readSync(std::span(context.buffer));
             *buffer = context.buffer.data();
             return static_cast<la_ssize_t>(bytesRead);
         }
 
-        template <LibArchiveSource TSource>
         static la_int64_t ArchiveSkipCallback(archive*, void* clientData, la_int64_t request)
         {
-            auto& context = *static_cast<ReadContext<TSource>*>(clientData);
-            if (context.stopToken->stop_requested() || request <= 0)
+            auto& context = *static_cast<Context*>(clientData);
+            if (context.stopToken.stop_requested() || request <= 0)
             {
                 return 0;
             }
 
-            return context.source->Skip(request);
+            return context.skip(request);
         }
 
-        ArchiveReader(ArchivePtr&& archive, std::vector<ArchiveEntryPtr>&& entries)
-            : m_archive(std::move(archive)), m_entries(std::move(entries))
+        ArchiveReader(ArchivePtr&& archive, std::unique_ptr<Context>&& context)
+            : m_archive(std::move(archive)), m_context(std::move(context))
         {
         }
 
         ArchivePtr m_archive;
-        std::vector<ArchiveEntryPtr> m_entries;
+        std::unique_ptr<Context> m_context;
     };
 
 } // namespace Flense::Core

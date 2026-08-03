@@ -21,9 +21,15 @@
     <ClInclude Include="ArchiveReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ImageParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -6,6 +6,7 @@
 #endif
 
 #include "ArchiveReader.h"
+#include "ImageParser.h"
 #include "WinRtByteStream.h"
 
 #include <stop_token>
@@ -89,17 +90,33 @@ namespace winrt::Flense::implementation
 
         co_await winrt::resume_background();
 
-        auto reader = ::Flense::Core::ArchiveReader::CreateFromStream(
-            stream,
-            [dispatcher, weak = get_weak()](double percent) {
-                dispatcher.TryEnqueue([weak, percent] {
+        auto reader = ::Flense::Core::ArchiveReader::CreateFromStream(stream, stopSource.get_token());
+
+        ::Flense::Core::ImageParser imageParser;
+
+        double lastReportedPercent = -1.0;
+        while (auto entry = reader.Next())
+        {
+            imageParser.ProcessEntry(*entry);
+
+            double const percent = static_cast<double>(stream.Position()) / static_cast<double>(stream.Size()) * 100.0;
+
+            // Only report on meaningful (>=5%) changes - TryEnqueue marshals to the UI thread,
+            // and posting on every entry (there can be thousands in a large archive) can flood it
+            // badly enough to look and behave like a hang.
+            if (percent - lastReportedPercent >= 5.0)
+            {
+                lastReportedPercent = percent;
+                dispatcher.TryEnqueue([weak = get_weak(), percent] {
                     if (auto self = weak.get())
                     {
                         self->LoadingProgress(percent);
                     }
                 });
-            },
-            stopSource.get_token());
+            }
+        }
+
+        m_layers = imageParser.Build();
 
         co_await wil::resume_foreground(dispatcher);
 
