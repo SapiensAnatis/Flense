@@ -29,6 +29,7 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="WinRtByteStream.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="ImageDetailsViewModel.h">
       <Filter>Features\ImageDetails</Filter>
     </ClInclude>
@@ -85,5 +86,8 @@
   <ItemGroup>
     <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />
     <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natstepfilter" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Flense.rc" />
   </ItemGroup>
 </Project>
