@@ -13,22 +13,22 @@
         <UserControl Name="LoadingDisplay" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}">
             <Grid Padding="36">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="1" Spacing="16">
-                    <TextBlock x:Name="MessageTextBlock" Margin="16" TextWrapping="Wrap" HorizontalAlignment="Center" />
+                    <TextBlock x:Name="MessageTextBlock" Margin="16" TextWrapping="Wrap" HorizontalAlignment="Center"/>
                     <ProgressBar Margin="16" Minimum="0" Maximum="100"
                                  Value="{x:Bind ViewModel.LoadingProgress, Mode=OneWay}"
-                                 Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+                                 Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}"/>
                 </StackPanel>
             </Grid>
         </UserControl>
         <UserControl Name="ImageDetails" Visibility="{x:Bind ViewModel.IsLoaded, Mode=OneWay}">
             <NavigationView IsBackButtonVisible="Collapsed" IsSettingsVisible="False" IsPaneToggleButtonVisible="False"
-                            MenuItemsSource="{x:Bind ViewModel.Filenames}">
+                            MenuItemsSource="{x:Bind ViewModel.Filenames}" PaneDisplayMode="Left" OpenPaneLength="500">
                 <Frame x:Name="ContentFrame"/>
             </NavigationView>
         </UserControl>
