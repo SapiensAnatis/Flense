@@ -1,0 +1,8 @@
+namespace Flense
+{
+    [default_interface]
+    runtimeclass ImageLayer 
+    {
+        String Command { get; };
+    }
+}

@@ -5,8 +5,10 @@
   "dependencies": [
     {
       "name": "libarchive",
-      "version>=": "3.8.7",
       "default-features": false
+    },
+    {
+      "name": "nlohmann-json"
     }
   ]
 }
