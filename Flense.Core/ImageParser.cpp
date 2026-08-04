@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "ArchiveReader.h"
+#include "ImageLayer.h"
 #include "ImageParser.h"
 
 #include <algorithm>
@@ -113,20 +114,23 @@ namespace Flense::Core
 
             const size_t sniffed = entry.ReadInto(std::as_writable_bytes(sniffSpan));
 
-            if (!LooksLikeJson(std::string_view{sniffBuffer.data(), sniffed}))
+            if (LooksLikeJson(std::string_view{sniffBuffer.data(), sniffed}))
             {
+                // Confirmed JSON (manifest/config/etc. - always small) - now safe to buffer in full.
+                std::string contents(sniffBuffer.data(), sniffed);
+                contents.resize(entry.Size());
+
+                std::span<char> const remainingSpan = std::span{contents}.subspan(sniffed);
+                const size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
+                contents.resize(sniffed + read);
+
+                return JsonBlobDetails{.digest = std::string{entry.Pathname()}, .contents = std::move(contents)};
+            }
+            else
+            {
+                // This is a tar file containing layer diffs.
                 return BlobFsDetails{};
             }
-
-            // Confirmed JSON (manifest/config/etc. - always small) - now safe to buffer in full.
-            std::string contents(sniffBuffer.data(), sniffed);
-            contents.resize(entry.Size());
-
-            std::span<char> const remainingSpan = std::span{contents}.subspan(sniffed);
-            const size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
-            contents.resize(sniffed + read);
-
-            return JsonBlobDetails{.digest = std::string{entry.Pathname()}, .contents = std::move(contents)};
         }
 
         /// <summary>
@@ -143,12 +147,35 @@ namespace Flense::Core
                 return ParseManifestJson(entry);
             }
 
-            if (!pathname.starts_with(BlobPrefix))
+            if (pathname.starts_with(BlobPrefix))
             {
-                return std::monostate{};
+                return ParseBlob(entry);
             }
 
-            return ParseBlob(entry);
+            return std::monostate{};
+        }
+
+        std::string CollapseWhitespace(const std::string_view s)
+        {
+            std::string out;
+            out.reserve(s.size());
+
+            bool previousIsSpace = false;
+
+            for (const char c : s)
+            {
+                const bool isSpace = (c == ' ' || c == '\t');
+                const bool keep = !isSpace || !previousIsSpace;
+
+                if (keep)
+                {
+                    out.push_back(isSpace ? ' ' : c);
+                }
+
+                previousIsSpace = isSpace;
+            }
+
+            return out;
         }
     } // namespace
 
@@ -182,20 +209,28 @@ namespace Flense::Core
     std::vector<ImageLayer> ImageParser::Build() const
     {
         std::vector<ImageLayer> layers;
-        for (const auto& layerPath : m_layerPaths)
+
+        if (!m_configPath)
         {
-            // TODO: populate ImageLayer::Size() once layer blob sizes are tracked.
-            layers.emplace_back(layerPath.substr(BlobPrefix.size()), 0);
+            return layers;
         }
 
-        if (m_configPath)
+        const auto configIt = m_jsonBlobsByDigest.find(*m_configPath);
+        if (configIt != m_jsonBlobsByDigest.end())
         {
-            const auto configIt = m_jsonBlobsByDigest.find(*m_configPath);
-            if (configIt != m_jsonBlobsByDigest.end())
-            {
-                const nlohmann::json config = nlohmann::json::parse(configIt->second);
+            const nlohmann::json config = nlohmann::json::parse(configIt->second);
+            const nlohmann::json& historyArray = config.at("history");
 
-                // TODO: populate ImageLayer::Command() from config's "history" array.
+            for (const auto& historyObj : historyArray)
+            {
+                if (auto it = historyObj.find("empty_layer"); it != historyObj.end() && it->get<bool>())
+                {
+                    continue;
+                }
+
+                std::string_view command = historyObj.at("created_by").get_ref<const std::string&>();
+
+                layers.emplace_back(CollapseWhitespace(command));
             }
         }
 

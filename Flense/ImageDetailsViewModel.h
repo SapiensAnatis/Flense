@@ -14,7 +14,7 @@ namespace winrt::Flense::implementation
         winrt::Windows::Storage::StorageFile ImageArchive();
         void ImageArchive(winrt::Windows::Storage::StorageFile const& value);
 
-        winrt::Windows::Foundation::Collections::IObservableVector<winrt::hstring> Filenames();
+        winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::ImageLayerWrapper> Layers();
 
         bool IsLoading();
         bool IsLoaded();
@@ -31,13 +31,14 @@ namespace winrt::Flense::implementation
         void LoadingProgress(double value);
 
         winrt::Windows::Storage::StorageFile m_imageFile{nullptr};
-        winrt::Windows::Foundation::Collections::IObservableVector<winrt::hstring> m_filenames{
-            winrt::single_threaded_observable_vector<winrt::hstring>()};
+
+        winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::ImageLayerWrapper> m_layers{
+            winrt::single_threaded_observable_vector<winrt::Flense::ImageLayerWrapper>()};
+
         winrt::event<winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
 
         bool m_isLoading{true};
         double m_loadingProgress{0.0};
-        std::vector<::Flense::Core::ImageLayer> m_layers;
     };
 } // namespace winrt::Flense::implementation
 

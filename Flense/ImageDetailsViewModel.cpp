@@ -6,6 +6,7 @@
 #endif
 
 #include "ArchiveReader.h"
+#include "ImageLayerWrapper.h"
 #include "ImageParser.h"
 #include "WinRtByteStream.h"
 
@@ -34,9 +35,9 @@ namespace winrt::Flense::implementation
         }
     }
 
-    IObservableVector<hstring> ImageDetailsViewModel::Filenames()
+    IObservableVector<winrt::Flense::ImageLayerWrapper> ImageDetailsViewModel::Layers()
     {
-        return m_filenames;
+        return m_layers;
     }
 
     bool ImageDetailsViewModel::IsLoading()
@@ -99,7 +100,8 @@ namespace winrt::Flense::implementation
         {
             imageParser.ProcessEntry(*entry);
 
-            double const percent = static_cast<double>(stream.Position()) / static_cast<double>(stream.Size()) * 100.0;
+            // Image parsing is 10% :)
+            double const percent = static_cast<double>(stream.Position()) / static_cast<double>(stream.Size()) * 90.0;
 
             // Only report on meaningful (>=5%) changes - TryEnqueue marshals to the UI thread,
             // and posting on every entry (there can be thousands in a large archive) can flood it
@@ -116,7 +118,10 @@ namespace winrt::Flense::implementation
             }
         }
 
-        m_layers = imageParser.Build();
+        for (const auto& layer : imageParser.Build())
+        {
+            Layers().Append(winrt::make<implementation::ImageLayerWrapper>(layer));
+        }
 
         co_await wil::resume_foreground(dispatcher);
 

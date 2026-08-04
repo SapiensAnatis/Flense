@@ -1,3 +1,5 @@
+import "ImageLayerWrapper.idl";
+
 namespace Flense
 {
     [bindable]
@@ -7,7 +9,7 @@ namespace Flense
         ImageDetailsViewModel();
 
         Windows.Storage.StorageFile ImageArchive;
-        Windows.Foundation.Collections.IObservableVector<String> Filenames{ get; };
+        Windows.Foundation.Collections.IObservableVector<Flense.ImageLayerWrapper> Layers{ get; };
 
         Boolean IsLoading{ get; };
         Boolean IsLoaded{ get; };
