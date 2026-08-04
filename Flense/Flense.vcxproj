@@ -128,6 +128,10 @@
       <DependentUpon>ImageDetailsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="ImageLayerWrapper.h">
+      <DependentUpon>ImageLayerWrapper.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="LandingPage.xaml.h">
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -158,6 +162,10 @@
       <DependentUpon>ImageDetailsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="ImageLayerWrapper.cpp">
+      <DependentUpon>ImageLayerWrapper.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="LandingPage.xaml.cpp">
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -179,6 +187,9 @@
     <Midl Include="ImageDetailsPage.idl">
       <DependentUpon>ImageDetailsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="ImageLayerWrapper.idl">
+      <SubType>Designer</SubType>
     </Midl>
     <Midl Include="LandingPage.idl">
       <DependentUpon>LandingPage.xaml</DependentUpon>

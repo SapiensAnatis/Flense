@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ImageLayer.h"
+
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -11,41 +13,12 @@ namespace Flense::Core
 {
     class ArchiveEntry;
 
-    class ImageLayer
-    {
-      public:
-        ImageLayer(std::string digest, uint64_t size) : m_digest(std::move(digest)), m_size(size)
-        {
-        }
-
-        std::string_view Digest() const
-        {
-            return m_digest;
-        }
-
-        uint64_t Size() const
-        {
-            return m_size;
-        }
-
-        // TODO: populate from the image config's "history" array once that's parsed.
-        std::string_view Command() const
-        {
-            return m_command;
-        }
-
-      private:
-        std::string m_digest;
-        uint64_t m_size;
-        std::string m_command;
-    };
-
     /// <summary>
     /// Accumulates OCI image manifest/config details from an archive's entries, fed one at a time.
     /// </summary>
     /// <remarks>
-    /// It is designed to parse an image in a single unordered pass, so has to allocate more than strictly necessarry -
-    /// e.g. in storing the contents of every JSON file encountered in case one of them turns out to be the "Config".
+    /// It is designed to parse an image in a single unordered pass, so has to allocate more than strictly necessary -
+    /// e.g. by storing the contents of every JSON file encountered in case one of them turns out to be the "Config".
     /// But these files are usually on the order of kilobytes in size so this is an acceptable compromise.
     /// </remarks>
     class ImageParser

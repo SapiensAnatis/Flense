@@ -218,6 +218,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ImageLayer.h" />
     <ClInclude Include="ImageParser.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ArchiveReader.h" />

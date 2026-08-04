@@ -1,7 +1,6 @@
 namespace Flense
 {
-    [default_interface]
-    runtimeclass ImageLayer 
+    runtimeclass ImageLayerWrapper 
     {
         String Command { get; };
     }

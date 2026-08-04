@@ -27,9 +27,16 @@
             </Grid>
         </UserControl>
         <UserControl Name="ImageDetails" Visibility="{x:Bind ViewModel.IsLoaded, Mode=OneWay}">
-            <NavigationView IsBackButtonVisible="Collapsed" IsSettingsVisible="False" IsPaneToggleButtonVisible="False"
-                            MenuItemsSource="{x:Bind ViewModel.Filenames}" PaneDisplayMode="Left" OpenPaneLength="500">
+            <NavigationView PaneTitle="Layers" IsBackButtonVisible="Collapsed" IsSettingsVisible="False" IsPaneToggleButtonVisible="False"
+                            MenuItemsSource="{x:Bind ViewModel.Layers}" PaneDisplayMode="Left" OpenPaneLength="500">
                 <Frame x:Name="ContentFrame"/>
+                <NavigationView.MenuItemTemplate>
+                    <DataTemplate x:DataType="local:ImageLayerWrapper">
+                        <StackPanel>
+                            <TextBlock Text="{x:Bind Command, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </DataTemplate>
+                </NavigationView.MenuItemTemplate>
             </NavigationView>
         </UserControl>
     </Grid>

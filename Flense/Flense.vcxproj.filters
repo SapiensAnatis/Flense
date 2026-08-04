@@ -17,6 +17,9 @@
     <Midl Include="ImageDetailsViewModel.idl">
       <Filter>ViewModels</Filter>
     </Midl>
+    <Midl Include="ImageLayerWrapper.idl">
+      <Filter>Wrappers</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
