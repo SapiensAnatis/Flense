@@ -16,3 +16,4 @@ IncludeCategories:
     Priority: 2
   - Regex: '^<.*>$'    # STL headers
     Priority: 3
+QualifierAlignment: Left

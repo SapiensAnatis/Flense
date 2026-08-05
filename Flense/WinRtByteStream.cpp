@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "ArchiveReader.h"
 #include "WinRtByteStream.h"
 
 #include <algorithm>
@@ -17,7 +18,7 @@ namespace winrt::Flense::implementation
 
     size_t WinRtByteStream::ReadSync(std::span<std::byte> buffer)
     {
-        uint32_t const loaded = m_reader.LoadAsync(static_cast<uint32_t>(buffer.size())).get();
+        const uint32_t loaded = m_reader.LoadAsync(static_cast<uint32_t>(buffer.size())).get();
         if (loaded > 0)
         {
             auto* data = reinterpret_cast<uint8_t*>(buffer.data());
@@ -29,9 +30,9 @@ namespace winrt::Flense::implementation
 
     int64_t WinRtByteStream::Skip(int64_t request)
     {
-        uint64_t const size = m_stream.Size();
-        uint64_t const maxSkip = size > m_position ? size - m_position : 0;
-        uint64_t const actualSkip = std::min<uint64_t>(static_cast<uint64_t>(request), maxSkip);
+        const uint64_t size = m_stream.Size();
+        const uint64_t maxSkip = size > m_position ? size - m_position : 0;
+        const uint64_t actualSkip = std::min<uint64_t>(static_cast<uint64_t>(request), maxSkip);
         if (actualSkip == 0)
         {
             return 0;
@@ -57,4 +58,6 @@ namespace winrt::Flense::implementation
     {
         return m_position;
     }
+
+    static_assert(::Flense::Core::ByteStream<WinRtByteStream>);
 } // namespace winrt::Flense::implementation
