@@ -20,6 +20,7 @@
     <Midl Include="ImageLayerWrapper.idl">
       <Filter>Wrappers</Filter>
     </Midl>
+    <Midl Include="FilesystemTreeNode.idl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

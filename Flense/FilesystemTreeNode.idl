@@ -1,0 +1,8 @@
+namespace Flense
+{
+    runtimeclass FilesystemTreeNode 
+    {
+        String Name { get; };
+        Windows.Foundation.Collections.IObservableVector<FilesystemTreeNode> Children { get; };
+    }
+}
