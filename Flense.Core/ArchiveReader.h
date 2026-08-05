@@ -27,7 +27,7 @@ namespace Flense::Core
     /// async - callers are expected to ArchiveReader::ProcessArchive on a background thread.
     /// </remarks>
     template <typename T>
-    concept LibArchiveSource = requires(T& source, std::span<std::byte> buffer, int64_t requestedSkip) {
+    concept ByteStream = requires(T& source, std::span<std::byte> buffer, int64_t requestedSkip) {
         { source.ReadSync(buffer) } -> std::convertible_to<size_t>;
         { source.Skip(requestedSkip) } -> std::convertible_to<int64_t>;
         { source.Size() } -> std::convertible_to<uint64_t>;
@@ -110,12 +110,12 @@ namespace Flense::Core
         /// <remarks>
         /// Blocking - Next() and ArchiveEntry::ReadInto() must be called from a background thread.
         /// </remarks>
-        /// <typeparam name="TSource">The type of the byte source.</typeparam>
+        /// <typeparam name="TSource">The type of the byte stream.</typeparam>
         /// <param name="source">The byte source to read from. Must outlive the returned ArchiveReader.</param>
         /// <param name="stopToken">The token to check for cancellation.</param>
         /// <returns>An ArchiveReader instance for enumerating the archive entries.</returns>
-        template <LibArchiveSource TSource>
-        static ArchiveReader CreateFromStream(TSource& source, std::stop_token stopToken)
+        template <ByteStream TStream>
+        static ArchiveReader CreateFromStream(TStream& source, std::stop_token stopToken)
         {
             ArchivePtr archive{archive_read_new()};
 

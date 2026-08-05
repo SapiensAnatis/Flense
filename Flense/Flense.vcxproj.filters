@@ -24,17 +24,21 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
-    <ClCompile Include="WinRtByteStream.cpp" />
     <ClCompile Include="ImageDetailsViewModel.cpp">
       <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="WinRtByteStream.cpp">
+      <Filter>Helpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="WinRtByteStream.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ImageDetailsViewModel.h">
       <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="WinRtByteStream.h">
+      <Filter>Helpers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -72,6 +76,9 @@
     </Filter>
     <Filter Include="Wrappers">
       <UniqueIdentifier>{79376057-2cdd-42e1-89dc-77afd00fd05e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{7f8c81a2-f6e3-469a-a764-d911b316fb69}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
