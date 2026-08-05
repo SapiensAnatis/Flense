@@ -9,11 +9,11 @@ namespace Flense
         ImageDetailsViewModel();
 
         Windows.Storage.StorageFile ImageArchive;
-        Windows.Foundation.Collections.IObservableVector<Flense.ImageLayerWrapper> Layers{ get; };
+        Windows.Foundation.Collections.IObservableVector<Flense.ImageLayerWrapper> Layers { get; };
 
-        Boolean IsLoading{ get; };
-        Boolean IsLoaded{ get; };
-        Double LoadingProgress{ get; };
+        Boolean IsLoading { get; };
+        Boolean IsLoaded { get; };
+        Double LoadingProgress { get; };
 
         Windows.Foundation.IAsyncAction LoadAsync();
     }
