@@ -56,14 +56,23 @@ namespace Flense::Core
         constexpr std::string_view BlobPrefix = "blobs/sha256/";
 
         /// <summary>
-        /// Tests whether a blob could plausibly be JSON.
+        /// Checks if a character is a space or a tab. Matches fewer characters than isspace and is locale-independent.
+        /// </summary>
+        /// <param name="c">The character to test.</param>
+        /// <returns>Whether c is a space or a tab.</returns>
+        [[nodiscard]] bool IsSpaceOrTab(const char c)
+        {
+            return c == ' ' || c == '\t';
+        }
+
+        /// <summary>
+        /// Tests whether a blob could plausibly be a JSON file with an object as the root member.
         /// </summary>
         /// <param name="prefix">The first few bytes of the blob.</param>
-        /// <returns>A value indicating whether the blob looks like JSON.</returns>
-        bool LooksLikeJson(const std::string_view prefix)
+        /// <returns>A value indicating whether the blob looks like a JSON object.</returns>
+        bool LooksLikeJsonObject(const std::string_view prefix)
         {
-            const auto it =
-                std::ranges::find_if(prefix, [](char c) { return !std::isspace(static_cast<unsigned char>(c)); });
+            const auto it = std::ranges::find_if(prefix, [](char c) { return !IsSpaceOrTab(c); });
             return it != prefix.end() && *it == '{';
         }
 
@@ -114,7 +123,7 @@ namespace Flense::Core
 
             const size_t sniffed = entry.ReadInto(std::as_writable_bytes(sniffSpan));
 
-            if (LooksLikeJson(std::string_view{sniffBuffer.data(), sniffed}))
+            if (LooksLikeJsonObject(std::string_view{sniffBuffer.data(), sniffed}))
             {
                 // Confirmed JSON (manifest/config/etc. - always small) - now safe to buffer in full.
                 std::string contents(sniffBuffer.data(), sniffed);
@@ -155,16 +164,21 @@ namespace Flense::Core
             return std::monostate{};
         }
 
-        std::string CollapseWhitespace(const std::string_view s)
+        /// <summary>
+        /// Collapses runs of whitespace and/or tab characters into a single whitespace character.
+        /// </summary>
+        /// <param name="string">The input string.</param>
+        /// <returns>A new string with whitespace collased.</returns>
+        std::string CollapseWhitespace(const std::string_view string)
         {
             std::string out;
-            out.reserve(s.size());
+            out.reserve(string.size());
 
             bool previousIsSpace = false;
 
-            for (const char c : s)
+            for (const char c : string)
             {
-                const bool isSpace = (c == ' ' || c == '\t');
+                const bool isSpace = IsSpaceOrTab(c);
                 const bool keep = !isSpace || !previousIsSpace;
 
                 if (keep)
@@ -184,7 +198,7 @@ namespace Flense::Core
         ParsedEntry parsed = ParseEntry(entry);
 
         std::visit(
-            [&]<typename T>(T& value) {
+            [this]<typename T>(T& value) {
                 if constexpr (std::is_same_v<T, ManifestDetails>)
                 {
                     m_configPath = std::move(value.configPath);
