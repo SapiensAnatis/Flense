@@ -223,6 +223,7 @@
     <ClInclude Include="ImageParser.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ArchiveReader.h" />
+    <ClInclude Include="FilesystemTree.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageParser.cpp" />

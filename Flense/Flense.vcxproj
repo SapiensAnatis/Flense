@@ -125,6 +125,10 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FilesystemTreeNode.h">
+      <DependentUpon>FilesystemTreeNode.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="ImageDetailsPage.xaml.h">
       <DependentUpon>ImageDetailsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -159,6 +163,10 @@
     <Page Include="MainWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FilesystemTreeNode.cpp">
+      <DependentUpon>FilesystemTreeNode.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="ImageDetailsPage.xaml.cpp">
       <DependentUpon>ImageDetailsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -185,6 +193,9 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="FilesystemTreeNode.idl">
+      <SubType>Designer</SubType>
+    </Midl>
     <Midl Include="ImageDetailsPage.idl">
       <DependentUpon>ImageDetailsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
