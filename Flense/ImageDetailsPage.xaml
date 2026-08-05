@@ -33,7 +33,7 @@
                 <NavigationView.MenuItemTemplate>
                     <DataTemplate x:DataType="local:ImageLayerWrapper">
                         <StackPanel>
-                            <TextBlock Text="{x:Bind Command, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{x:Bind Command}" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </DataTemplate>
                 </NavigationView.MenuItemTemplate>
