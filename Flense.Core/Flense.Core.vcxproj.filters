@@ -30,6 +30,9 @@
     <ClInclude Include="Tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NestedArchiveByteStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="ParseFilesystemTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>

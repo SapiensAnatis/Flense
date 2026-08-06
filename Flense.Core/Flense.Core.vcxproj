@@ -223,12 +223,14 @@
     <ClInclude Include="ParseFilesystemTree.h" />
     <ClInclude Include="ImageLayer.h" />
     <ClInclude Include="ImageParser.h" />
+    <ClInclude Include="NestedArchiveByteStream.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ArchiveReader.h" />
     <ClInclude Include="Tree.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageParser.cpp" />
+    <ClCompile Include="NestedArchiveByteStream.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
