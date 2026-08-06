@@ -1,120 +1,60 @@
 #pragma once
 
-#include <algorithm>
-#include <span>
+#include "Tree.h"
+
 #include <string>
-#include <string_view>
-#include <vector>
 
 namespace Flense::Core
 {
     /// <summary>
     /// Represents a type of node in a filesystem tree.
     /// </summary>
-    enum class FilesystemTreeNodeKind
+    enum class FilesystemNodeKind
     {
-        Unassigned = 0,
-        Directory = 1,
-        File = 2,
+        Directory = 0,
+        File = 1,
     };
 
     /// <summary>
-    /// Represents a node in a filesystem tree.
+    /// Represents a type of diff operation on a file in a filesystem tree.
     /// </summary>
-    class FilesystemTreeNode
+    enum class FilesystemChangeKind
     {
-      public:
-        FilesystemTreeNode(std::string name, FilesystemTreeNodeKind kind) : m_name(std::move(name)), m_kind(kind)
-        {
-        }
-
-        /// <summary>
-        /// Gets the name of the node - i.e. the name of the individual file or folder.
-        /// </summary>
-        /// <returns>The name of the node.</returns>
-        [[nodiscard]] std::string_view Name() const
-        {
-            return m_name;
-        }
-
-        /// <summary>
-        /// Gets a view over the node's children.
-        /// </summary>
-        /// <returns>A view over the node's children.</returns>
-        /// <remarks>
-        /// The returned span is over a vector's internal memory, so it is invalidated if AddChild is called after
-        /// this method.
-        /// The return type is deliberately vague to account for future changes in how the tree is implemented.
-        /// </remarks>
-        [[nodiscard]] std::ranges::forward_range auto Children() const
-        {
-            return m_children;
-        }
-
-        /// <summary>
-        /// Gets the node kind.
-        /// </summary>
-        /// <returns>The node kind.</returns>
-        [[nodiscard]] FilesystemTreeNodeKind Kind() const
-        {
-            return m_kind;
-        }
-
-        /// <summary>
-        /// Adds a child to the node.
-        /// </summary>
-        /// <param name="name">The name of the new node.</param>
-        /// <param name="kind">The kind of the new node.</param>
-        /// <returns>A reference to the newly added node.</returns>
-        FilesystemTreeNode& AddChild(std::string_view name, FilesystemTreeNodeKind kind)
-        {
-            return m_children.emplace_back(std::move(name), kind);
-        }
-
-        /// <summary>
-        /// Gets an existing child based on the values of name and kind, or if it does not exist, adds a new a child
-        /// with the given properties.
-        /// </summary>
-        /// <param name="name">The name of the node to get or add.</param>
-        /// <param name="kind">The kind of the node to get or add.</param>
-        /// <returns>A reference to the newly added node.</returns>
-        FilesystemTreeNode& GetOrAddChild(std::string_view name, FilesystemTreeNodeKind kind)
-        {
-            if (auto it = std::ranges::find_if(m_children,
-                                               [name, kind](const FilesystemTreeNode& node) {
-                                                   return node.Name() == name && node.Kind() == kind;
-                                               });
-                it != m_children.end())
-            {
-                return *it;
-            }
-
-            return AddChild(name, kind);
-        }
-
-      private:
-        std::string m_name;
-        FilesystemTreeNodeKind m_kind;
-        std::vector<FilesystemTreeNode> m_children;
+        None = 0,
+        Added = 1,
+        Removed = 2,
     };
 
-    class FilesystemTree
+    /// <summary>
+    /// Represents the information associated with a filesystem tree node.
+    /// </summary>
+    struct FilesystemNodeInfo
     {
-      public:
-        explicit FilesystemTree(FilesystemTreeNode root) : m_root(std::move(root))
-        {
-        }
-
-        /// <summary>
-        /// Gets a reference to the root element.
-        /// </summary>
-        /// <returns>A reference to the root element.</returns>
-        [[nodiscard]] FilesystemTreeNode& Root()
-        {
-            return m_root;
-        }
-
-      private:
-        FilesystemTreeNode m_root;
+        FilesystemNodeKind kind;
+        uint64_t subtreeFileSize;
+        uint64_t size;
+        std::string name;
     };
+
+    /// <summary>
+    /// Represents a diff that was applied to a filesystem node.
+    /// </summary>
+    struct FilesystemChangeInfo
+    {
+        FilesystemChangeKind diff;
+        FilesystemNodeKind kind;
+        uint64_t size;
+        std::string name;
+    };
+
+    /// <summary>
+    /// A node in a tree that describes a filesystem.
+    /// </summary>
+    using FilesystemTreeNodeRef = TreeNodeRef<FilesystemNodeInfo>;
+
+    /// <summary>
+    /// A node in a tree that describes diffs applied to a filesystem.
+    /// </summary>
+    using FilesystemChangeTreeNodeRef = TreeNodeRef<FilesystemChangeInfo>;
+
 } // namespace Flense::Core
