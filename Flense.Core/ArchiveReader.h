@@ -22,7 +22,7 @@ namespace Flense::Core
     /// A source libarchive can pull compressed bytes from.
     /// </summary>
     /// <remarks>
-    /// All operations are  synchronous/blocking by design: libarchive drives reading via plain C callbacks
+    /// All operations are synchronous/blocking by design: libarchive drives reading via plain C callbacks
     /// that block the calling thread until they return, so there is no point in the source itself being
     /// async - callers are expected to ArchiveReader::ProcessArchive on a background thread.
     /// </remarks>
@@ -55,7 +55,7 @@ namespace Flense::Core
         /// </summary>
         uint64_t Size() const
         {
-            int64_t const size = archive_entry_size(m_entry);
+            const int64_t size = archive_entry_size(m_entry);
             return size > 0 ? static_cast<uint64_t>(size) : 0;
         }
 
@@ -73,7 +73,7 @@ namespace Flense::Core
             size_t totalRead = 0;
             while (totalRead < buffer.size())
             {
-                la_ssize_t const bytesRead =
+                const la_ssize_t bytesRead =
                     archive_read_data(m_archive, buffer.data() + totalRead, buffer.size() - totalRead);
                 if (bytesRead <= 0)
                 {
@@ -114,8 +114,7 @@ namespace Flense::Core
         /// <param name="source">The byte source to read from. Must outlive the returned ArchiveReader.</param>
         /// <param name="stopToken">The token to check for cancellation.</param>
         /// <returns>An ArchiveReader instance for enumerating the archive entries.</returns>
-        template <ByteStream TStream>
-        static ArchiveReader CreateFromStream(TStream& source, std::stop_token stopToken)
+        template <ByteStream TStream> static ArchiveReader CreateFromStream(TStream& source, std::stop_token stopToken)
         {
             ArchivePtr archive{archive_read_new()};
 
@@ -156,6 +155,19 @@ namespace Flense::Core
             return ArchiveEntry{entry, m_archive.get()};
         }
 
+        /// <summary>
+        /// Skips a number of bytes in the underlying byte source.
+        /// </summary>
+        /// <param name="request">The number of bytes to skip.</param>
+        /// <returns>The number of bytes skipped.</returns>
+        /// <remarks>
+        /// Used for NestedArchiveByteStream where libarchive may want to skip while reading a sub-tar.
+        /// </remarks>
+        int64_t Skip(int64_t request)
+        {
+            return m_context->skip(request);
+        }
+
       private:
         struct ArchiveDeleter
         {
@@ -185,7 +197,7 @@ namespace Flense::Core
                 return 0;
             }
 
-            size_t const bytesRead = context.readSync(std::span(context.buffer));
+            const size_t bytesRead = context.readSync(std::span(context.buffer));
             *buffer = context.buffer.data();
             return static_cast<la_ssize_t>(bytesRead);
         }

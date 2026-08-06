@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ImageLayer.h"
-
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -12,6 +10,7 @@
 namespace Flense::Core
 {
     class ArchiveEntry;
+    class ImageLayer;
 
     /// <summary>
     /// Accumulates OCI image manifest/config details from an archive's entries, fed one at a time.

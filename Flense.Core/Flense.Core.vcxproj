@@ -219,11 +219,13 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FilesystemTree.h" />
+    <ClInclude Include="ParseFilesystemTree.h" />
     <ClInclude Include="ImageLayer.h" />
     <ClInclude Include="ImageParser.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ArchiveReader.h" />
-    <ClInclude Include="FilesystemTree.h" />
+    <ClInclude Include="Tree.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ImageParser.cpp" />
@@ -235,6 +237,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ParseFilesystemTree.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
