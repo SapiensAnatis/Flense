@@ -51,6 +51,7 @@ namespace Flense::Core
         /// </summary>
         struct BlobFsDetails
         {
+            FilesystemChangeTreeNodeRef filesystemChanges;
         };
 
         using ParsedEntry = std::variant<std::monostate, ManifestDetails, JsonBlobDetails, BlobFsDetails>;
@@ -143,9 +144,9 @@ namespace Flense::Core
                 NestedArchiveByteStream nestedStream(&entry, std::as_bytes(std::span(sniffBuffer)));
                 auto reader = ArchiveReader::CreateFromStream(nestedStream, std::stop_token{});
 
-                ParseLayerFilesystem(&reader);
-
-                return BlobFsDetails{};
+                return BlobFsDetails{
+                    .filesystemChanges = ParseLayerFilesystem(&reader),
+                };
             }
         }
 
@@ -217,7 +218,7 @@ namespace Flense::Core
                 }
                 else if constexpr (std::is_same_v<T, BlobFsDetails>)
                 {
-                    // Nothing to accumulate (yet).
+                    OutputDebugString(L"HEllo world");
                 }
                 else if constexpr (std::is_same_v<T, std::monostate>)
                 {

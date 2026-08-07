@@ -31,6 +31,11 @@ namespace Flense::Core
     /// <summary>
     /// A node in a tree that describes diffs applied to a filesystem.
     /// </summary>
+    using FilesystemChangeTreeNode = TreeNode<FilesystemChangeInfo>;
+
+    /// <summary>
+    /// A ref to a node in a tree that describes diffs applied to a filesystem.
+    /// </summary>
     using FilesystemChangeTreeNodeRef = TreeNodeRef<FilesystemChangeInfo>;
 
 } // namespace Flense::Core
