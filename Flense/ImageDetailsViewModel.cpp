@@ -26,7 +26,7 @@ namespace winrt::Flense::implementation
         return m_imageFile;
     }
 
-    void ImageDetailsViewModel::ImageArchive(StorageFile const& value)
+    void ImageDetailsViewModel::ImageArchive(const StorageFile& value)
     {
         if (m_imageFile != value)
         {
@@ -100,8 +100,7 @@ namespace winrt::Flense::implementation
         {
             imageParser.ProcessEntry(*entry);
 
-            // Image parsing is 10% :)
-            double const percent = static_cast<double>(stream.Position()) / static_cast<double>(stream.Size()) * 90.0;
+            const double percent = (static_cast<double>(stream.Position()) / static_cast<double>(stream.Size())) * 50.0;
 
             // Only report on meaningful (>=5%) changes - TryEnqueue marshals to the UI thread,
             // and posting on every entry (there can be thousands in a large archive) can flood it
@@ -118,24 +117,24 @@ namespace winrt::Flense::implementation
             }
         }
 
+        co_await wil::resume_foreground(dispatcher);
+
         for (const auto& layer : imageParser.Build())
         {
             Layers().Append(winrt::make<implementation::ImageLayerWrapper>(layer));
         }
-
-        co_await wil::resume_foreground(dispatcher);
 
         LoadingProgress(100);
 
         IsLoading(false);
     }
 
-    event_token ImageDetailsViewModel::PropertyChanged(PropertyChangedEventHandler const& handler)
+    event_token ImageDetailsViewModel::PropertyChanged(const PropertyChangedEventHandler& handler)
     {
         return m_propertyChanged.add(handler);
     }
 
-    void ImageDetailsViewModel::PropertyChanged(event_token const& token) noexcept
+    void ImageDetailsViewModel::PropertyChanged(const event_token& token) noexcept
     {
         m_propertyChanged.remove(token);
     }
