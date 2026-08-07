@@ -125,6 +125,10 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FilesystemItemTemplateSelector.h">
+      <DependentUpon>FilesystemItemTemplateSelector.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="FilesystemTreeNode.h">
       <DependentUpon>FilesystemTreeNode.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -163,6 +167,10 @@
     <Page Include="MainWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FilesystemItemTemplateSelector.cpp">
+      <DependentUpon>FilesystemItemTemplateSelector.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="FilesystemTreeNode.cpp">
       <DependentUpon>FilesystemTreeNode.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -193,6 +201,9 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="FilesystemItemTemplateSelector.idl">
+      <SubType>Designer</SubType>
+    </Midl>
     <Midl Include="FilesystemTreeNode.idl">
       <SubType>Designer</SubType>
     </Midl>

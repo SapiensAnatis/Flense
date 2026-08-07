@@ -8,6 +8,36 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     NavigationCacheMode="Enabled">
+    
+    <Page.Resources>
+        <!-- DataTemplate for folders -->
+        <DataTemplate x:Key="FolderTemplate" x:DataType="local:FilesystemTreeNode">
+            <TreeViewItem AutomationProperties.Name="{x:Bind Name}"
+                ItemsSource="{x:Bind Children}" IsExpanded="True">
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon Glyph="&#xE8B7;" />
+                    <TextBlock Margin="0,0,10,0"/>
+                    <TextBlock Text="{x:Bind Name}" />
+                </StackPanel>
+            </TreeViewItem>
+        </DataTemplate>
+
+        <!-- DataTemplate for files -->
+        <DataTemplate x:Key="FileTemplate" x:DataType="local:FilesystemTreeNode">
+            <TreeViewItem AutomationProperties.Name="{x:Bind Name}">
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon Glyph="&#xE8A5;" />
+                    <TextBlock Margin="0,0,10,0"/>
+                    <TextBlock Text="{x:Bind Name}"/>
+                </StackPanel>
+            </TreeViewItem>
+        </DataTemplate>
+
+        <local:FilesystemItemTemplateSelector x:Key="FilesystemItemTemplateSelector"
+            FolderTemplate="{StaticResource FolderTemplate}"
+            FileTemplate="{StaticResource FileTemplate}" />
+
+    </Page.Resources>
 
     <Grid>
         <UserControl Name="LoadingDisplay" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}">
@@ -31,17 +61,14 @@
                             MenuItemsSource="{x:Bind ViewModel.Layers, Mode=OneWay}"
                             SelectedItem="{x:Bind ViewModel.SelectedLayer, Mode=TwoWay}"
                             PaneDisplayMode="Left" OpenPaneLength="500">
-                <TreeView ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}">
-                    <TreeView.ItemTemplate>
-                        <DataTemplate x:DataType="local:FilesystemTreeNode">
-                            <TreeViewItem Content="{x:Bind Name}" ItemsSource="{x:Bind Children}"/>
-                        </DataTemplate>
-                    </TreeView.ItemTemplate>
-                </TreeView>
+                
+                <TreeView ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}" 
+                          ItemTemplateSelector="{StaticResource FilesystemItemTemplateSelector}"/>
+
                 <NavigationView.MenuItemTemplate>
                     <DataTemplate x:DataType="local:ImageLayerWrapper">
                         <StackPanel>
-                            <TextBlock Text="{x:Bind Command}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{x:Bind Command}" TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
                     </DataTemplate>
                 </NavigationView.MenuItemTemplate>

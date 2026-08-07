@@ -1,0 +1,11 @@
+namespace Flense
+{
+    [default_interface]
+    runtimeclass FilesystemItemTemplateSelector : Microsoft.UI.Xaml.Controls.DataTemplateSelector
+    {
+        FilesystemItemTemplateSelector();
+
+        Microsoft.UI.Xaml.DataTemplate FileTemplate;
+        Microsoft.UI.Xaml.DataTemplate FolderTemplate;
+    }
+}

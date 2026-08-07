@@ -10,6 +10,7 @@ namespace winrt::Flense::implementation
         FilesystemTreeNode(winrt::hstring name, ::Flense::Core::FilesystemChangeTreeNodeRef node);
 
         winrt::hstring Name();
+        bool IsDirectory();
         Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> Children();
 
       private:
