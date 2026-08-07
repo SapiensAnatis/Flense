@@ -27,7 +27,7 @@ namespace Flense::Core
         /// Processes an individual archive entry, and store it in the parser's internal state for a later Build() call.
         /// </summary>
         /// <param name="entry">The archive entry.</param>
-        void ProcessEntry(const ArchiveEntry& entry);
+        void ProcessEntry(ArchiveEntry& entry);
 
         /// <summary>
         /// Assembles a vector of image layers once all archive entries have been handed to ProcessEntry().

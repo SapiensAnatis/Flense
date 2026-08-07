@@ -3,6 +3,8 @@
 #include "ArchiveReader.h"
 #include "ImageLayer.h"
 #include "ImageParser.h"
+#include "NestedArchiveByteStream.h"
+#include "ParseFilesystemTree.h"
 
 #include <algorithm>
 #include <array>
@@ -86,8 +88,8 @@ namespace Flense::Core
             std::string contents;
             contents.resize(entry.Size());
 
-            std::span<char> const contentsSpan = std::span{contents};
-            size_t const bytesRead = entry.ReadInto(std::as_writable_bytes(contentsSpan));
+            const std::span<char> contentsSpan = std::span{contents};
+            const size_t bytesRead = entry.ReadInto(std::as_writable_bytes(contentsSpan));
             contents.resize(bytesRead);
 
             const nlohmann::json manifests = nlohmann::json::parse(contents);
@@ -113,7 +115,7 @@ namespace Flense::Core
         /// </summary>
         /// <param name="entry">The archive entry.</param>
         /// <returns>A BlobFsDetails or JsonBlobDetails.</returns>
-        ParsedEntry ParseBlob(const ArchiveEntry& entry)
+        ParsedEntry ParseBlob(ArchiveEntry& entry)
         {
             // Sniff a small, bounded prefix first - large layer blobs must never be buffered in
             // full just to find out they're not JSON.
@@ -129,7 +131,7 @@ namespace Flense::Core
                 std::string contents(sniffBuffer.data(), sniffed);
                 contents.resize(entry.Size());
 
-                std::span<char> const remainingSpan = std::span{contents}.subspan(sniffed);
+                const std::span<char> remainingSpan = std::span{contents}.subspan(sniffed);
                 const size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
                 contents.resize(sniffed + read);
 
@@ -138,6 +140,11 @@ namespace Flense::Core
             else
             {
                 // This is a tar file containing layer diffs.
+                NestedArchiveByteStream nestedStream(&entry, std::as_bytes(std::span(sniffBuffer)));
+                auto reader = ArchiveReader::CreateFromStream(nestedStream, std::stop_token{});
+
+                ParseLayerFilesystem(&reader);
+
                 return BlobFsDetails{};
             }
         }
@@ -147,7 +154,7 @@ namespace Flense::Core
         /// </summary>
         /// <param name="entry">The archive entry.</param>
         /// <returns>A variant over the possible types.</returns>
-        ParsedEntry ParseEntry(const ArchiveEntry& entry)
+        ParsedEntry ParseEntry(ArchiveEntry& entry)
         {
             const std::string_view pathname = entry.Pathname();
 
@@ -193,7 +200,7 @@ namespace Flense::Core
         }
     } // namespace
 
-    void ImageParser::ProcessEntry(const ArchiveEntry& entry)
+    void ImageParser::ProcessEntry(ArchiveEntry& entry)
     {
         ParsedEntry parsed = ParseEntry(entry);
 
@@ -208,9 +215,13 @@ namespace Flense::Core
                 {
                     m_jsonBlobsByDigest.emplace(std::move(value.digest), std::move(value.contents));
                 }
-                else if constexpr (std::is_same_v<T, BlobFsDetails> || std::is_same_v<T, std::monostate>)
+                else if constexpr (std::is_same_v<T, BlobFsDetails>)
                 {
                     // Nothing to accumulate (yet).
+                }
+                else if constexpr (std::is_same_v<T, std::monostate>)
+                {
+                    // Do nothing
                 }
                 else
                 {

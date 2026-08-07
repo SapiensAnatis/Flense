@@ -20,8 +20,7 @@ namespace Flense::Core
         /// </summary>
         /// <param name="entry">Non-owning reference to the archive entry.</param>
         /// <param name="initialBuffer">An initial buffer that may have already been read from the entry.</param>
-        explicit NestedArchiveByteStream(ArchiveEntry* entry, ArchiveReader* reader,
-                                         std::span<std::byte> initialBuffer);
+        NestedArchiveByteStream(ArchiveEntry* entry, std::span<const std::byte> initialBuffer);
 
         size_t ReadSync(std::span<std::byte> buffer);
         int64_t Skip(int64_t request);
@@ -30,9 +29,8 @@ namespace Flense::Core
 
       private:
         uint64_t m_position{0};
-        std::span<std::byte> m_initialBuffer;
+        std::span<const std::byte> m_initialBuffer;
         ArchiveEntry* m_entry{nullptr};
-        ArchiveReader* m_reader{nullptr};
     };
 
 } // namespace Flense::Core
