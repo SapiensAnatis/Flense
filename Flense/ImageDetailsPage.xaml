@@ -28,7 +28,7 @@
         </UserControl>
         <UserControl Name="ImageDetails" Visibility="{x:Bind ViewModel.IsLoaded, Mode=OneWay}">
             <NavigationView PaneTitle="Layers" IsBackButtonVisible="Collapsed" IsSettingsVisible="False" IsPaneToggleButtonVisible="False"
-                            MenuItemsSource="{x:Bind ViewModel.Layers}" PaneDisplayMode="Left" OpenPaneLength="500">
+                            MenuItemsSource="{x:Bind ViewModel.Layers, Mode=OneWay}" PaneDisplayMode="Left" OpenPaneLength="500">
                 <Frame x:Name="ContentFrame"/>
                 <NavigationView.MenuItemTemplate>
                     <DataTemplate x:DataType="local:ImageLayerWrapper">
