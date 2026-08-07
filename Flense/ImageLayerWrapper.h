@@ -13,8 +13,10 @@ namespace winrt::Flense::implementation
         ImageLayerWrapper(::Flense::Core::ImageLayer);
 
         winrt::hstring Command();
+        winrt::Flense::FilesystemTreeNode FilesystemChanges();
 
       private:
         ::Flense::Core::ImageLayer m_layer;
+        winrt::Flense::FilesystemTreeNode m_filesystemChanges{nullptr};
     };
 } // namespace winrt::Flense::implementation

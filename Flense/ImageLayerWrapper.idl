@@ -1,7 +1,10 @@
+import "FilesystemTreeNode.idl";
+
 namespace Flense
 {
-    runtimeclass ImageLayerWrapper 
+    runtimeclass ImageLayerWrapper
     {
         String Command { get; };
+        Flense.FilesystemTreeNode FilesystemChanges { get; };
     }
 }

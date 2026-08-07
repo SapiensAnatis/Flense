@@ -50,6 +50,20 @@ namespace winrt::Flense::implementation
         }
     }
 
+    winrt::Flense::ImageLayerWrapper ImageDetailsViewModel::SelectedLayer()
+    {
+        return m_selectedLayer;
+    }
+
+    void ImageDetailsViewModel::SelectedLayer(const winrt::Flense::ImageLayerWrapper& value)
+    {
+        if (m_selectedLayer != value)
+        {
+            m_selectedLayer = value;
+            m_propertyChanged(*this, PropertyChangedEventArgs{L"SelectedLayer"});
+        }
+    }
+
     bool ImageDetailsViewModel::IsLoading()
     {
         return m_isLoading;
@@ -135,6 +149,11 @@ namespace winrt::Flense::implementation
                             std::ranges::to<std::vector>();
 
         Layers(winrt::single_threaded_observable_vector<winrt::Flense::ImageLayerWrapper>(std::move(parsedLayers)));
+
+        if (m_layers.Size() > 0)
+        {
+            SelectedLayer(m_layers.GetAt(0));
+        }
 
         LoadingProgress(100);
 
