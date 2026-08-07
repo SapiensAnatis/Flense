@@ -10,9 +10,8 @@
 
 namespace Flense::Core
 {
-    NestedArchiveByteStream::NestedArchiveByteStream(ArchiveEntry* entry, ArchiveReader* reader,
-                                                     std::span<std::byte> initialBuffer)
-        : m_entry(entry), m_reader(reader), m_initialBuffer(initialBuffer)
+    NestedArchiveByteStream::NestedArchiveByteStream(ArchiveEntry* entry, std::span<const std::byte> initialBuffer)
+        : m_entry(entry), m_initialBuffer(initialBuffer)
     {
     }
 
@@ -44,7 +43,7 @@ namespace Flense::Core
 
     int64_t NestedArchiveByteStream::Skip(const int64_t request)
     {
-        const int64_t actualSkip = m_reader->Skip(request);
+        const int64_t actualSkip = m_entry->ParentReader()->Skip(request);
         m_position += static_cast<uint64_t>(actualSkip);
 
         return actualSkip;

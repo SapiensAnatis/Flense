@@ -1,5 +1,7 @@
 #pragma once
 
+#include "FileKind.h"
+
 #include <archive.h>
 #include <archive_entry.h>
 
@@ -33,6 +35,8 @@ namespace Flense::Core
         { source.Size() } -> std::convertible_to<uint64_t>;
         { source.Position() } -> std::convertible_to<uint64_t>;
     };
+
+    class ArchiveReader;
 
     /// <summary>
     /// A single entry (file, directory, etc.) within an archive, hiding the underlying libarchive
@@ -86,13 +90,45 @@ namespace Flense::Core
             return totalRead;
         }
 
+        /// <summary>
+        /// Gets the type of the entry (i.e. dir/file/symlink/other).
+        /// </summary>
+        /// <returns>The type of the entry.</returns>
+        FileKind FileKind() const
+        {
+            switch (archive_entry_filetype(m_entry))
+            {
+            case AE_IFDIR:
+                return FileKind::Directory;
+            case AE_IFREG:
+                return FileKind::File;
+            case AE_IFLNK:
+                return FileKind::Symlink;
+            default:
+                return FileKind::Other;
+            }
+        }
+
+        /// <summary>
+        /// Gets the parent archive reader.
+        /// </summary>
+        /// <remarks>
+        /// Used for NestedArchiveByteStream where we want to call ArchiveReader::Skip while reading a sub-tar.
+        /// </remarks>
+        ArchiveReader* ParentReader() const
+        {
+            return m_parentReader;
+        }
+
       private:
         friend class ArchiveReader;
 
-        ArchiveEntry(archive_entry* entry, archive* archive) : m_entry(entry), m_archive(archive)
+        ArchiveEntry(archive_entry* entry, archive* archive, ArchiveReader* parentReader)
+            : m_entry(entry), m_archive(archive), m_parentReader(parentReader)
         {
         }
 
+        ArchiveReader* m_parentReader;
         archive_entry* m_entry;
         archive* m_archive;
     };
@@ -141,6 +177,9 @@ namespace Flense::Core
         /// the archive is exhausted (or cancellation via the stop_token passed to CreateFromStream
         /// stops the underlying read).
         /// </summary>
+        /// <remarks>
+        /// Invalidates any string_views or other references obtained from previous entries.
+        /// </remarks>
         std::optional<ArchiveEntry> Next()
         {
             archive_entry* entry;
@@ -152,7 +191,7 @@ namespace Flense::Core
 
             // TODO: This always succeeds on paper, we are undoubtedly missing some error handling
 
-            return ArchiveEntry{entry, m_archive.get()};
+            return ArchiveEntry{entry, m_archive.get(), this};
         }
 
         /// <summary>

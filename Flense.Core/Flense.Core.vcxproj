@@ -219,6 +219,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FileKind.h" />
     <ClInclude Include="FilesystemTree.h" />
     <ClInclude Include="ParseFilesystemTree.h" />
     <ClInclude Include="ImageLayer.h" />
