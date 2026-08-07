@@ -16,6 +16,9 @@ namespace winrt::Flense::implementation
 
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::ImageLayerWrapper> Layers();
 
+        winrt::Flense::ImageLayerWrapper SelectedLayer();
+        void SelectedLayer(const winrt::Flense::ImageLayerWrapper& value);
+
         bool IsLoading();
         bool IsLoaded();
         double LoadingProgress();
@@ -35,6 +38,8 @@ namespace winrt::Flense::implementation
 
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::ImageLayerWrapper> m_layers{
             winrt::single_threaded_observable_vector<winrt::Flense::ImageLayerWrapper>()};
+
+        winrt::Flense::ImageLayerWrapper m_selectedLayer{nullptr};
 
         winrt::event<winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
 

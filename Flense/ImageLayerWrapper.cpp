@@ -5,6 +5,8 @@
 #include "ImageLayerWrapper.g.cpp"
 #endif
 
+#include "FilesystemTreeNode.h"
+
 namespace winrt::Flense::implementation
 {
     ImageLayerWrapper::ImageLayerWrapper(::Flense::Core::ImageLayer layer) : m_layer(std::move(layer))
@@ -15,5 +17,15 @@ namespace winrt::Flense::implementation
     {
         // TODO: Cache strings
         return winrt::to_hstring(m_layer.Command());
+    }
+
+    winrt::Flense::FilesystemTreeNode ImageLayerWrapper::FilesystemChanges()
+    {
+        if (!m_filesystemChanges)
+        {
+            m_filesystemChanges = winrt::make<FilesystemTreeNode>(L"", m_layer.FilesystemChanges());
+        }
+
+        return m_filesystemChanges;
     }
 } // namespace winrt::Flense::implementation

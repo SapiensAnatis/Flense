@@ -10,6 +10,7 @@ namespace Flense
 
         Windows.Storage.StorageFile ImageArchive;
         Windows.Foundation.Collections.IObservableVector<Flense.ImageLayerWrapper> Layers { get; };
+        Flense.ImageLayerWrapper SelectedLayer;
 
         Boolean IsLoading { get; };
         Boolean IsLoaded { get; };

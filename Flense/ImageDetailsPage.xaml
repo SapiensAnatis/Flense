@@ -28,8 +28,16 @@
         </UserControl>
         <UserControl Name="ImageDetails" Visibility="{x:Bind ViewModel.IsLoaded, Mode=OneWay}">
             <NavigationView PaneTitle="Layers" IsBackButtonVisible="Collapsed" IsSettingsVisible="False" IsPaneToggleButtonVisible="False"
-                            MenuItemsSource="{x:Bind ViewModel.Layers, Mode=OneWay}" PaneDisplayMode="Left" OpenPaneLength="500">
-                <Frame x:Name="ContentFrame"/>
+                            MenuItemsSource="{x:Bind ViewModel.Layers, Mode=OneWay}"
+                            SelectedItem="{x:Bind ViewModel.SelectedLayer, Mode=TwoWay}"
+                            PaneDisplayMode="Left" OpenPaneLength="500">
+                <TreeView ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}">
+                    <TreeView.ItemTemplate>
+                        <DataTemplate x:DataType="local:FilesystemTreeNode">
+                            <TreeViewItem Content="{x:Bind Name}" ItemsSource="{x:Bind Children}"/>
+                        </DataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
                 <NavigationView.MenuItemTemplate>
                     <DataTemplate x:DataType="local:ImageLayerWrapper">
                         <StackPanel>

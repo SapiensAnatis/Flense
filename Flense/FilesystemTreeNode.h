@@ -1,17 +1,20 @@
 ﻿#pragma once
 
+#include "FilesystemTree.h"
 #include "FilesystemTreeNode.g.h"
 
 namespace winrt::Flense::implementation
 {
     struct FilesystemTreeNode : FilesystemTreeNodeT<FilesystemTreeNode>
     {
-        FilesystemTreeNode() = default;
+        FilesystemTreeNode(winrt::hstring name, ::Flense::Core::FilesystemChangeTreeNodeRef node);
 
         winrt::hstring Name();
         Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> Children();
 
       private:
-        Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> m_children;
+        winrt::hstring m_name;
+        ::Flense::Core::FilesystemChangeTreeNodeRef m_node;
+        Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> m_children{nullptr};
     };
 } // namespace winrt::Flense::implementation
