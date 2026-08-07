@@ -16,6 +16,23 @@ namespace Flense::Core
             FilesystemChangeInfo info;
             std::flat_map<std::string, MutableTreeNode> children;
         };
+
+        TreeNodeRef<FilesystemChangeInfo> Freeze(MutableTreeNode&& node)
+        {
+            auto containers = std::move(node.children).extract();
+
+            std::vector<FilesystemChangeTreeNodeRef> frozen;
+            frozen.reserve(containers.values.size());
+
+            for (auto& child : containers.values)
+            {
+                frozen.push_back(Freeze(std::move(child)));
+            }
+
+            return FilesystemChangeTreeNode::Create(
+                node.info, std::flat_map<std::string, FilesystemChangeTreeNodeRef>(
+                               std::sorted_unique, std::move(containers.keys), std::move(frozen)));
+        }
     } // namespace
 
     FilesystemChangeTreeNodeRef ParseLayerFilesystem(ArchiveReader* nestedTarReader)
@@ -62,6 +79,6 @@ namespace Flense::Core
             };
         }
 
-        return {};
+        return Freeze(std::move(rootNode));
     }
 } // namespace Flense::Core
