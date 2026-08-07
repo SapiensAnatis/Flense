@@ -12,7 +12,7 @@ namespace winrt::Flense::implementation
         ImageDetailsViewModel() = default;
 
         winrt::Windows::Storage::StorageFile ImageArchive();
-        void ImageArchive(winrt::Windows::Storage::StorageFile const& value);
+        void ImageArchive(const winrt::Windows::Storage::StorageFile& value);
 
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::ImageLayerWrapper> Layers();
 
@@ -23,12 +23,13 @@ namespace winrt::Flense::implementation
         winrt::Windows::Foundation::IAsyncAction LoadAsync();
 
         winrt::event_token PropertyChanged(
-            winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
-        void PropertyChanged(winrt::event_token const& token) noexcept;
+            const winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler& handler);
+        void PropertyChanged(const winrt::event_token& token) noexcept;
 
       private:
         void IsLoading(bool value);
         void LoadingProgress(double value);
+        void Layers(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::ImageLayerWrapper> value);
 
         winrt::Windows::Storage::StorageFile m_imageFile{nullptr};
 

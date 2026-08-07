@@ -10,6 +10,7 @@
 #include "ImageParser.h"
 #include "WinRtByteStream.h"
 
+#include <ranges>
 #include <stop_token>
 
 using namespace winrt;
@@ -38,6 +39,15 @@ namespace winrt::Flense::implementation
     IObservableVector<winrt::Flense::ImageLayerWrapper> ImageDetailsViewModel::Layers()
     {
         return m_layers;
+    }
+
+    void ImageDetailsViewModel::Layers(IObservableVector<winrt::Flense::ImageLayerWrapper> value)
+    {
+        if (m_layers != value)
+        {
+            m_layers = std::move(value);
+            m_propertyChanged(*this, PropertyChangedEventArgs{L"Layers"});
+        }
     }
 
     bool ImageDetailsViewModel::IsLoading()
@@ -119,10 +129,12 @@ namespace winrt::Flense::implementation
 
         co_await wil::resume_foreground(dispatcher);
 
-        for (const auto& layer : imageParser.Build())
-        {
-            Layers().Append(winrt::make<implementation::ImageLayerWrapper>(layer));
-        }
+        auto parsedLayers = imageParser.Build() | std::views::transform([](const auto& layer) {
+                                return winrt::make<implementation::ImageLayerWrapper>(layer);
+                            }) |
+                            std::ranges::to<std::vector>();
+
+        Layers(winrt::single_threaded_observable_vector<winrt::Flense::ImageLayerWrapper>(std::move(parsedLayers)));
 
         LoadingProgress(100);
 
