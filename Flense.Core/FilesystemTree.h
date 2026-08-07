@@ -1,5 +1,6 @@
 #pragma once
 
+#include "FileKind.h"
 #include "Tree.h"
 
 #include <string>
@@ -26,6 +27,8 @@ namespace Flense::Core
         FileKind kind;
         uint64_t size;
         FilesystemChangeKind changeKind;
+
+        bool operator==(const FilesystemChangeInfo& other) const = default;
     };
 
     /// <summary>

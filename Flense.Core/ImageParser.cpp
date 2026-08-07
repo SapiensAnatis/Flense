@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "ArchiveReader.h"
+#include "FilesystemTree.h"
 #include "ImageLayer.h"
 #include "ImageParser.h"
 #include "NestedArchiveByteStream.h"
@@ -42,15 +43,16 @@ namespace Flense::Core
         /// </remarks>
         struct JsonBlobDetails
         {
-            std::string digest;
+            std::string archivePath;
             std::string contents;
         };
 
         /// <summary>
-        /// A binary filesystem blob. Stub implementation.
+        /// A binary filesystem blob.
         /// </summary>
         struct BlobFsDetails
         {
+            std::string archivePath;
             FilesystemChangeTreeNodeRef filesystemChanges;
         };
 
@@ -136,7 +138,10 @@ namespace Flense::Core
                 const size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
                 contents.resize(sniffed + read);
 
-                return JsonBlobDetails{.digest = std::string{entry.Pathname()}, .contents = std::move(contents)};
+                return JsonBlobDetails{
+                    .archivePath = std::string{entry.Pathname()},
+                    .contents = std::move(contents),
+                };
             }
             else
             {
@@ -145,6 +150,7 @@ namespace Flense::Core
                 auto reader = ArchiveReader::CreateFromStream(nestedStream, std::stop_token{});
 
                 return BlobFsDetails{
+                    .archivePath = std::string(entry.Pathname()),
                     .filesystemChanges = ParseLayerFilesystem(&reader),
                 };
             }
@@ -214,11 +220,12 @@ namespace Flense::Core
                 }
                 else if constexpr (std::is_same_v<T, JsonBlobDetails>)
                 {
-                    m_jsonBlobsByDigest.emplace(std::move(value.digest), std::move(value.contents));
+                    m_jsonBlobsByDigest.emplace(std::move(value.archivePath), std::move(value.contents));
                 }
                 else if constexpr (std::is_same_v<T, BlobFsDetails>)
                 {
-                    OutputDebugString(L"HEllo world");
+                    m_filesystemsByLayerDigest.emplace(std::move(value.archivePath),
+                                                       std::move(value.filesystemChanges));
                 }
                 else if constexpr (std::is_same_v<T, std::monostate>)
                 {
@@ -247,6 +254,8 @@ namespace Flense::Core
             const nlohmann::json config = nlohmann::json::parse(configIt->second);
             const nlohmann::json& historyArray = config.at("history");
 
+            size_t layerNum = 0;
+
             for (const auto& historyObj : historyArray)
             {
                 if (auto it = historyObj.find("empty_layer"); it != historyObj.end() && it->get<bool>())
@@ -256,7 +265,14 @@ namespace Flense::Core
 
                 std::string_view command = historyObj.at("created_by").get_ref<const std::string&>();
 
-                layers.emplace_back(CollapseWhitespace(command));
+                // TODO: Make this more destructive so the filesystem tree can be moved?
+                // Though, does it really matter if it's just a shared pointer?
+                const std::string& layerPath = m_layerPaths.at(layerNum);
+                const FilesystemChangeTreeNodeRef& fs = m_filesystemsByLayerDigest.at(layerPath);
+
+                layers.emplace_back(CollapseWhitespace(command), fs);
+
+                layerNum += 1;
             }
         }
 
