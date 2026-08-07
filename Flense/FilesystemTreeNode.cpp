@@ -17,6 +17,11 @@ namespace winrt::Flense::implementation
         return m_name;
     }
 
+    bool FilesystemTreeNode::IsDirectory()
+    {
+        return m_node->Data().kind == ::Flense::Core::FileKind::Directory;
+    }
+
     Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> FilesystemTreeNode::Children()
     {
         if (!m_children)

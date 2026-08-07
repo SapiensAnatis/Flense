@@ -21,6 +21,9 @@
       <Filter>Wrappers</Filter>
     </Midl>
     <Midl Include="FilesystemTreeNode.idl" />
+    <Midl Include="FilesystemItemTemplateSelector.idl">
+      <Filter>ViewModels</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
