@@ -1,5 +1,7 @@
 #pragma once
 
+#include "FilesystemTree.h"
+
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -41,6 +43,7 @@ namespace Flense::Core
 
         // Raw, not-yet-parsed JSON text keyed by digest hashes
         std::unordered_map<std::string, std::string> m_jsonBlobsByDigest;
+        std::unordered_map<std::string, FilesystemChangeTreeNodeRef> m_filesystemsByLayerDigest;
     };
 
 } // namespace Flense::Core

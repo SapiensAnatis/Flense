@@ -33,6 +33,11 @@ namespace Flense::Core
                 node.info, std::flat_map<std::string, FilesystemChangeTreeNodeRef>(
                                std::sorted_unique, std::move(containers.keys), std::move(frozen)));
         }
+
+        TreeNodeRef<FilesystemChangeInfo> SetChangeTypeToNone(const TreeNodeRef<FilesystemChangeInfo>& node)
+        {
+            Visit(node, [](const FilesystemChangeInfo& info) { return info; });
+        }
     } // namespace
 
     FilesystemChangeTreeNodeRef ParseLayerFilesystem(ArchiveReader* nestedTarReader)

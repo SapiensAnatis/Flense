@@ -1,25 +1,32 @@
 #pragma once
 
+#include "FilesystemTree.h"
+
 #include <string>
 #include <string_view>
 
 namespace Flense::Core
 {
-
     class ImageLayer
     {
       public:
-        ImageLayer(std::string command) : m_command(std::move(command))
+        ImageLayer(std::string command, FilesystemChangeTreeNodeRef filesystemChanges)
+            : m_command(std::move(command)), m_filesystemChanges(std::move(filesystemChanges))
         {
         }
 
-        std::string_view Command() const
+        [[nodiscard]] std::string_view Command() const
         {
             return m_command;
         }
 
+        [[nodiscard]] FilesystemChangeTreeNodeRef FilesystemChanges() const
+        {
+            return m_filesystemChanges;
+        }
+
       private:
         std::string m_command;
+        FilesystemChangeTreeNodeRef m_filesystemChanges;
     };
-
 } // namespace Flense::Core
