@@ -16,6 +16,7 @@ namespace winrt::Flense::implementation
         winrt::Flense::ImageDetailsViewModel ViewModel();
 
         winrt::fire_and_forget OnNavigatedTo(winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
+        void OnNavigatedFrom(winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
 
       private:
         winrt::Flense::ImageDetailsViewModel m_viewModel;

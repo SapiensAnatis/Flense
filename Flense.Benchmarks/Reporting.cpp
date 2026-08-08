@@ -145,6 +145,14 @@ namespace Flense::Benchmarks
             }
 
             std::cout << "\nSlowest entries (final run)\n";
+
+            if (result.workerCount != 1)
+            {
+                // With workers, ProcessEntry only copies a layer's compressed bytes out of the archive -
+                // the inflate happens elsewhere - so these times measure the hand-off, not the work.
+                std::cout << "(hand-off time only; layer decompression is not included)\n";
+            }
+
             std::cout << std::format("{:>12}{:>13}{:>14}  {}\n", "time", "size", "throughput", "path");
             PrintRule(12 + 13 + 14 + 2 + 40);
 
@@ -187,7 +195,8 @@ namespace Flense::Benchmarks
     {
         std::cout << std::format("\nImage: {} ({})\n", result.imagePath.filename().string(),
                                  FormatBytes(result.imageSizeBytes));
-        std::cout << std::format("Runs : {} (1 warmup, warm page cache)\n\n", result.runs);
+        std::cout << std::format("Runs : {} (1 warmup, warm page cache)\n", result.runs);
+        std::cout << std::format("Layer workers: {}\n\n", result.workerCount);
 
         PrintPhaseTable(result);
         PrintSlowestEntries(result);

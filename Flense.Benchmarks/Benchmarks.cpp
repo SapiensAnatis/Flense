@@ -14,7 +14,9 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <format>
 #include <stop_token>
+#include <string>
 #include <unordered_set>
 #include <vector>
 
@@ -74,6 +76,7 @@ namespace Flense::Benchmarks
         /// The real workload: enumerate the archive, hand every entry to ImageParser, then Build().
         /// </summary>
         /// <param name="path">The image path.</param>
+        /// <param name="workerCount">The parser's layer-decompression thread count.</param>
         /// <param name="collectEntryTimings">Whether to time each ProcessEntry call individually.</param>
         /// <param name="reporter">The progress reporter.</param>
         /// <param name="passIndex">The index of the pass this stage belongs to.</param>
@@ -81,16 +84,20 @@ namespace Flense::Benchmarks
         /// <remarks>
         /// The parser and the returned layers are destroyed by the caller, after both timers have been
         /// stopped - tearing down a tree of a million shared_ptrs is not part of what we're measuring.
+        ///
+        /// With more than one worker the parse/build split stops being a split of the work: ProcessEntry
+        /// returns as soon as a layer's compressed bytes have been copied out, and Build() is where the
+        /// wait for the decompressions actually lands. Only endToEnd is comparable across worker counts.
         /// </remarks>
-        ParsePassResult RunParsePass(const std::filesystem::path& path, const bool collectEntryTimings,
-                                     ProgressReporter& reporter, const int passIndex)
+        ParsePassResult RunParsePass(const std::filesystem::path& path, const size_t workerCount,
+                                     const bool collectEntryTimings, ProgressReporter& reporter, const int passIndex)
         {
             reporter.ReportPass(passIndex, "parse");
 
             ParsePassResult result;
 
             FileByteStream stream{path};
-            Core::ImageParser parser;
+            Core::ImageParser parser{Core::ImageParserOptions{.workerCount = workerCount}};
 
             const auto parseStart = Clock::now();
 
@@ -149,6 +156,52 @@ namespace Flense::Benchmarks
             {
                 CountTreeNodes(child, logicalCount, uniqueNodes);
             }
+        }
+
+        /// <summary>
+        /// Compares two filesystem trees by value, describing the first place they diverge.
+        /// </summary>
+        /// <param name="left">The first tree.</param>
+        /// <param name="right">The second tree.</param>
+        /// <param name="path">The path walked to reach these two nodes, for the message.</param>
+        /// <returns>An empty string if the trees are equal, otherwise a description of the difference.</returns>
+        std::string DescribeTreeDifference(const Core::FilesystemChangeTreeNodeRef& left,
+                                           const Core::FilesystemChangeTreeNodeRef& right, const std::string& path)
+        {
+            if (!left || !right)
+            {
+                return left == right ? std::string{} : std::format("'{}' present on only one side", path);
+            }
+
+            if (!(left->Data() == right->Data()))
+            {
+                return std::format("'{}' has differing info", path);
+            }
+
+            const auto& leftChildren = left->Children();
+            const auto& rightChildren = right->Children();
+
+            if (leftChildren.size() != rightChildren.size())
+            {
+                return std::format("'{}' has {} children vs {}", path, leftChildren.size(), rightChildren.size());
+            }
+
+            for (const auto& [name, leftChild] : leftChildren)
+            {
+                const auto it = rightChildren.find(name);
+                if (it == rightChildren.end())
+                {
+                    return std::format("'{}/{}' missing on one side", path, name);
+                }
+
+                if (std::string difference = DescribeTreeDifference(leftChild, it->second, path + "/" + name);
+                    !difference.empty())
+                {
+                    return difference;
+                }
+            }
+
+            return {};
         }
 
         /// <summary>
@@ -233,11 +286,12 @@ namespace Flense::Benchmarks
         return it == samplesMs.end() ? 0.0 : *it;
     }
 
-    BenchmarkResult RunBenchmark(const std::filesystem::path& imagePath, const int runs)
+    BenchmarkResult RunBenchmark(const std::filesystem::path& imagePath, const int runs, const size_t workerCount)
     {
         BenchmarkResult result;
         result.imagePath = imagePath;
         result.runs = runs;
+        result.workerCount = workerCount;
         result.imageSizeBytes = std::filesystem::file_size(imagePath);
 
         ProgressReporter reporter{imagePath.filename().string(), runs + 1};
@@ -246,7 +300,7 @@ namespace Flense::Benchmarks
         // first parse also pays one-off costs (heap growth, page faults on first touch) that would
         // otherwise land entirely on run 1 and skew the max.
         RunIoPass(imagePath, reporter, 0);
-        RunParsePass(imagePath, false, reporter, 0);
+        RunParsePass(imagePath, workerCount, false, reporter, 0);
 
         std::vector<Core::ImageLayer> lastLayers;
 
@@ -257,7 +311,7 @@ namespace Flense::Benchmarks
 
             PhaseSlot(result.phases, Phase::Io).samplesMs.push_back(RunIoPass(imagePath, reporter, passIndex));
 
-            ParsePassResult pass = RunParsePass(imagePath, isFinalRun, reporter, passIndex);
+            ParsePassResult pass = RunParsePass(imagePath, workerCount, isFinalRun, reporter, passIndex);
 
             PhaseSlot(result.phases, Phase::ParseEntries).samplesMs.push_back(pass.parseMs);
             PhaseSlot(result.phases, Phase::Build).samplesMs.push_back(pass.buildMs);
@@ -291,5 +345,35 @@ namespace Flense::Benchmarks
         result.counters.peakWorkingSetBytes = PeakWorkingSetBytes();
 
         return result;
+    }
+
+    std::string VerifyParallelMatchesSerial(const std::filesystem::path& imagePath, const size_t workerCount)
+    {
+        ProgressReporter reporter{imagePath.filename().string(), 2};
+
+        const std::vector<Core::ImageLayer> serial = RunParsePass(imagePath, 1, false, reporter, 0).layers;
+        const std::vector<Core::ImageLayer> parallel = RunParsePass(imagePath, workerCount, false, reporter, 1).layers;
+
+        if (serial.size() != parallel.size())
+        {
+            return std::format("layer count differs: {} serial vs {} parallel", serial.size(), parallel.size());
+        }
+
+        for (size_t i = 0; i < serial.size(); i += 1)
+        {
+            if (serial[i].Command() != parallel[i].Command())
+            {
+                return std::format("layer {} command differs", i);
+            }
+
+            if (const std::string difference =
+                    DescribeTreeDifference(serial[i].FilesystemChanges(), parallel[i].FilesystemChanges(), "");
+                !difference.empty())
+            {
+                return std::format("layer {}: {}", i, difference);
+            }
+        }
+
+        return {};
     }
 } // namespace Flense::Benchmarks

@@ -30,7 +30,13 @@
     <ClInclude Include="Tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NestedArchiveByteStream.h">
+    <ClInclude Include="MemoryByteStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ByteBudget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FilesystemParsing.h">
@@ -50,7 +56,10 @@
     <ClCompile Include="ImageParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NestedArchiveByteStream.cpp">
+    <ClCompile Include="MemoryByteStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FilesystemParsing.cpp">

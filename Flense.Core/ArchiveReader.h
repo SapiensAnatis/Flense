@@ -118,26 +118,13 @@ namespace Flense::Core
             }
         }
 
-        /// <summary>
-        /// Gets the parent archive reader.
-        /// </summary>
-        /// <remarks>
-        /// Used for NestedArchiveByteStream where we want to call ArchiveReader::Skip while reading a sub-tar.
-        /// </remarks>
-        ArchiveReader* ParentReader() const
-        {
-            return m_parentReader;
-        }
-
       private:
         friend class ArchiveReader;
 
-        ArchiveEntry(archive_entry* entry, archive* archive, ArchiveReader* parentReader)
-            : m_entry(entry), m_archive(archive), m_parentReader(parentReader)
+        ArchiveEntry(archive_entry* entry, archive* archive) : m_entry(entry), m_archive(archive)
         {
         }
 
-        ArchiveReader* m_parentReader;
         archive_entry* m_entry;
         archive* m_archive;
     };
@@ -200,20 +187,7 @@ namespace Flense::Core
 
             // TODO: This always succeeds on paper, we are undoubtedly missing some error handling
 
-            return ArchiveEntry{entry, m_archive.get(), this};
-        }
-
-        /// <summary>
-        /// Skips a number of bytes in the underlying byte source.
-        /// </summary>
-        /// <param name="request">The number of bytes to skip.</param>
-        /// <returns>The number of bytes skipped.</returns>
-        /// <remarks>
-        /// Used for NestedArchiveByteStream where libarchive may want to skip while reading a sub-tar.
-        /// </remarks>
-        int64_t Skip(int64_t request)
-        {
-            return m_context->skip(request);
+            return ArchiveEntry{entry, m_archive.get()};
         }
 
       private:

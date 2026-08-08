@@ -111,13 +111,15 @@ namespace winrt::Flense::implementation
         LoadingProgress(0);
         IsLoading(true);
 
-        std::stop_source stopSource;
+        const std::stop_token stopToken = m_stopSource.get_token();
 
         co_await winrt::resume_background();
 
-        auto reader = ::Flense::Core::ArchiveReader::CreateFromStream(stream, stopSource.get_token());
+        auto reader = ::Flense::Core::ArchiveReader::CreateFromStream(stream, stopToken);
 
-        ::Flense::Core::ImageParser imageParser;
+        // Layer decompression happens on the parser's own worker threads; this one only walks the
+        // archive and hands the compressed blobs over.
+        ::Flense::Core::ImageParser imageParser{::Flense::Core::ImageParserOptions{.stopToken = stopToken}};
 
         double lastReportedPercent = -1.0;
         while (auto entry = reader.Next())
@@ -141,12 +143,14 @@ namespace winrt::Flense::implementation
             }
         }
 
-        co_await wil::resume_foreground(dispatcher);
-
+        // Build() waits for the outstanding layer decompressions before folding them together, so it
+        // has to stay on the background thread.
         auto parsedLayers = imageParser.Build() | std::views::transform([](const auto& layer) {
                                 return winrt::make<implementation::ImageLayerWrapper>(layer);
                             }) |
                             std::ranges::to<std::vector>();
+
+        co_await wil::resume_foreground(dispatcher);
 
         Layers(winrt::single_threaded_observable_vector<winrt::Flense::ImageLayerWrapper>(std::move(parsedLayers)));
 
@@ -158,6 +162,11 @@ namespace winrt::Flense::implementation
         LoadingProgress(100);
 
         IsLoading(false);
+    }
+
+    void ImageDetailsViewModel::Cancel()
+    {
+        m_stopSource.request_stop();
     }
 
     event_token ImageDetailsViewModel::PropertyChanged(const PropertyChangedEventHandler& handler)

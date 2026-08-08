@@ -12,6 +12,7 @@
 #include <iostream>
 #include <optional>
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -98,6 +99,34 @@ namespace
 
         return paths;
     }
+
+    /// <summary>
+    /// The parser worker counts to sweep, ascending.
+    /// </summary>
+    /// <remarks>
+    /// 1 is the serial baseline everything else is judged against. The rest are powers of two up to
+    /// the hardware thread count, which is enough to show where the speedup curve flattens without
+    /// multiplying the runtime of an already slow benchmark.
+    /// </remarks>
+    /// <returns>The worker counts to benchmark.</returns>
+    std::vector<size_t> WorkerCountSweep()
+    {
+        const size_t hardwareThreads = std::max<size_t>(1, std::thread::hardware_concurrency());
+
+        std::vector<size_t> counts{1};
+
+        for (size_t count = 2; count < hardwareThreads; count *= 2)
+        {
+            counts.push_back(count);
+        }
+
+        if (hardwareThreads > 1)
+        {
+            counts.push_back(hardwareThreads);
+        }
+
+        return counts;
+    }
 } // namespace
 
 int main()
@@ -122,14 +151,35 @@ int main()
             return 1;
         }
 
+        const std::vector<size_t> workerCounts = WorkerCountSweep();
+
         for (const std::filesystem::path& imagePath : imagePaths)
         {
-            std::cout << std::format("Benchmarking {}...\n", imagePath.filename().string()) << std::flush;
+            const std::string imageName = imagePath.filename().string();
 
-            const BenchmarkResult result = RunBenchmark(imagePath, Runs);
+            // A faster parse that produces a different tree is not a faster parse. Check that before
+            // spending several minutes measuring it.
+            std::cout << std::format("Verifying {} parses identically in parallel...\n", imageName) << std::flush;
 
-            PrintReport(result);
-            std::cout << std::flush;
+            if (const std::string difference = VerifyParallelMatchesSerial(imagePath, workerCounts.back());
+                !difference.empty())
+            {
+                std::cerr << std::format("\nParallel parse of {} does not match the serial parse: {}\n", imageName,
+                                         difference);
+                return 1;
+            }
+
+            for (const size_t workerCount : workerCounts)
+            {
+                std::cout << std::format("Benchmarking {} ({} worker{})...\n", imageName, workerCount,
+                                         workerCount == 1 ? "" : "s")
+                          << std::flush;
+
+                const BenchmarkResult result = RunBenchmark(imagePath, Runs, workerCount);
+
+                PrintReport(result);
+                std::cout << std::flush;
+            }
         }
 
         return 0;

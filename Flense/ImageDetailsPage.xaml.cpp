@@ -34,4 +34,11 @@ namespace winrt::Flense::implementation
             MessageTextBlock().Text(L"Invalid parameter passed to ImageDetailsPage.");
         }
     }
+
+    void ImageDetailsPage::OnNavigatedFrom(NavigationEventArgs const&)
+    {
+        // A load in progress owns worker threads chewing through layer blobs. Nobody is going to look
+        // at the result now, so tell it to stop rather than letting it run to completion.
+        winrt::get_self<implementation::ImageDetailsViewModel>(m_viewModel)->Cancel();
+    }
 } // namespace winrt::Flense::implementation

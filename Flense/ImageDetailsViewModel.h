@@ -3,6 +3,7 @@
 #include "ImageDetailsViewModel.g.h"
 #include "ImageParser.h"
 
+#include <stop_token>
 #include <vector>
 
 namespace winrt::Flense::implementation
@@ -25,6 +26,12 @@ namespace winrt::Flense::implementation
 
         winrt::Windows::Foundation::IAsyncAction LoadAsync();
 
+        /// <summary>
+        /// Asks an in-progress LoadAsync to give up. Not projected - callers within the app reach it
+        /// through winrt::get_self.
+        /// </summary>
+        void Cancel();
+
         winrt::event_token PropertyChanged(
             const winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler& handler);
         void PropertyChanged(const winrt::event_token& token) noexcept;
@@ -45,6 +52,8 @@ namespace winrt::Flense::implementation
 
         bool m_isLoading{true};
         double m_loadingProgress{0.0};
+
+        std::stop_source m_stopSource;
     };
 } // namespace winrt::Flense::implementation
 

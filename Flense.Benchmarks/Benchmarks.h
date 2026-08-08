@@ -85,6 +85,9 @@ namespace Flense::Benchmarks
         uint64_t imageSizeBytes{0};
         int runs{0};
 
+        /// <summary>The number of layer-decompression threads the parser was configured with.</summary>
+        size_t workerCount{1};
+
         std::vector<PhaseResult> phases;
         Counters counters;
 
@@ -98,7 +101,21 @@ namespace Flense::Benchmarks
     /// </summary>
     /// <param name="imagePath">The image to benchmark.</param>
     /// <param name="runs">The number of timed runs.</param>
+    /// <param name="workerCount">The parser's layer-decompression thread count. 1 runs everything on
+    /// the archive-walking thread, which is the baseline the parallel results are compared against.</param>
     /// <returns>The collected results.</returns>
     /// <exception cref="std::runtime_error">The image could not be opened.</exception>
-    BenchmarkResult RunBenchmark(const std::filesystem::path& imagePath, int runs);
+    BenchmarkResult RunBenchmark(const std::filesystem::path& imagePath, int runs, size_t workerCount);
+
+    /// <summary>
+    /// Parses an image serially and again in parallel, and checks the two produce identical layers.
+    /// </summary>
+    /// <remarks>
+    /// A parallel parse that is merely fast is worthless, and a corrupted filesystem tree is not
+    /// something the timings would ever reveal - so this runs before any of them.
+    /// </remarks>
+    /// <param name="imagePath">The image to check.</param>
+    /// <param name="workerCount">The worker count to compare the serial parse against.</param>
+    /// <returns>An empty string if the two agree, otherwise a description of the first difference.</returns>
+    std::string VerifyParallelMatchesSerial(const std::filesystem::path& imagePath, size_t workerCount);
 } // namespace Flense::Benchmarks
