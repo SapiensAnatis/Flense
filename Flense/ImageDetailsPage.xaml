@@ -61,9 +61,26 @@
                             MenuItemsSource="{x:Bind ViewModel.Layers, Mode=OneWay}"
                             SelectedItem="{x:Bind ViewModel.SelectedLayer, Mode=TwoWay}"
                             PaneDisplayMode="Left" OpenPaneLength="500">
-                
-                <TreeView ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}" 
-                          ItemTemplateSelector="{StaticResource FilesystemItemTemplateSelector}"/>
+                <Grid Padding="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Filesystem changes"
+                               Style="{ThemeResource SubtitleTextBlockStyle}"/>
+
+                    <Border Grid.Row="1"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            Padding="1"
+                            Margin="0,12,0,0"
+                            CornerRadius="{ThemeResource ControlCornerRadius}"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <TreeView ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}"
+                                  ItemTemplateSelector="{StaticResource FilesystemItemTemplateSelector}"/>
+                    </Border>
+                </Grid>
 
                 <NavigationView.MenuItemTemplate>
                     <DataTemplate x:DataType="local:ImageLayerWrapper">
