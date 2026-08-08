@@ -367,3 +367,7 @@ enc_temp_folder/
 
 # vcpkg manifest-mode install output
 vcpkg_installed/
+
+# Test data
+TestData/**/*.tar
+TestData/**/*.tar.gz
