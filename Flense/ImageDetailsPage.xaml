@@ -13,7 +13,8 @@
         <!-- DataTemplate for folders -->
         <DataTemplate x:Key="FolderTemplate" x:DataType="local:FilesystemTreeNode">
             <TreeViewItem AutomationProperties.Name="{x:Bind Name}"
-                ItemsSource="{x:Bind Children}" IsExpanded="True">
+                ItemsSource="{x:Bind Children}" IsExpanded="True"
+                Background="{x:Bind Background}">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon Glyph="&#xE8B7;" />
                     <TextBlock Margin="0,0,10,0"/>
@@ -24,7 +25,8 @@
 
         <!-- DataTemplate for files -->
         <DataTemplate x:Key="FileTemplate" x:DataType="local:FilesystemTreeNode">
-            <TreeViewItem AutomationProperties.Name="{x:Bind Name}">
+            <TreeViewItem AutomationProperties.Name="{x:Bind Name}"
+                Background="{x:Bind Background}">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon Glyph="&#xE8A5;" />
                     <TextBlock Margin="0,0,10,0"/>
