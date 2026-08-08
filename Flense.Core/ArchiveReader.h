@@ -51,7 +51,16 @@ namespace Flense::Core
       public:
         std::string_view Pathname() const
         {
-            return archive_entry_pathname(m_entry);
+            const char* pathname = archive_entry_pathname(m_entry);
+
+            if (pathname)
+            {
+                return std::string_view(pathname);
+            }
+            else
+            {
+                return "";
+            }
         }
 
         /// <summary>
