@@ -12,10 +12,7 @@
     <Page.Resources>
         <!--  DataTemplate for folders  -->
         <DataTemplate x:Key="FolderTemplate" x:DataType="local:FilesystemTreeNode">
-            <TreeViewItem
-                AutomationProperties.Name="{x:Bind Name}"
-                Background="{x:Bind Background}"
-                ItemsSource="{x:Bind Children}">
+            <TreeViewItem Background="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemColourConverter}}" ItemsSource="{x:Bind Children}">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon Glyph="&#xE8B7;" />
                     <TextBlock Margin="0,0,10,0" />
@@ -26,7 +23,7 @@
 
         <!--  DataTemplate for files  -->
         <DataTemplate x:Key="FileTemplate" x:DataType="local:FilesystemTreeNode">
-            <TreeViewItem AutomationProperties.Name="{x:Bind Name}" Background="{x:Bind Background}">
+            <TreeViewItem Background="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemColourConverter}}">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon Glyph="&#xE8A5;" />
                     <TextBlock Margin="0,0,10,0" />
@@ -39,6 +36,8 @@
             x:Key="FilesystemItemTemplateSelector"
             FileTemplate="{StaticResource FileTemplate}"
             FolderTemplate="{StaticResource FolderTemplate}" />
+
+        <local:FilesystemItemColourConverter x:Key="FilesystemItemColourConverter" />
 
     </Page.Resources>
 

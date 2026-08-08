@@ -125,6 +125,10 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FilesystemItemColourConverter.h">
+      <DependentUpon>FilesystemItemColourConverter.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="FilesystemItemTemplateSelector.h">
       <DependentUpon>FilesystemItemTemplateSelector.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -167,6 +171,10 @@
     <Page Include="MainWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FilesystemItemColourConverter.cpp">
+      <DependentUpon>FilesystemItemColourConverter.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="FilesystemItemTemplateSelector.cpp">
       <DependentUpon>FilesystemItemTemplateSelector.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -201,6 +209,9 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="FilesystemItemColourConverter.idl">
+      <SubType>Designer</SubType>
+    </Midl>
     <Midl Include="FilesystemItemTemplateSelector.idl">
       <SubType>Designer</SubType>
     </Midl>
@@ -225,6 +236,7 @@
       <SubType>Code</SubType>
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Midl>
+    <Midl Include="FilesystemChangeKind.idl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt">
