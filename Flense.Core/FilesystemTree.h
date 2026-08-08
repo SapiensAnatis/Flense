@@ -17,6 +17,7 @@ namespace Flense::Core
         None,
         Added,
         Removed,
+        Modified,
     };
 
     /// <summary>

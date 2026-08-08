@@ -10,12 +10,15 @@ using namespace winrt::Microsoft::UI::Xaml;
 using namespace winrt::Windows::UI::Xaml::Interop;
 using namespace winrt::Microsoft::UI::Xaml::Media;
 
+#include "winrt/Flense.h"
+
 namespace winrt::Flense::implementation
 {
     namespace
     {
         static SolidColorBrush AddedBrush{nullptr};
         static SolidColorBrush RemovedBrush{nullptr};
+        static SolidColorBrush ModifiedBrush{nullptr};
         static SolidColorBrush DefaultBrush{nullptr};
     } // namespace
 
@@ -28,8 +31,14 @@ namespace winrt::Flense::implementation
         AddedBrush.Opacity(0.2);
 
         auto critcalBrush = resources.Lookup(winrt::box_value(L"SystemFillColorCriticalBrush")).as<SolidColorBrush>();
-        RemovedBrush = SolidColorBrush(successBrush.Color());
+        RemovedBrush = SolidColorBrush(critcalBrush.Color());
         RemovedBrush.Opacity(0.2);
+
+        auto cautionBrush = resources.Lookup(winrt::box_value(L"SystemFillColorCautionBrush")).as<SolidColorBrush>();
+        ModifiedBrush = SolidColorBrush(cautionBrush.Color());
+        ModifiedBrush.Opacity(0.2);
+
+        DefaultBrush = SolidColorBrush(winrt::Windows::UI::Color());
     }
 
     IInspectable FilesystemItemColourConverter::Convert(const IInspectable& value, const TypeName& /* targetType */,
@@ -46,6 +55,8 @@ namespace winrt::Flense::implementation
             return AddedBrush;
         case Removed:
             return RemovedBrush;
+        case Modified:
+            return ModifiedBrush;
         default:
             return DefaultBrush;
         }

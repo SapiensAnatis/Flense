@@ -32,6 +32,8 @@ namespace winrt::Flense::implementation
             return winrt::Flense::FilesystemChangeKind::Added;
         case ::Flense::Core::FilesystemChangeKind::Removed:
             return winrt::Flense::FilesystemChangeKind::Removed;
+        case ::Flense::Core::FilesystemChangeKind::Modified:
+            return winrt::Flense::FilesystemChangeKind::Modified;
         default:
             return winrt::Flense::FilesystemChangeKind::Unspecified;
         }
