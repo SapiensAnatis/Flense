@@ -20,9 +20,11 @@
     <Midl Include="ImageLayerWrapper.idl">
       <Filter>Wrappers</Filter>
     </Midl>
-    <Midl Include="FilesystemTreeNode.idl" />
     <Midl Include="FilesystemItemTemplateSelector.idl">
       <Filter>ViewModels</Filter>
+    </Midl>
+    <Midl Include="FilesystemTreeNode.idl">
+      <Filter>Wrappers</Filter>
     </Midl>
   </ItemGroup>
   <ItemGroup>
