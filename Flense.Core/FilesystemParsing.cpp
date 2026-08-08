@@ -151,7 +151,11 @@ namespace Flense::Core
                 return nullptr;
             }
 
-            return FilesystemChangeTreeNode::Create(diff->Data(), PatchChildren(base->Children(), diff->Children()));
+            // The root node exists in both trees, so it is not strictly added but rather modified.
+            FilesystemChangeInfo newInfo(diff->Data());
+            newInfo.changeKind = FilesystemChangeKind::Modified;
+
+            return FilesystemChangeTreeNode::Create(newInfo, PatchChildren(base->Children(), diff->Children()));
         }
     } // namespace
 
