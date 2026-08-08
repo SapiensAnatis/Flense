@@ -1,11 +1,11 @@
 #include "pch.h"
 
 #include "ArchiveReader.h"
+#include "FilesystemParsing.h"
 #include "FilesystemTree.h"
 #include "ImageLayer.h"
 #include "ImageParser.h"
 #include "NestedArchiveByteStream.h"
-#include "ParseFilesystemTree.h"
 
 #include <algorithm>
 #include <array>
@@ -255,6 +255,7 @@ namespace Flense::Core
             const nlohmann::json& historyArray = config.at("history");
 
             size_t layerNum = 0;
+            FilesystemChangeTreeNodeRef currentFsSnapshot{nullptr};
 
             for (const auto& historyObj : historyArray)
             {
@@ -268,11 +269,37 @@ namespace Flense::Core
                 // TODO: Make this more destructive so the filesystem tree can be moved?
                 // Though, does it really matter if it's just a shared pointer?
                 const std::string& layerPath = m_layerPaths.at(layerNum);
-                const FilesystemChangeTreeNodeRef& fs = m_filesystemsByLayerDigest.at(layerPath);
+                const FilesystemChangeTreeNodeRef& diff = m_filesystemsByLayerDigest.at(layerPath);
+
+                FilesystemChangeTreeNodeRef fs;
+
+                if (currentFsSnapshot)
+                {
+                    fs = ApplyFilesystemChanges(currentFsSnapshot, diff);
+                }
+                else
+                {
+                    fs = diff;
+                }
 
                 layers.emplace_back(CollapseWhitespace(command), fs);
 
                 layerNum += 1;
+
+                currentFsSnapshot = Visit(fs, [](const FilesystemChangeInfo& info) {
+                    if (info.changeKind != FilesystemChangeKind::None)
+                    {
+                        return FilesystemChangeInfo{
+                            .kind = info.kind,
+                            .size = info.size,
+                            .changeKind = FilesystemChangeKind::None,
+                        };
+                    }
+                    else
+                    {
+                        return info;
+                    }
+                });
             }
         }
 

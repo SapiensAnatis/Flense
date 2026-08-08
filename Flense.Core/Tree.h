@@ -87,25 +87,4 @@ namespace Flense::Core
             std::move(data), TreeNode<T>::ChildrenContainer(std::sorted_unique, children.keys(), std::move(values)));
     }
 
-    template <typename T, typename F, typename U = std::invoke_result_t<F&, const T&>>
-        requires(!std::same_as<U, T>)
-    TreeNodeRef<T> Visit(const TreeNodeRef<T>& node, F&& fn)
-    {
-        const auto& children = node->Children();
-
-        std::vector<TreeNodeRef<U>> values;
-        values.reserve(children.size());
-
-        for (const auto& child : children.values())
-        {
-            auto next = Visit(child, fn);
-            values.push_back(std::move(next));
-        }
-
-        auto data = fn(node->Data());
-
-        return TreeNode<U>::Create(
-            std::move(data), TreeNode<U>::ChildrenContainer(std::sorted_unique, children.keys(), std::move(values)));
-    }
-
 } // namespace Flense::Core
