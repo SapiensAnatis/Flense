@@ -37,25 +37,6 @@ namespace winrt::Flense::implementation
         }
     }
 
-    winrt::Microsoft::UI::Xaml::Media::Brush FilesystemTreeNode::Background()
-    {
-        if (ChangeKind() != winrt::Flense::FilesystemChangeKind::Added)
-        {
-            return nullptr;
-        }
-
-        // Take the theme-aware "success" green from Fluent's resources rather than hardcoding a color,
-        // but make our own brush instance so we can lower its opacity without mutating the shared resource.
-        auto resources = winrt::Microsoft::UI::Xaml::Application::Current().Resources();
-        auto successBrush = resources.Lookup(winrt::box_value(L"SystemFillColorSuccessBrush"))
-                                 .as<winrt::Microsoft::UI::Xaml::Media::SolidColorBrush>();
-
-        auto brush = winrt::Microsoft::UI::Xaml::Media::SolidColorBrush(successBrush.Color());
-        brush.Opacity(0.2);
-
-        return brush;
-    }
-
     Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> FilesystemTreeNode::
         Children()
     {
