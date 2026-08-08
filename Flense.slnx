@@ -17,4 +17,8 @@
   <Project Path="Flense/Flense.vcxproj" Id="52ed318b-9ba0-455b-b9e1-8e1b5b3c366d">
     <Deploy />
   </Project>
+  <Project Path="Flense.Benchmarks/Flense.Benchmarks.vcxproj" Id="3f1c8a72-6b4e-4d29-9a51-7c0e2f8b41d6">
+    <Platform Solution="*|ARM64" Project="x64" />
+    <Platform Solution="*|x86" Project="x64" />
+  </Project>
 </Solution>
