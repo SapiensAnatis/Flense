@@ -2,6 +2,8 @@
 
 > flense /ˈflɛns/ (v) to strip the blubber or skin from, as from a whale.
 
+![Screenshot of Flense UI, showing image diff view](./img/DiffView.png)
+
 A WinUI 3 desktop app for analysing Docker images, following in the footsteps of [wagoodman/dive](https://github.com/wagoodman/dive) or 
 [fudanglp/peel](https://github.com/fudanglp/peel).
 

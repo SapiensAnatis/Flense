@@ -1,8 +1,8 @@
 #include "pch.h"
 
 #include "ArchiveReader.h"
+#include "FilesystemParsing.h"
 #include "FilesystemTree.h"
-#include "ParseFilesystemTree.h"
 
 #include <flat_map>
 #include <ranges>
@@ -34,9 +34,124 @@ namespace Flense::Core
                                std::sorted_unique, std::move(containers.keys), std::move(frozen)));
         }
 
-        TreeNodeRef<FilesystemChangeInfo> SetChangeTypeToNone(const TreeNodeRef<FilesystemChangeInfo>& node)
+        // TODO: This patch logic is entirely AI-generated. Check it over when tidying up the code
+
+        FilesystemChangeTreeNodeRef PatchNode(const FilesystemChangeTreeNodeRef& base,
+                                              const FilesystemChangeTreeNodeRef& diff);
+
+        /// <summary>
+        /// Recursively drops any nodes marked FilesystemChangeKind::Removed from a diff subtree that is being
+        /// inserted wholesale, since there is nothing in the (absent) base for them to remove.
+        /// </summary>
+        FilesystemChangeTreeNodeRef PruneRemoved(const FilesystemChangeTreeNodeRef& node)
         {
-            Visit(node, [](const FilesystemChangeInfo& info) { return info; });
+            const auto& keys = node->Children().keys();
+            const auto& values = node->Children().values();
+
+            std::vector<std::string> prunedKeys;
+            std::vector<FilesystemChangeTreeNodeRef> prunedValues;
+
+            bool changed = false;
+
+            for (size_t i = 0; i < keys.size(); ++i)
+            {
+                if (values[i]->Data().changeKind == FilesystemChangeKind::Removed)
+                {
+                    changed = true;
+                    continue;
+                }
+
+                auto prunedChild = PruneRemoved(values[i]);
+                changed = changed || (prunedChild.get() != values[i].get());
+
+                prunedKeys.push_back(keys[i]);
+                prunedValues.push_back(std::move(prunedChild));
+            }
+
+            if (!changed)
+            {
+                return node; // no removed descendants, alias the existing subtree
+            }
+
+            return FilesystemChangeTreeNode::Create(
+                node->Data(), FilesystemChangeTreeNode::ChildrenContainer(std::sorted_unique, std::move(prunedKeys),
+                                                                          std::move(prunedValues)));
+        }
+
+        /// <summary>
+        /// Merges a base node's children with a diff node's children: entries only in base carry over unchanged,
+        /// entries only in diff are inserted wholesale, and entries in both are recursively patched.
+        /// </summary>
+        FilesystemChangeTreeNode::ChildrenContainer PatchChildren(
+            const FilesystemChangeTreeNode::ChildrenContainer& baseChildren,
+            const FilesystemChangeTreeNode::ChildrenContainer& diffChildren)
+        {
+            const auto& baseKeys = baseChildren.keys();
+            const auto& baseValues = baseChildren.values();
+            const auto& diffKeys = diffChildren.keys();
+            const auto& diffValues = diffChildren.values();
+
+            std::vector<std::string> outKeys;
+            std::vector<FilesystemChangeTreeNodeRef> outValues;
+            outKeys.reserve(baseKeys.size() + diffKeys.size());
+            outValues.reserve(baseKeys.size() + diffKeys.size());
+
+            size_t baseIndex = 0;
+            size_t diffIndex = 0;
+
+            while (baseIndex < baseKeys.size() || diffIndex < diffKeys.size())
+            {
+                const bool baseExhausted = baseIndex >= baseKeys.size();
+                const bool diffExhausted = diffIndex >= diffKeys.size();
+
+                if (diffExhausted || (!baseExhausted && baseKeys[baseIndex] < diffKeys[diffIndex]))
+                {
+                    // Only in base: not touched by this diff, carry over unchanged.
+                    outKeys.push_back(baseKeys[baseIndex]);
+                    outValues.push_back(baseValues[baseIndex]);
+                    ++baseIndex;
+                }
+                else if (baseExhausted || diffKeys[diffIndex] < baseKeys[baseIndex])
+                {
+                    // Only in diff: a brand new entry. Nothing to remove it from, so skip whiteouts here.
+                    if (diffValues[diffIndex]->Data().changeKind != FilesystemChangeKind::Removed)
+                    {
+                        outKeys.push_back(diffKeys[diffIndex]);
+                        outValues.push_back(PruneRemoved(diffValues[diffIndex]));
+                    }
+                    ++diffIndex;
+                }
+                else
+                {
+                    // Present in both: recursively patch, unless the diff removes this node entirely.
+                    if (auto patched = PatchNode(baseValues[baseIndex], diffValues[diffIndex]))
+                    {
+                        outKeys.push_back(baseKeys[baseIndex]);
+                        outValues.push_back(std::move(patched));
+                    }
+
+                    ++baseIndex;
+                    ++diffIndex;
+                }
+            }
+
+            return FilesystemChangeTreeNode::ChildrenContainer(std::sorted_unique, std::move(outKeys),
+                                                               std::move(outValues));
+        }
+
+        /// <summary>
+        /// Patches a single base node with its corresponding diff node.
+        /// </summary>
+        /// <returns>The patched node, or nullptr if the diff removes this node entirely.</returns>
+        FilesystemChangeTreeNodeRef PatchNode(const FilesystemChangeTreeNodeRef& base,
+                                              const FilesystemChangeTreeNodeRef& diff)
+        {
+            if (diff->Data().changeKind == FilesystemChangeKind::Removed)
+            {
+                return nullptr;
+            }
+
+            return FilesystemChangeTreeNode::Create(diff->Data(), PatchChildren(base->Children(), diff->Children()));
         }
     } // namespace
 
@@ -85,5 +200,11 @@ namespace Flense::Core
         }
 
         return Freeze(std::move(rootNode));
+    }
+
+    FilesystemChangeTreeNodeRef ApplyFilesystemChanges(const FilesystemChangeTreeNodeRef& base,
+                                                       const FilesystemChangeTreeNodeRef& diff)
+    {
+        return PatchNode(base, diff);
     }
 } // namespace Flense::Core
