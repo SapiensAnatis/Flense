@@ -219,21 +219,24 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ByteBudget.h" />
+    <ClInclude Include="ChunkPool.h" />
+    <ClInclude Include="ChunkQueueByteStream.h" />
+    <ClInclude Include="EntryByteStream.h" />
     <ClInclude Include="FileKind.h" />
     <ClInclude Include="FilesystemTree.h" />
     <ClInclude Include="FilesystemParsing.h" />
     <ClInclude Include="ImageLayer.h" />
     <ClInclude Include="ImageParser.h" />
-    <ClInclude Include="MemoryByteStream.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ArchiveReader.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="Tree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ChunkPool.cpp" />
+    <ClCompile Include="ChunkQueueByteStream.cpp" />
+    <ClCompile Include="EntryByteStream.cpp" />
     <ClCompile Include="ImageParser.cpp" />
-    <ClCompile Include="MemoryByteStream.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Create</PrecompiledHeader>

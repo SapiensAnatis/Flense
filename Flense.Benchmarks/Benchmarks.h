@@ -73,6 +73,12 @@ namespace Flense::Benchmarks
         /// <summary>Distinct nodes by address across all layers - how much structural sharing achieves.</summary>
         size_t uniqueTreeNodeCount{0};
 
+        /// <summary>
+        /// Time the archive walk spent blocked waiting for read-ahead memory, from the final run.
+        /// Zero means the budget was never the constraint; a large value means raising it would help.
+        /// </summary>
+        double readAheadStallMs{0.0};
+
         uint64_t peakWorkingSetBytes{0};
     };
 

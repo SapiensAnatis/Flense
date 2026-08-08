@@ -67,6 +67,7 @@ namespace Flense::Benchmarks
         {
             double parseMs{0.0};
             double buildMs{0.0};
+            double readAheadStallMs{0.0};
             size_t entryCount{0};
             std::vector<EntryTiming> entryTimings;
             std::vector<Core::ImageLayer> layers;
@@ -130,6 +131,9 @@ namespace Flense::Benchmarks
             const auto buildStart = Clock::now();
             result.layers = parser.Build();
             result.buildMs = ElapsedMs(buildStart);
+
+            result.readAheadStallMs =
+                std::chrono::duration<double, std::milli>(parser.ReadAheadStallTime()).count();
 
             return result;
         }
@@ -318,6 +322,7 @@ namespace Flense::Benchmarks
             PhaseSlot(result.phases, Phase::EndToEnd).samplesMs.push_back(pass.parseMs + pass.buildMs);
 
             result.counters.entryCount = pass.entryCount;
+            result.counters.readAheadStallMs = pass.readAheadStallMs;
 
             if (isFinalRun)
             {

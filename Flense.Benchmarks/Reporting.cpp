@@ -187,6 +187,11 @@ namespace Flense::Benchmarks
                                          GroupDigits(counters.uniqueTreeNodeCount), sharing);
             }
 
+            if (result.workerCount != 1)
+            {
+                std::cout << std::format("Read-ahead stall: {}\n", FormatDuration(counters.readAheadStallMs));
+            }
+
             std::cout << std::format("Peak working set: {}\n", FormatBytes(counters.peakWorkingSetBytes));
         }
     } // namespace

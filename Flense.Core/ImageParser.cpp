@@ -1,28 +1,29 @@
 #include "pch.h"
 
 #include "ArchiveReader.h"
-#include "ByteBudget.h"
+#include "ChunkPool.h"
+#include "ChunkQueueByteStream.h"
+#include "EntryByteStream.h"
 #include "FilesystemParsing.h"
 #include "FilesystemTree.h"
 #include "ImageLayer.h"
 #include "ImageParser.h"
-#include "MemoryByteStream.h"
 
 #include <algorithm>
 #include <array>
 #include <cassert>
 #include <cctype>
 #include <exception>
+#include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
-#include <type_traits>
+#include <thread>
 #include <unordered_map>
 #include <utility>
-#include <variant>
 #include <vector>
 
 namespace Flense::Core
@@ -38,72 +39,8 @@ namespace Flense::Core
             std::vector<std::string> layerPaths;
         };
 
-        /// <summary>
-        /// Represents the file contents of a JSON blob from blobs/sha256/.
-        /// </summary>
-        /// <remarks>
-        /// This could be the image config or something else entirely. Its role isn't known until
-        /// it's cross-referenced against ManifestDetails.
-        /// </remarks>
-        struct JsonBlobDetails
-        {
-            std::string archivePath;
-            std::string contents;
-        };
-
-        /// <summary>
-        /// The still-compressed bytes of a layer blob, lifted out of the archive so that the walk can
-        /// move on while the blob is decompressed elsewhere.
-        /// </summary>
-        /// <remarks>
-        /// Carrying these bytes has already been charged to the parser's ByteBudget, and whoever
-        /// finishes with them owes it a Release of compressedBytes.size().
-        /// </remarks>
-        struct LayerBlobDetails
-        {
-            std::string archivePath;
-            std::vector<std::byte> compressedBytes;
-        };
-
-        using ParsedEntry = std::variant<std::monostate, ManifestDetails, JsonBlobDetails, LayerBlobDetails>;
-
         constexpr std::string_view BlobPrefix = "blobs/sha256/";
-
-        /// <summary>
-        /// Releases a ByteBudget charge on scope exit unless it has been handed on to someone else.
-        /// A charge that escapes both - because an allocation threw between the two - would never be
-        /// returned, and the next producer to wait on the budget would wait forever.
-        /// </summary>
-        class BudgetRelease
-        {
-          public:
-            BudgetRelease(ByteBudget& budget, const uint64_t bytes) : m_budget(&budget), m_bytes(bytes)
-            {
-            }
-
-            BudgetRelease(const BudgetRelease&) = delete;
-            BudgetRelease& operator=(const BudgetRelease&) = delete;
-
-            ~BudgetRelease()
-            {
-                if (m_budget)
-                {
-                    m_budget->Release(m_bytes);
-                }
-            }
-
-            /// <summary>
-            /// Gives up responsibility for the charge - the caller now owes the release.
-            /// </summary>
-            void Detach()
-            {
-                m_budget = nullptr;
-            }
-
-          private:
-            ByteBudget* m_budget;
-            uint64_t m_bytes;
-        };
+        constexpr size_t SniffLength = 64;
 
         /// <summary>
         /// Checks if a character is a space or a tab. Matches fewer characters than isspace and is locale-independent.
@@ -159,88 +96,6 @@ namespace Flense::Core
         }
 
         /// <summary>
-        /// Parses a blob found under sha256/blobs/.
-        /// </summary>
-        /// <param name="entry">The archive entry.</param>
-        /// <param name="budget">The budget to charge a layer blob's buffered bytes to.</param>
-        /// <returns>A LayerBlobDetails or JsonBlobDetails.</returns>
-        ParsedEntry ParseBlob(ArchiveEntry& entry, ByteBudget& budget)
-        {
-            // Sniff a small, bounded prefix first - large layer blobs must never be buffered in
-            // full just to find out they're not JSON.
-            std::array<char, 64> sniffBuffer{};
-            const size_t sniffLength = std::min(sniffBuffer.size(), static_cast<size_t>(entry.Size()));
-            std::span<char> sniffSpan = std::span{sniffBuffer}.first(sniffLength);
-
-            const size_t sniffed = entry.ReadInto(std::as_writable_bytes(sniffSpan));
-
-            if (LooksLikeJsonObject(std::string_view{sniffBuffer.data(), sniffed}))
-            {
-                // Confirmed JSON (manifest/config/etc. - always small) - now safe to buffer in full.
-                std::string contents(sniffBuffer.data(), sniffed);
-                contents.resize(entry.Size());
-
-                const std::span<char> remainingSpan = std::span{contents}.subspan(sniffed);
-                const size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
-                contents.resize(sniffed + read);
-
-                return JsonBlobDetails{
-                    .archivePath = std::string{entry.Pathname()},
-                    .contents = std::move(contents),
-                };
-            }
-            else
-            {
-                // This is a tar file containing layer diffs. The outer archive is forward-only, so its
-                // bytes have to be taken now, in full, even though the expensive part - inflating them -
-                // is going to happen somewhere else. Waiting on the budget first is what stops this from
-                // reading the whole image into memory when the workers fall behind.
-                const uint64_t size = entry.Size();
-                budget.Acquire(size);
-                BudgetRelease charge{budget, size};
-
-                std::vector<std::byte> compressedBytes(size);
-                const std::span<std::byte> blobSpan{compressedBytes};
-
-                std::copy_n(std::as_bytes(std::span{sniffBuffer}).begin(), sniffed, blobSpan.begin());
-                entry.ReadInto(blobSpan.subspan(sniffed));
-
-                LayerBlobDetails details{
-                    .archivePath = std::string{entry.Pathname()},
-                    .compressedBytes = std::move(compressedBytes),
-                };
-
-                // Whoever parses these bytes returns the charge once they are done with them.
-                charge.Detach();
-
-                return details;
-            }
-        }
-
-        /// <summary>
-        /// Parses an archive entry into one of a number of possible entry types.
-        /// </summary>
-        /// <param name="entry">The archive entry.</param>
-        /// <param name="budget">The budget to charge a layer blob's buffered bytes to.</param>
-        /// <returns>A variant over the possible types.</returns>
-        ParsedEntry ParseEntry(ArchiveEntry& entry, ByteBudget& budget)
-        {
-            const std::string_view pathname = entry.Pathname();
-
-            if (pathname == "manifest.json")
-            {
-                return ParseManifestJson(entry);
-            }
-
-            if (pathname.starts_with(BlobPrefix))
-            {
-                return ParseBlob(entry, budget);
-            }
-
-            return std::monostate{};
-        }
-
-        /// <summary>
         /// Collapses runs of whitespace and/or tab characters into a single whitespace character.
         /// </summary>
         /// <param name="string">The input string.</param>
@@ -269,94 +124,202 @@ namespace Flense::Core
         }
     } // namespace
 
-    ImageParser::ImageParser(ImageParserOptions options)
-        : m_options(std::move(options)), m_budget(m_options.inFlightByteBudget, m_options.stopToken)
+    ImageParser::ImageParser(ImageParserOptions options) : m_options(std::move(options))
     {
         if (m_options.workerCount != 1)
         {
-            m_pool.emplace(m_options.workerCount);
+            const size_t chunkSize = std::max<size_t>(1, m_options.chunkSize);
+            const size_t maxChunks = static_cast<size_t>(std::max<uint64_t>(1, m_options.readAheadByteBudget / chunkSize));
+
+            m_chunkPool.emplace(chunkSize, maxChunks, m_options.stopToken);
+            m_workerPool.emplace(m_options.workerCount);
         }
     }
 
     ImageParser::~ImageParser()
     {
-        // Workers touch members declared below m_pool, which would otherwise be destroyed first.
-        if (m_pool)
+        // Workers touch members declared below the pools, which would otherwise be destroyed first.
+        if (m_workerPool)
         {
-            m_pool->WaitForIdle();
+            m_workerPool->WaitForIdle();
         }
     }
 
     void ImageParser::ProcessEntry(ArchiveEntry& entry)
     {
-        ParsedEntry parsed = ParseEntry(entry, m_budget);
+        const std::string_view pathname = entry.Pathname();
 
-        std::visit(
-            [this]<typename T>(T& value) {
-                if constexpr (std::is_same_v<T, ManifestDetails>)
-                {
-                    m_configPath = std::move(value.configPath);
-                    m_layerPaths = std::move(value.layerPaths);
-                }
-                else if constexpr (std::is_same_v<T, JsonBlobDetails>)
-                {
-                    m_jsonBlobsByDigest.emplace(std::move(value.archivePath), std::move(value.contents));
-                }
-                else if constexpr (std::is_same_v<T, LayerBlobDetails>)
-                {
-                    if (m_pool)
-                    {
-                        m_pool->Submit([this, path = std::move(value.archivePath),
-                                        bytes = std::move(value.compressedBytes)]() mutable {
-                            ParseLayerBlob(std::move(path), std::move(bytes));
-                        });
-                    }
-                    else
-                    {
-                        ParseLayerBlob(std::move(value.archivePath), std::move(value.compressedBytes));
-                    }
-                }
-                else if constexpr (std::is_same_v<T, std::monostate>)
-                {
-                    // Do nothing
-                }
-                else
-                {
-                    static_assert(false, "unhandled ParsedEntry alternative");
-                }
-            },
-            parsed);
+        if (pathname == "manifest.json")
+        {
+            ManifestDetails manifest = ParseManifestJson(entry);
+
+            m_configPath = std::move(manifest.configPath);
+            m_layerPaths = std::move(manifest.layerPaths);
+        }
+        else if (pathname.starts_with(BlobPrefix))
+        {
+            ProcessBlob(entry);
+        }
     }
 
-    void ImageParser::ParseLayerBlob(std::string archivePath, std::vector<std::byte> compressedBytes)
+    void ImageParser::ProcessBlob(ArchiveEntry& entry)
     {
-        const BudgetRelease release{m_budget, compressedBytes.size()};
+        // Sniff a small, bounded prefix first - large layer blobs must never be buffered in
+        // full just to find out they're not JSON.
+        std::array<char, SniffLength> sniffBuffer{};
+        const size_t sniffLength = std::min(sniffBuffer.size(), static_cast<size_t>(entry.Size()));
+        const std::span<char> sniffSpan = std::span{sniffBuffer}.first(sniffLength);
 
-        try
+        const size_t sniffed = entry.ReadInto(std::as_writable_bytes(sniffSpan));
+        const std::span<const std::byte> prefix = std::as_bytes(std::span{sniffBuffer}).first(sniffed);
+
+        if (LooksLikeJsonObject(std::string_view{sniffBuffer.data(), sniffed}))
         {
-            MemoryByteStream stream{compressedBytes};
-            auto reader = ArchiveReader::CreateFromStream(stream, m_options.stopToken);
+            // Confirmed JSON (manifest/config/etc. - always small) - now safe to buffer in full.
+            std::string contents(sniffBuffer.data(), sniffed);
+            contents.resize(entry.Size());
 
-            FilesystemChangeTreeNodeRef tree = ParseLayerFilesystem(&reader);
+            const std::span<char> remainingSpan = std::span{contents}.subspan(sniffed);
+            const size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
+            contents.resize(sniffed + read);
 
-            const std::scoped_lock lock{m_resultsMutex};
-            m_filesystemsByLayerDigest.emplace(std::move(archivePath), std::move(tree));
+            m_jsonBlobsByDigest.emplace(std::string{entry.Pathname()}, std::move(contents));
+
+            return;
         }
-        catch (...)
+
+        // Otherwise it is a tar of layer diffs.
+        std::string archivePath{entry.Pathname()};
+
+        if (m_workerPool)
         {
-            const std::scoped_lock lock{m_resultsMutex};
-            if (!m_firstWorkerException)
+            StreamLayerToWorker(entry, std::move(archivePath), prefix);
+        }
+        else
+        {
+            ParseLayerInline(entry, std::move(archivePath), prefix);
+        }
+    }
+
+    void ImageParser::ParseLayerInline(ArchiveEntry& entry, std::string archivePath,
+                                       const std::span<const std::byte> prefix)
+    {
+        EntryByteStream stream{&entry, prefix};
+        auto reader = ArchiveReader::CreateFromStream(stream, m_options.stopToken);
+
+        StoreLayer(std::move(archivePath), ParseLayerFilesystem(&reader));
+    }
+
+    void ImageParser::StreamLayerToWorker(ArchiveEntry& entry, std::string archivePath,
+                                          const std::span<const std::byte> prefix)
+    {
+        AcquireLayerSlot();
+
+        auto stream = std::make_shared<ChunkQueueByteStream>(*m_chunkPool, entry.Size(), m_options.stopToken);
+
+        // Submitted before a single chunk has been filled, so the worker is inflating the head of the
+        // layer while the walk is still reading its tail.
+        m_workerPool->Submit([this, stream, path = std::move(archivePath)]() mutable {
+            try
             {
-                m_firstWorkerException = std::current_exception();
+                auto reader = ArchiveReader::CreateFromStream(*stream, m_options.stopToken);
+                StoreLayer(std::move(path), ParseLayerFilesystem(&reader));
+            }
+            catch (...)
+            {
+                RecordWorkerException(std::current_exception());
+            }
+
+            // Both must happen however the parse ended: the first so the walk stops queueing chunks
+            // nobody will drain, the second so the next layer can start.
+            stream->ConsumerFinished();
+            ReleaseLayerSlot();
+        });
+
+        size_t prefixOffset = 0;
+
+        while (true)
+        {
+            Chunk chunk = m_chunkPool->Acquire();
+
+            if (chunk.buffer.empty())
+            {
+                // Cancelled.
+                break;
+            }
+
+            size_t filled = 0;
+
+            if (prefixOffset < prefix.size())
+            {
+                filled = std::min(prefix.size() - prefixOffset, chunk.buffer.size());
+                std::copy_n(prefix.begin() + prefixOffset, filled, chunk.buffer.begin());
+                prefixOffset += filled;
+            }
+
+            filled += entry.ReadInto(std::span{chunk.buffer}.subspan(filled));
+
+            // A short fill means the entry's body is exhausted.
+            const bool lastChunk = filled < chunk.buffer.size();
+
+            chunk.used = filled;
+
+            const bool wanted = stream->Push(std::move(chunk));
+
+            if (lastChunk || !wanted)
+            {
+                // !wanted means the worker stopped reading early - libarchive stops at the end of the
+                // gzip member and ignores any trailing padding - so the rest of the entry can just be
+                // skipped by the outer reader rather than copied.
+                break;
             }
         }
+
+        stream->Finish();
+    }
+
+    void ImageParser::StoreLayer(std::string archivePath, FilesystemChangeTreeNodeRef tree)
+    {
+        const std::scoped_lock lock{m_resultsMutex};
+        m_filesystemsByLayerDigest.emplace(std::move(archivePath), std::move(tree));
+    }
+
+    void ImageParser::RecordWorkerException(std::exception_ptr exception)
+    {
+        const std::scoped_lock lock{m_resultsMutex};
+
+        if (!m_firstWorkerException)
+        {
+            m_firstWorkerException = std::move(exception);
+        }
+    }
+
+    void ImageParser::AcquireLayerSlot()
+    {
+        const size_t limit = m_workerPool->WorkerCount();
+
+        std::unique_lock lock{m_slotMutex};
+
+        m_slotFreed.wait(lock, m_options.stopToken, [this, limit] { return m_layersInFlight < limit; });
+
+        m_layersInFlight += 1;
+    }
+
+    void ImageParser::ReleaseLayerSlot()
+    {
+        {
+            const std::scoped_lock lock{m_slotMutex};
+            m_layersInFlight -= 1;
+        }
+
+        m_slotFreed.notify_one();
     }
 
     std::vector<ImageLayer> ImageParser::Build()
     {
-        if (m_pool)
+        if (m_workerPool)
         {
-            m_pool->WaitForIdle();
+            m_workerPool->WaitForIdle();
         }
 
         if (m_firstWorkerException)

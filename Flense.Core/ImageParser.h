@@ -1,15 +1,19 @@
 #pragma once
 
-#include "ByteBudget.h"
+#include "ChunkPool.h"
 #include "FilesystemTree.h"
 #include "ThreadPool.h"
 
+#include <chrono>
+#include <condition_variable>
 #include <cstdint>
 #include <exception>
 #include <mutex>
 #include <optional>
+#include <span>
 #include <stop_token>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -25,16 +29,23 @@ namespace Flense::Core
     {
         /// <summary>
         /// How many threads decompress layer blobs. 0 means one per hardware thread; 1 means the work
-        /// happens inline on the thread calling ProcessEntry, with no pool created at all.
+        /// happens inline on the thread calling ProcessEntry, straight off the archive, with no pool,
+        /// no read-ahead and no buffering.
         /// </summary>
         size_t workerCount = 0;
 
         /// <summary>
-        /// The ceiling on how many bytes of not-yet-decompressed layer blobs may be held in memory at
-        /// once. ProcessEntry blocks when handing over a blob would exceed it, so this bounds the
-        /// parser's peak memory rather than letting it scale with the image size.
+        /// The ceiling on how many bytes of layer data may be buffered between the archive walk and
+        /// the workers. This is a hard cap: layers stream through it a chunk at a time, so a layer
+        /// larger than the whole budget costs no more memory than a small one.
         /// </summary>
-        uint64_t inFlightByteBudget = 512ull * 1024 * 1024;
+        uint64_t readAheadByteBudget = 256ull * 1024 * 1024;
+
+        /// <summary>
+        /// The granularity the budget is handed out in. Smaller means finer-grained overlap between
+        /// the walk and the workers, at the cost of more locking.
+        /// </summary>
+        size_t chunkSize = 2ull * 1024 * 1024;
 
         /// <summary>
         /// Token that cancels both the archive walk and any in-progress layer decompression.
@@ -51,10 +62,10 @@ namespace Flense::Core
     /// But these files are usually on the order of kilobytes in size so this is an acceptable compromise.
     ///
     /// Parsing is CPU-bound on gzip decompression of the layer blobs, and each layer's diff is independent
-    /// of every other, so those are handed off to a thread pool. The archive itself is a forward-only
-    /// stream - it may eventually be `docker save` piped to stdin - which means a blob cannot be left
-    /// for a worker to read lazily: its compressed bytes are copied out in full, on the calling thread,
-    /// before the walk can advance to the next entry. See ImageParserOptions::inFlightByteBudget.
+    /// of every other, so those are handed off to a thread pool. The archive is forward-only - it may
+    /// eventually be `docker save` piped to stdin - so the walk cannot leave a layer for a worker to
+    /// come back to: it reads ahead into pooled chunks, which a worker drains and returns while the
+    /// walk is still filling them. ChunkPool is what bounds that read-ahead.
     /// </remarks>
     class ImageParser
     {
@@ -74,9 +85,9 @@ namespace Flense::Core
         /// Processes an individual archive entry, and store it in the parser's internal state for a later Build() call.
         /// </summary>
         /// <remarks>
-        /// For layer blobs this returns once the compressed bytes have been copied out of the entry -
-        /// the decompression itself may still be in flight on a worker thread. Blocks while the
-        /// in-flight byte budget is exhausted.
+        /// For layer blobs this returns once the compressed bytes have been pumped across to a worker -
+        /// the decompression itself may still be in flight. Blocks while the read-ahead budget is
+        /// exhausted, which is the backpressure keeping memory bounded.
         /// </remarks>
         /// <param name="entry">The archive entry.</param>
         void ProcessEntry(ArchiveEntry& entry);
@@ -92,20 +103,68 @@ namespace Flense::Core
         /// <returns>A vector of image layers.</returns>
         std::vector<ImageLayer> Build();
 
+        /// <summary>
+        /// How long the archive walk spent blocked waiting for read-ahead memory. Zero means the
+        /// budget never got in the way; a large value means raising it would buy throughput.
+        /// </summary>
+        std::chrono::nanoseconds ReadAheadStallTime() const
+        {
+            return m_chunkPool ? m_chunkPool->StalledFor() : std::chrono::nanoseconds{0};
+        }
+
       private:
         /// <summary>
-        /// Decompresses a layer blob and records its filesystem diff, then returns its bytes to the
-        /// budget. Runs on a worker thread when there is a pool, inline otherwise.
+        /// Handles an entry under blobs/sha256/, which is either a small JSON document or a layer.
         /// </summary>
-        /// <param name="archivePath">The blob's path within the outer archive.</param>
-        /// <param name="compressedBytes">The blob's compressed bytes.</param>
-        void ParseLayerBlob(std::string archivePath, std::vector<std::byte> compressedBytes);
+        /// <param name="entry">The archive entry.</param>
+        void ProcessBlob(ArchiveEntry& entry);
+
+        /// <summary>
+        /// Pumps a layer's compressed bytes into a pipe that a worker thread decompresses as they arrive.
+        /// </summary>
+        /// <param name="entry">The archive entry positioned at the layer.</param>
+        /// <param name="archivePath">The layer's path within the archive.</param>
+        /// <param name="prefix">Bytes already read from the entry while sniffing it.</param>
+        void StreamLayerToWorker(ArchiveEntry& entry, std::string archivePath, std::span<const std::byte> prefix);
+
+        /// <summary>
+        /// Decompresses a layer on the calling thread, reading straight from the archive.
+        /// </summary>
+        /// <param name="entry">The archive entry positioned at the layer.</param>
+        /// <param name="archivePath">The layer's path within the archive.</param>
+        /// <param name="prefix">Bytes already read from the entry while sniffing it.</param>
+        void ParseLayerInline(ArchiveEntry& entry, std::string archivePath, std::span<const std::byte> prefix);
+
+        /// <summary>
+        /// Records a parsed layer diff. Safe to call from a worker thread.
+        /// </summary>
+        void StoreLayer(std::string archivePath, FilesystemChangeTreeNodeRef tree);
+
+        /// <summary>
+        /// Records a worker's exception if it is the first one, to be rethrown from Build().
+        /// </summary>
+        void RecordWorkerException(std::exception_ptr exception);
+
+        /// <summary>
+        /// Blocks until fewer than workerCount layers are in flight.
+        /// </summary>
+        /// <remarks>
+        /// This is what makes the chunk pool deadlock-free: every layer holding chunks has a thread
+        /// actively draining it, so a walk blocked waiting for memory is always waiting on a worker
+        /// that is about to hand some back.
+        /// </remarks>
+        void AcquireLayerSlot();
+        void ReleaseLayerSlot();
 
         ImageParserOptions m_options;
-        ByteBudget m_budget;
 
-        // Engaged only when running with more than one worker.
-        std::optional<ThreadPool> m_pool;
+        // Both engaged only when running with more than one worker.
+        std::optional<ChunkPool> m_chunkPool;
+        std::optional<ThreadPool> m_workerPool;
+
+        std::mutex m_slotMutex;
+        std::condition_variable_any m_slotFreed;
+        size_t m_layersInFlight{0};
 
         std::mutex m_resultsMutex;
         std::exception_ptr m_firstWorkerException;
