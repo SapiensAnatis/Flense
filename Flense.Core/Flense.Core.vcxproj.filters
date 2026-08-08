@@ -33,7 +33,7 @@
     <ClInclude Include="NestedArchiveByteStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ParseFilesystemTree.h">
+    <ClInclude Include="FilesystemParsing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FilesystemTree.h">
@@ -53,7 +53,7 @@
     <ClCompile Include="NestedArchiveByteStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParseFilesystemTree.cpp">
+    <ClCompile Include="FilesystemParsing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
