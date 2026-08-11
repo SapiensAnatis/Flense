@@ -155,9 +155,20 @@ namespace Flense::Core
             // The root node exists in both trees, so it is not strictly added but rather modified.
             FilesystemChangeInfo newInfo(diff->Data());
             newInfo.changeKind = FilesystemChangeKind::Modified;
-            newInfo.size += base->Data().size;
 
-            return FilesystemChangeTreeNode::Create(newInfo, PatchChildren(base->Children(), diff->Children()));
+            FilesystemChangeTreeNode::ChildrenContainer children = PatchChildren(base->Children(), diff->Children());
+
+            if (newInfo.kind == FileKind::Directory)
+            {
+                // Roll up the whole flattened subtree, not just this layer's contribution.
+                newInfo.size = 0;
+                for (const auto& child : children.values())
+                {
+                    newInfo.size += child->Data().size;
+                }
+            }
+
+            return FilesystemChangeTreeNode::Create(newInfo, children);
         }
     } // namespace
 
