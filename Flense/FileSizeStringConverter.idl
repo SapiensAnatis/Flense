@@ -1,0 +1,7 @@
+namespace Flense
+{
+    runtimeclass FileSizeStringConverter : [default] Microsoft.UI.Xaml.Data.IValueConverter
+    {
+        FileSizeStringConverter();
+    }
+}

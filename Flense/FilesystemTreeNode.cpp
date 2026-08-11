@@ -39,6 +39,11 @@ namespace winrt::Flense::implementation
         }
     }
 
+    uint64_t FilesystemTreeNode::Size()
+    {
+        return m_node->Data().size;
+    }
+
     Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> FilesystemTreeNode::
         Children()
     {

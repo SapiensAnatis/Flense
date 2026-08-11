@@ -125,6 +125,10 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FileSizeStringConverter.h">
+      <DependentUpon>FileSizeStringConverter.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="FilesystemItemColourConverter.h">
       <DependentUpon>FilesystemItemColourConverter.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -171,6 +175,10 @@
     <Page Include="MainWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FileSizeStringConverter.cpp">
+      <DependentUpon>FileSizeStringConverter.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="FilesystemItemColourConverter.cpp">
       <DependentUpon>FilesystemItemColourConverter.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -209,6 +217,9 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="FileSizeStringConverter.idl">
+      <SubType>Designer</SubType>
+    </Midl>
     <Midl Include="FilesystemItemColourConverter.idl">
       <SubType>Designer</SubType>
     </Midl>

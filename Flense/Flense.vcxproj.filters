@@ -32,6 +32,9 @@
     <Midl Include="FilesystemChangeKind.idl">
       <Filter>Wrappers</Filter>
     </Midl>
+    <Midl Include="FileSizeStringConverter.idl">
+      <Filter>Converters</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
