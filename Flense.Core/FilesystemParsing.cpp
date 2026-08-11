@@ -26,7 +26,8 @@ namespace Flense::Core
 
             for (auto& child : containers.values)
             {
-                frozen.push_back(Freeze(std::move(child)));
+                const FilesystemChangeTreeNodeRef& added = frozen.emplace_back(Freeze(std::move(child)));
+                node.info.size += added->Data().size;
             }
 
             return FilesystemChangeTreeNode::Create(
@@ -154,6 +155,7 @@ namespace Flense::Core
             // The root node exists in both trees, so it is not strictly added but rather modified.
             FilesystemChangeInfo newInfo(diff->Data());
             newInfo.changeKind = FilesystemChangeKind::Modified;
+            newInfo.size += base->Data().size;
 
             return FilesystemChangeTreeNode::Create(newInfo, PatchChildren(base->Children(), diff->Children()));
         }
