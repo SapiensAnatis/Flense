@@ -10,9 +10,8 @@ namespace winrt::Flense::implementation
         FilesystemTreeNode(winrt::hstring name, ::Flense::Core::FilesystemChangeTreeNodeRef node);
 
         winrt::hstring Name();
-        bool IsDirectory();
+        winrt::Flense::FileKind Kind();
         winrt::Flense::FilesystemChangeKind ChangeKind();
-        Microsoft::UI::Xaml::Media::Brush Background();
         uint64_t Size();
         Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> Children();
 

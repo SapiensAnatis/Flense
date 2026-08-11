@@ -17,9 +17,21 @@ namespace winrt::Flense::implementation
         return m_name;
     }
 
-    bool FilesystemTreeNode::IsDirectory()
+    winrt::Flense::FileKind FilesystemTreeNode::Kind()
     {
-        return m_node->Data().kind == ::Flense::Core::FileKind::Directory;
+        switch (m_node->Data().kind)
+        {
+        case ::Flense::Core::FileKind::File:
+            return winrt::Flense::FileKind::File;
+        case ::Flense::Core::FileKind::Directory:
+            return winrt::Flense::FileKind::Directory;
+        case ::Flense::Core::FileKind::Symlink:
+            return winrt::Flense::FileKind::Symlink;
+        case ::Flense::Core::FileKind::Other:
+            return winrt::Flense::FileKind::Other;
+        default:
+            return winrt::Flense::FileKind::Unspecified;
+        }
     }
 
     winrt::Flense::FilesystemChangeKind FilesystemTreeNode::ChangeKind()

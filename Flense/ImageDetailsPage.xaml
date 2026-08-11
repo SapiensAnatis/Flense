@@ -12,8 +12,8 @@
     <Page.Resources>
 
 
-        <!--  DataTemplate for folders  -->
-        <DataTemplate x:Key="FolderTemplate" x:DataType="local:FilesystemTreeNode">
+        <!--  One row per filesystem entry; the glyph and the expander both come from the bound node.  -->
+        <DataTemplate x:Key="FilesystemItemTemplate" x:DataType="local:FilesystemTreeNode">
             <TreeViewItem Background="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemColourConverter}}" ItemsSource="{x:Bind Children}">
                 <Grid
                     Padding="0,0,36,0"
@@ -24,7 +24,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <FontIcon Grid.Column="0" Glyph="&#xE8A5;" />
+                    <FontIcon Grid.Column="0" Glyph="{x:Bind Kind, Converter={StaticResource FileKindGlyphConverter}}" />
                     <TextBlock
                         Grid.Column="1"
                         Text="{x:Bind Name}"
@@ -37,39 +37,10 @@
                 </Grid>
             </TreeViewItem>
         </DataTemplate>
-
-        <!--  DataTemplate for files  -->
-        <DataTemplate x:Key="FileTemplate" x:DataType="local:FilesystemTreeNode">
-            <TreeViewItem Background="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemColourConverter}}">
-                <Grid
-                    Padding="0,0,36,0"
-                    HorizontalAlignment="Stretch"
-                    ColumnSpacing="10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <FontIcon Grid.Column="0" Glyph="&#xE8A5;" />
-                    <TextBlock
-                        Grid.Column="1"
-                        Text="{x:Bind Name}"
-                        TextTrimming="CharacterEllipsis" />
-                    <TextBlock
-                        Grid.Column="2"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="{x:Bind Size, Converter={StaticResource FileSizeStringConverter}}"
-                        TextAlignment="Right" />
-                </Grid>
-            </TreeViewItem>
-        </DataTemplate>
-
-        <local:FilesystemItemTemplateSelector
-            x:Key="FilesystemItemTemplateSelector"
-            FileTemplate="{StaticResource FileTemplate}"
-            FolderTemplate="{StaticResource FolderTemplate}" />
 
         <local:FilesystemItemColourConverter x:Key="FilesystemItemColourConverter" />
+
+        <local:FileKindGlyphConverter x:Key="FileKindGlyphConverter" />
 
         <local:FileSizeStringConverter x:Key="FileSizeStringConverter" />
 
@@ -156,7 +127,7 @@
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 CornerRadius="{ThemeResource ControlCornerRadius}">
-                                <TreeView ItemTemplateSelector="{StaticResource FilesystemItemTemplateSelector}" ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}" />
+                                <TreeView ItemTemplate="{StaticResource FilesystemItemTemplate}" ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}" />
                             </Border>
                         </Grid>
                     </Border>

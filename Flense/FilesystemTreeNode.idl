@@ -1,3 +1,4 @@
+import "FileKind.idl";
 import "FilesystemChangeKind.idl";
 
 namespace Flense
@@ -5,7 +6,7 @@ namespace Flense
     runtimeclass FilesystemTreeNode
     {
         String Name { get; };
-        Boolean IsDirectory { get; };
+        FileKind Kind { get; };
         FilesystemChangeKind ChangeKind { get; };
         UInt64 Size { get; };
         Windows.Foundation.Collections.IObservableVector<FilesystemTreeNode> Children { get; };

@@ -23,13 +23,16 @@
     <Midl Include="FilesystemTreeNode.idl">
       <Filter>Wrappers</Filter>
     </Midl>
-    <Midl Include="FilesystemItemTemplateSelector.idl">
-      <Filter>Selectors</Filter>
-    </Midl>
     <Midl Include="FilesystemItemColourConverter.idl">
       <Filter>Converters</Filter>
     </Midl>
+    <Midl Include="FileKindGlyphConverter.idl">
+      <Filter>Converters</Filter>
+    </Midl>
     <Midl Include="FilesystemChangeKind.idl">
+      <Filter>Wrappers</Filter>
+    </Midl>
+    <Midl Include="FileKind.idl">
       <Filter>Wrappers</Filter>
     </Midl>
     <Midl Include="FileSizeStringConverter.idl">
@@ -94,9 +97,6 @@
     </Filter>
     <Filter Include="Helpers">
       <UniqueIdentifier>{7f8c81a2-f6e3-469a-a764-d911b316fb69}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Selectors">
-      <UniqueIdentifier>{b956772a-dd9f-4ea2-bb1c-5f63a0337aa3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Converters">
       <UniqueIdentifier>{cfa51aaa-1856-4de7-8e40-6ed715eda34d}</UniqueIdentifier>

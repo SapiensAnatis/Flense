@@ -1,0 +1,11 @@
+namespace Flense
+{
+    enum FileKind
+    {
+        Unspecified = 0,
+        File = 1,
+        Directory = 2,
+        Symlink = 3,
+        Other = 4,
+    };
+}

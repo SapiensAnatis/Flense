@@ -1,0 +1,9 @@
+import "FileKind.idl";
+
+namespace Flense
+{
+    runtimeclass FileKindGlyphConverter : [default] Microsoft.UI.Xaml.Data.IValueConverter
+    {
+        FileKindGlyphConverter();
+    }
+}

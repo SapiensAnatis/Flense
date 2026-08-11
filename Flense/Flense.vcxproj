@@ -133,8 +133,8 @@
       <DependentUpon>FilesystemItemColourConverter.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
-    <ClInclude Include="FilesystemItemTemplateSelector.h">
-      <DependentUpon>FilesystemItemTemplateSelector.idl</DependentUpon>
+    <ClInclude Include="FileKindGlyphConverter.h">
+      <DependentUpon>FileKindGlyphConverter.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="FilesystemTreeNode.h">
@@ -183,8 +183,8 @@
       <DependentUpon>FilesystemItemColourConverter.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
-    <ClCompile Include="FilesystemItemTemplateSelector.cpp">
-      <DependentUpon>FilesystemItemTemplateSelector.idl</DependentUpon>
+    <ClCompile Include="FileKindGlyphConverter.cpp">
+      <DependentUpon>FileKindGlyphConverter.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="FilesystemTreeNode.cpp">
@@ -223,7 +223,10 @@
     <Midl Include="FilesystemItemColourConverter.idl">
       <SubType>Designer</SubType>
     </Midl>
-    <Midl Include="FilesystemItemTemplateSelector.idl">
+    <Midl Include="FileKind.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="FileKindGlyphConverter.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="FilesystemTreeNode.idl">
