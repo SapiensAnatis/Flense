@@ -163,7 +163,11 @@
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 CornerRadius="{ThemeResource ControlCornerRadius}">
-                                <TreeView ItemTemplate="{StaticResource FilesystemItemTemplate}" ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}" />
+                                <TreeView
+                                    CanDragItems="False"
+                                    CanReorderItems="False"
+                                    ItemTemplate="{StaticResource FilesystemItemTemplate}"
+                                    ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}" />
                             </Border>
                         </Grid>
                     </Border>
