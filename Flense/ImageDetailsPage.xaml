@@ -10,40 +10,48 @@
     mc:Ignorable="d">
 
     <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--  Keeps a hovered row's own colour visible underneath the hover tint.  -->
+                <ResourceDictionary Source="ms-appx:///Themes/TreeViewItemStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
 
+            <!--  One row per filesystem entry; the glyph and the expander both come from the bound node.  -->
+            <DataTemplate x:Key="FilesystemItemTemplate" x:DataType="local:FilesystemTreeNode">
+                <TreeViewItem
+                    Background="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemColourConverter}}"
+                    ItemsSource="{x:Bind Children}"
+                    Style="{StaticResource LayeredBackgroundTreeViewItemStyle}">
+                    <Grid
+                        Padding="0,0,36,0"
+                        HorizontalAlignment="Stretch"
+                        ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="{x:Bind Kind, Converter={StaticResource FileKindGlyphConverter}}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            Text="{x:Bind Name}"
+                            TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                            Grid.Column="2"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind Size, Converter={StaticResource FileSizeStringConverter}}"
+                            TextAlignment="Right" />
+                    </Grid>
+                </TreeViewItem>
+            </DataTemplate>
 
-        <!--  One row per filesystem entry; the glyph and the expander both come from the bound node.  -->
-        <DataTemplate x:Key="FilesystemItemTemplate" x:DataType="local:FilesystemTreeNode">
-            <TreeViewItem Background="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemColourConverter}}" ItemsSource="{x:Bind Children}">
-                <Grid
-                    Padding="0,0,36,0"
-                    HorizontalAlignment="Stretch"
-                    ColumnSpacing="10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <FontIcon Grid.Column="0" Glyph="{x:Bind Kind, Converter={StaticResource FileKindGlyphConverter}}" />
-                    <TextBlock
-                        Grid.Column="1"
-                        Text="{x:Bind Name}"
-                        TextTrimming="CharacterEllipsis" />
-                    <TextBlock
-                        Grid.Column="2"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="{x:Bind Size, Converter={StaticResource FileSizeStringConverter}}"
-                        TextAlignment="Right" />
-                </Grid>
-            </TreeViewItem>
-        </DataTemplate>
+            <local:FilesystemItemColourConverter x:Key="FilesystemItemColourConverter" />
 
-        <local:FilesystemItemColourConverter x:Key="FilesystemItemColourConverter" />
+            <local:FileKindGlyphConverter x:Key="FileKindGlyphConverter" />
 
-        <local:FileKindGlyphConverter x:Key="FileKindGlyphConverter" />
+            <local:FileSizeStringConverter x:Key="FileSizeStringConverter" />
 
-        <local:FileSizeStringConverter x:Key="FileSizeStringConverter" />
-
+        </ResourceDictionary>
     </Page.Resources>
 
     <Grid>

@@ -11,6 +11,9 @@
     <Page Include="ImageDetailsPage.xaml">
       <Filter>Views</Filter>
     </Page>
+    <Page Include="Themes\TreeViewItemStyles.xaml">
+      <Filter>Themes</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />
@@ -100,6 +103,9 @@
     </Filter>
     <Filter Include="Converters">
       <UniqueIdentifier>{cfa51aaa-1856-4de7-8e40-6ed715eda34d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Themes">
+      <UniqueIdentifier>{b1d0e4a7-6c39-4f2a-9d84-2e5f7c1a83b6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
