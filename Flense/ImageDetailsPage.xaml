@@ -16,12 +16,42 @@
                 <ResourceDictionary Source="ms-appx:///Themes/TreeViewItemStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
+            <!--
+                One style per change kind. The tint is a stock brush rather than a mixed one - the
+                style's layer fades it to TreeViewItemBackgroundLayerOpacity - so the colours follow a
+                theme switch mid-run, which they cannot do when a converter hands out brush objects.
+            -->
+            <Style
+                x:Key="AddedTreeViewItemStyle"
+                BasedOn="{StaticResource LayeredBackgroundTreeViewItemStyle}"
+                TargetType="TreeViewItem">
+                <Setter Property="Background" Value="{ThemeResource SystemFillColorSuccessBrush}" />
+            </Style>
+
+            <Style
+                x:Key="RemovedTreeViewItemStyle"
+                BasedOn="{StaticResource LayeredBackgroundTreeViewItemStyle}"
+                TargetType="TreeViewItem">
+                <Setter Property="Background" Value="{ThemeResource SystemFillColorCriticalBrush}" />
+            </Style>
+
+            <Style
+                x:Key="ModifiedTreeViewItemStyle"
+                BasedOn="{StaticResource LayeredBackgroundTreeViewItemStyle}"
+                TargetType="TreeViewItem">
+                <Setter Property="Background" Value="{ThemeResource SystemFillColorCautionBrush}" />
+            </Style>
+
+            <local:FilesystemItemStyleConverter
+                x:Key="FilesystemItemStyleConverter"
+                Added="{StaticResource AddedTreeViewItemStyle}"
+                Modified="{StaticResource ModifiedTreeViewItemStyle}"
+                Removed="{StaticResource RemovedTreeViewItemStyle}"
+                Unchanged="{StaticResource LayeredBackgroundTreeViewItemStyle}" />
+
             <!--  One row per filesystem entry; the glyph and the expander both come from the bound node.  -->
             <DataTemplate x:Key="FilesystemItemTemplate" x:DataType="local:FilesystemTreeNode">
-                <TreeViewItem
-                    Background="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemColourConverter}}"
-                    ItemsSource="{x:Bind Children}"
-                    Style="{StaticResource LayeredBackgroundTreeViewItemStyle}">
+                <TreeViewItem ItemsSource="{x:Bind Children}" Style="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemStyleConverter}}">
                     <Grid
                         Padding="0,0,36,0"
                         HorizontalAlignment="Stretch"
@@ -44,8 +74,6 @@
                     </Grid>
                 </TreeViewItem>
             </DataTemplate>
-
-            <local:FilesystemItemColourConverter x:Key="FilesystemItemColourConverter" />
 
             <local:FileKindGlyphConverter x:Key="FileKindGlyphConverter" />
 

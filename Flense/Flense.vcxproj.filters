@@ -26,7 +26,7 @@
     <Midl Include="FilesystemTreeNode.idl">
       <Filter>Wrappers</Filter>
     </Midl>
-    <Midl Include="FilesystemItemColourConverter.idl">
+    <Midl Include="FilesystemItemStyleConverter.idl">
       <Filter>Converters</Filter>
     </Midl>
     <Midl Include="FileKindGlyphConverter.idl">

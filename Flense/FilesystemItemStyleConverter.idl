@@ -1,0 +1,14 @@
+import "FilesystemChangeKind.idl";
+
+namespace Flense
+{
+    runtimeclass FilesystemItemStyleConverter : Microsoft.UI.Xaml.Data.IValueConverter
+    {
+        FilesystemItemStyleConverter();
+
+        Microsoft.UI.Xaml.Style Added;
+        Microsoft.UI.Xaml.Style Removed;
+        Microsoft.UI.Xaml.Style Modified;
+        Microsoft.UI.Xaml.Style Unchanged;
+    }
+}

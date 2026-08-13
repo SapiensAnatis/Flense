@@ -18,6 +18,14 @@
         The setters are inlined rather than pulled in with BasedOn, because generic.xaml's keys are
         internal to WinUI and not guaranteed to resolve from app code.
     -->
+
+    <!--
+        How strongly an item's Background reads. Keeping the fade here rather than baking it into the
+        brush lets callers point Background at a stock, fully theme-aware brush such as
+        SystemFillColorSuccessBrush instead of mixing their own colour.
+    -->
+    <x:Double x:Key="TreeViewItemBackgroundLayerOpacity">0.2</x:Double>
+
     <Style x:Key="LayeredBackgroundTreeViewItemStyle" TargetType="TreeViewItem">
         <Setter Property="AllowDrop" Value="False" />
         <Setter Property="Background" Value="{ThemeResource TreeViewItemBackground}" />
@@ -44,12 +52,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TreeViewItem">
-                    <!--  Carries the item's own Background; the state brushes land on the grid inside it.  -->
-                    <Border
-                        x:Name="BackgroundLayer"
-                        Margin="{ThemeResource TreeViewItemPresenterMargin}"
-                        Background="{TemplateBinding Background}"
-                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <Grid x:Name="LayoutRoot" Margin="{ThemeResource TreeViewItemPresenterMargin}">
                         <!--  The states live on the template root, which is where GoToState looks for them.  -->
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="CommonStates">
@@ -179,6 +182,17 @@
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
 
+                        <!--
+                            The item's own Background, painted on its own layer so the state brushes
+                            below can sit on top of it. Empty on purpose: the opacity has to apply to
+                            the fill alone, not to the row's icon and text.
+                        -->
+                        <Border
+                            x:Name="BackgroundLayer"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Opacity="{ThemeResource TreeViewItemBackgroundLayerOpacity}" />
+
                         <Grid
                             x:Name="ContentPresenterGrid"
                             Padding="{ThemeResource TreeViewItemPresenterPadding}"
@@ -295,7 +309,7 @@
                                     Foreground="{TemplateBinding Foreground}" />
                             </Grid>
                         </Grid>
-                    </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
