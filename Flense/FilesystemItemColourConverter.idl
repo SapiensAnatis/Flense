@@ -1,0 +1,9 @@
+import "FilesystemChangeKind.idl";
+
+namespace Flense
+{
+    runtimeclass FilesystemItemColourConverter : [default] Microsoft.UI.Xaml.Data.IValueConverter
+    {
+        FilesystemItemColourConverter();
+    }
+}

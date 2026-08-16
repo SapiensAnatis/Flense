@@ -129,8 +129,8 @@
       <DependentUpon>FileSizeStringConverter.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
-    <ClInclude Include="FilesystemItemStyleConverter.h">
-      <DependentUpon>FilesystemItemStyleConverter.idl</DependentUpon>
+    <ClInclude Include="FilesystemItemColourConverter.h">
+      <DependentUpon>FilesystemItemColourConverter.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="FileKindGlyphConverter.h">
@@ -173,17 +173,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml" />
-    <Page Include="Themes\TreeViewItemStyles.xaml">
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileSizeStringConverter.cpp">
       <DependentUpon>FileSizeStringConverter.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
-    <ClCompile Include="FilesystemItemStyleConverter.cpp">
-      <DependentUpon>FilesystemItemStyleConverter.idl</DependentUpon>
+    <ClCompile Include="FilesystemItemColourConverter.cpp">
+      <DependentUpon>FilesystemItemColourConverter.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="FileKindGlyphConverter.cpp">
@@ -223,7 +220,7 @@
     <Midl Include="FileSizeStringConverter.idl">
       <SubType>Designer</SubType>
     </Midl>
-    <Midl Include="FilesystemItemStyleConverter.idl">
+    <Midl Include="FilesystemItemColourConverter.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="FileKind.idl">

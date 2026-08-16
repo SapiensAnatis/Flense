@@ -11,69 +11,51 @@
 
     <Page.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <!--  Keeps a hovered row's own colour visible underneath the hover tint.  -->
-                <ResourceDictionary Source="ms-appx:///Themes/TreeViewItemStyles.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-
-            <!--
-                One style per change kind. The tint is a stock brush rather than a mixed one - the
-                style's layer fades it to TreeViewItemBackgroundLayerOpacity - so the colours follow a
-                theme switch mid-run, which they cannot do when a converter hands out brush objects.
-            -->
-            <Style
-                x:Key="AddedTreeViewItemStyle"
-                BasedOn="{StaticResource LayeredBackgroundTreeViewItemStyle}"
-                TargetType="TreeViewItem">
-                <Setter Property="Background" Value="{ThemeResource SystemFillColorSuccessBrush}" />
+            <Style x:Key="FilesystemItemContentStyle" TargetType="Border">
+                <Setter Property="Padding" Value="0,3,0,5" />
+                <Setter Property="VerticalAlignment" Value="Center" />
             </Style>
 
-            <Style
-                x:Key="RemovedTreeViewItemStyle"
-                BasedOn="{StaticResource LayeredBackgroundTreeViewItemStyle}"
-                TargetType="TreeViewItem">
-                <Setter Property="Background" Value="{ThemeResource SystemFillColorCriticalBrush}" />
-            </Style>
-
-            <Style
-                x:Key="ModifiedTreeViewItemStyle"
-                BasedOn="{StaticResource LayeredBackgroundTreeViewItemStyle}"
-                TargetType="TreeViewItem">
-                <Setter Property="Background" Value="{ThemeResource SystemFillColorCautionBrush}" />
-            </Style>
-
-            <local:FilesystemItemStyleConverter
-                x:Key="FilesystemItemStyleConverter"
-                Added="{StaticResource AddedTreeViewItemStyle}"
-                Modified="{StaticResource ModifiedTreeViewItemStyle}"
-                Removed="{StaticResource RemovedTreeViewItemStyle}"
-                Unchanged="{StaticResource LayeredBackgroundTreeViewItemStyle}" />
-
-            <!--  One row per filesystem entry; the glyph and the expander both come from the bound node.  -->
             <DataTemplate x:Key="FilesystemItemTemplate" x:DataType="local:FilesystemTreeNode">
-                <TreeViewItem ItemsSource="{x:Bind Children}" Style="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemStyleConverter}}">
-                    <Grid
-                        Padding="0,0,36,0"
-                        HorizontalAlignment="Stretch"
-                        ColumnSpacing="10">
+                <TreeViewItem VerticalContentAlignment="Stretch" ItemsSource="{x:Bind Children}">
+                    <Grid HorizontalAlignment="Stretch" ColumnSpacing="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="150" />
                         </Grid.ColumnDefinitions>
-                        <FontIcon Grid.Column="0" Glyph="{x:Bind Kind, Converter={StaticResource FileKindGlyphConverter}}" />
-                        <TextBlock
-                            Grid.Column="1"
-                            Text="{x:Bind Name}"
-                            TextTrimming="CharacterEllipsis" />
-                        <TextBlock
+
+                        <!--  Background for first two columns  -->
+                        <Border
+                            Grid.ColumnSpan="2"
+                            Background="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemColourConverter}}"
+                            CornerRadius="{ThemeResource ControlCornerRadius}" />
+
+                        <Border
+                            Grid.Column="0"
+                            Padding="8,0"
+                            Style="{StaticResource FilesystemItemContentStyle}">
+                            <FontIcon Glyph="{x:Bind Kind, Converter={StaticResource FileKindGlyphConverter}}" />
+                        </Border>
+
+                        <Border Grid.Column="1" Style="{StaticResource FilesystemItemContentStyle}">
+                            <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" />
+                        </Border>
+
+                        <Border
                             Grid.Column="2"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind Size, Converter={StaticResource FileSizeStringConverter}}"
-                            TextAlignment="Right" />
+                            Padding="0,0,16,0"
+                            Style="{StaticResource FilesystemItemContentStyle}">
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind Size, Converter={StaticResource FileSizeStringConverter}}"
+                                TextAlignment="Right" />
+                        </Border>
                     </Grid>
                 </TreeViewItem>
             </DataTemplate>
+
+            <local:FilesystemItemColourConverter x:Key="FilesystemItemColourConverter" />
 
             <local:FileKindGlyphConverter x:Key="FileKindGlyphConverter" />
 
@@ -167,7 +149,11 @@
                                     CanDragItems="False"
                                     CanReorderItems="False"
                                     ItemTemplate="{StaticResource FilesystemItemTemplate}"
-                                    ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}" />
+                                    ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}">
+                                    <TreeView.Resources>
+                                        <Thickness x:Key="TreeViewItemPresenterPadding">0</Thickness>
+                                    </TreeView.Resources>
+                                </TreeView>
                             </Border>
                         </Grid>
                     </Border>
