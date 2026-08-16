@@ -22,7 +22,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="100" />
                         </Grid.ColumnDefinitions>
 
                         <!--  Background for first two columns  -->
@@ -140,20 +140,54 @@
 
                             <Border
                                 Grid.Row="1"
-                                Padding="2,4,2,4"
                                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 CornerRadius="{ThemeResource ControlCornerRadius}">
-                                <TreeView
-                                    CanDragItems="False"
-                                    CanReorderItems="False"
-                                    ItemTemplate="{StaticResource FilesystemItemTemplate}"
-                                    ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}">
-                                    <TreeView.Resources>
-                                        <Thickness x:Key="TreeViewItemPresenterPadding">0</Thickness>
-                                    </TreeView.Resources>
-                                </TreeView>
+                                <Grid CornerRadius="{ThemeResource ControlCornerRadius}" RowSpacing="8">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid Padding="8,6" Background="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="100" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Padding="40,0"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Center"
+                                            HorizontalTextAlignment="Left"
+                                            Text="Name" />
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                            <Rectangle
+                                                Grid.Column="1"
+                                                Width="1"
+                                                Height="20"
+                                                Margin="0,0,12,0"
+                                                VerticalAlignment="Center"
+                                                Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                                            <TextBlock
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Center"
+                                                HorizontalTextAlignment="Left"
+                                                Text="Size" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <TreeView
+                                        Grid.Row="1"
+                                        CanDragItems="False"
+                                        CanReorderItems="False"
+                                        ItemTemplate="{StaticResource FilesystemItemTemplate}"
+                                        ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}">
+                                        <TreeView.Resources>
+                                            <Thickness x:Key="TreeViewItemPresenterPadding">0</Thickness>
+                                        </TreeView.Resources>
+                                    </TreeView>
+                                </Grid>
                             </Border>
                         </Grid>
                     </Border>
