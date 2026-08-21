@@ -15,6 +15,7 @@ namespace Flense
         Boolean IsLoading { get; };
         Boolean IsLoaded { get; };
         Double LoadingProgress { get; };
+        String StatusMessage;
 
         Windows.Foundation.IAsyncAction LoadAsync();
     }

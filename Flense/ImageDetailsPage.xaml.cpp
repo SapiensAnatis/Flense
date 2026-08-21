@@ -26,7 +26,7 @@ namespace winrt::Flense::implementation
         if (auto imageArchive = e.Parameter().try_as<StorageFile>())
         {
             m_viewModel.ImageArchive(imageArchive);
-            MessageTextBlock().Text(L"Loading image: " + imageArchive.Name());
+            m_viewModel.StatusMessage(L"Loading image: " + imageArchive.Name());
             m_loadAsyncAction = m_viewModel.LoadAsync();
 
             try
@@ -44,7 +44,7 @@ namespace winrt::Flense::implementation
         }
         else
         {
-            MessageTextBlock().Text(L"Invalid parameter passed to ImageDetailsPage.");
+            m_viewModel.StatusMessage(L"Invalid parameter passed to ImageDetailsPage.");
         }
 
         m_loadAsyncAction = nullptr;

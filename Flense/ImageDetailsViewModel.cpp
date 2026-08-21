@@ -98,6 +98,20 @@ namespace winrt::Flense::implementation
         }
     }
 
+    hstring ImageDetailsViewModel::StatusMessage()
+    {
+        return m_statusMessage;
+    }
+
+    void ImageDetailsViewModel::StatusMessage(const hstring& value)
+    {
+        if (m_statusMessage != value)
+        {
+            m_statusMessage = value;
+            m_propertyChanged(*this, PropertyChangedEventArgs{L"StatusMessage"});
+        }
+    }
+
     IAsyncAction ImageDetailsViewModel::LoadAsync()
     {
         auto lifetime = get_strong();

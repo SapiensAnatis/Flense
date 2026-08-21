@@ -23,6 +23,9 @@ namespace winrt::Flense::implementation
         bool IsLoaded();
         double LoadingProgress();
 
+        winrt::hstring StatusMessage();
+        void StatusMessage(const winrt::hstring& value);
+
         winrt::Windows::Foundation::IAsyncAction LoadAsync();
 
         winrt::event_token PropertyChanged(
@@ -45,6 +48,7 @@ namespace winrt::Flense::implementation
 
         bool m_isLoading{true};
         double m_loadingProgress{0.0};
+        winrt::hstring m_statusMessage;
     };
 } // namespace winrt::Flense::implementation
 
