@@ -3,6 +3,7 @@
 #include "FilesystemTree.h"
 
 #include <span>
+#include <stop_token>
 
 namespace Flense::Core
 {
@@ -12,7 +13,10 @@ namespace Flense::Core
     /// Populate a filesystem tree from a nested .tar archive inside an image layer.
     /// </summary>
     /// <param name="nestedTarReader"></param>
-    FilesystemChangeTreeNodeRef ParseLayerFilesystem(ArchiveReader* nestedTarReader);
+    /// <param name="stopToken">Handed to ArchiveReader::Next, so the walk can be interrupted part-way through a
+    /// large entry. On cancellation the partial tree built so far is returned, so callers must discard it rather
+    /// than treat it as a layer.</param>
+    FilesystemChangeTreeNodeRef ParseLayerFilesystem(ArchiveReader* nestedTarReader, std::stop_token stopToken);
 
     /// <summary>
     /// Applies a diff tree on top of a base tree, producing the resulting merged filesystem state.

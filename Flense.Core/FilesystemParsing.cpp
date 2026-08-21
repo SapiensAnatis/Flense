@@ -138,7 +138,7 @@ namespace Flense::Core
         }
     } // namespace
 
-    FilesystemChangeTreeNodeRef ParseLayerFilesystem(ArchiveReader* nestedTarReader)
+    FilesystemChangeTreeNodeRef ParseLayerFilesystem(ArchiveReader* nestedTarReader, std::stop_token stopToken)
     {
         static constexpr std::string_view WhiteoutPrefix = ".wh.";
 
@@ -152,7 +152,7 @@ namespace Flense::Core
             .info = root,
         };
 
-        while (auto entry = nestedTarReader->Next())
+        while (auto entry = nestedTarReader->Next(stopToken))
         {
             std::string_view path = entry->Pathname();
 

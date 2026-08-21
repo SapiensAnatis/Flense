@@ -157,9 +157,8 @@ namespace Flense::Core
         /// </remarks>
         /// <typeparam name="TSource">The type of the byte stream.</typeparam>
         /// <param name="source">The byte source to read from. Must outlive the returned ArchiveReader.</param>
-        /// <param name="stopToken">The token to check for cancellation.</param>
         /// <returns>An ArchiveReader instance for enumerating the archive entries.</returns>
-        template <ByteStream TStream> static ArchiveReader CreateFromStream(TStream& source, std::stop_token stopToken)
+        template <ByteStream TStream> static ArchiveReader CreateFromStream(TStream& source)
         {
             ArchivePtr archive{archive_read_new()};
 
@@ -169,7 +168,6 @@ namespace Flense::Core
             auto context = std::make_unique<Context>(Context{
                 .readSync = [&source](std::span<std::byte> buffer) { return source.ReadSync(buffer); },
                 .skip = [&source](int64_t request) { return source.Skip(request); },
-                .stopToken = std::move(stopToken),
             });
 
             archive_read_set_callback_data(archive.get(), context.get());
@@ -183,14 +181,20 @@ namespace Flense::Core
         /// <summary>
         /// Advances to the next entry in the archive. Automatically skips any part of the previous
         /// entry's data that wasn't consumed via ArchiveEntry::ReadInto(). Returns nullopt once
-        /// the archive is exhausted (or cancellation via the stop_token passed to CreateFromStream
-        /// stops the underlying read).
+        /// the archive is exhausted, or once cancellation is requested.
         /// </summary>
+        /// <param name="stopToken">Checked as the underlying stream is read, so this call can be interrupted
+        /// part-way through skipping a large entry rather than only between entries. It applies to this call
+        /// alone - the reader holds no cancellation state of its own between operations, and a nullopt return
+        /// means "exhausted or cancelled", so callers that need to tell the two apart test the token
+        /// themselves.</param>
         /// <remarks>
         /// Invalidates any string_views or other references obtained from previous entries.
         /// </remarks>
-        std::optional<ArchiveEntry> Next()
+        std::optional<ArchiveEntry> Next(std::stop_token stopToken)
         {
+            const StopTokenScope scope{*m_context, std::move(stopToken)};
+
             archive_entry* entry;
             if (m_context->stopToken.stop_requested() ||
                 archive_read_next_header(m_archive.get(), &entry) != ARCHIVE_OK)
@@ -233,8 +237,34 @@ namespace Flense::Core
         {
             std::function<size_t(std::span<std::byte>)> readSync;
             std::function<int64_t(int64_t)> skip;
+
+            // Only set for the duration of a single operation, by StopTokenScope.
             std::stop_token stopToken;
+
             std::array<std::byte, ChunkSize> buffer;
+        };
+
+        /// <summary>
+        /// Lends a stop_token to the context for the duration of one operation, so the libarchive callbacks
+        /// can see it without the reader keeping cancellation state between calls.
+        /// </summary>
+        struct StopTokenScope
+        {
+            StopTokenScope(Context& context, std::stop_token token) : m_context(context)
+            {
+                m_context.stopToken = token;
+            }
+
+            ~StopTokenScope()
+            {
+                m_context.stopToken = std::stop_token{};
+            }
+
+            StopTokenScope(const StopTokenScope&) = delete;
+            StopTokenScope& operator=(const StopTokenScope&) = delete;
+
+          private:
+            Context& m_context;
         };
 
         static la_ssize_t ArchiveReadCallback(archive*, void* clientData, const void** buffer)
@@ -242,7 +272,7 @@ namespace Flense::Core
             auto& context = *static_cast<Context*>(clientData);
             if (context.stopToken.stop_requested())
             {
-                return 0;
+                return ARCHIVE_FATAL;
             }
 
             const size_t bytesRead = context.readSync(std::span(context.buffer));
@@ -255,7 +285,7 @@ namespace Flense::Core
             auto& context = *static_cast<Context*>(clientData);
             if (context.stopToken.stop_requested() || request <= 0)
             {
-                return 0;
+                return ARCHIVE_FATAL;
             }
 
             return context.skip(request);

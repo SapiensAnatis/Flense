@@ -118,8 +118,8 @@ namespace Flense::Core
         /// Parses a blob found under sha256/blobs/.
         /// </summary>
         /// <param name="entry">The archive entry.</param>
-        /// <param name="stopToken">The token to check for cancellation, handed to the nested archive reader so a
-        /// large layer blob can be abandoned part-way through rather than only between entries.</param>
+        /// <param name="stopToken">The token to check for cancellation, handed to ParseLayerFilesystem so a large
+        /// layer blob can be abandoned part-way through rather than only between top-level entries.</param>
         /// <returns>A BlobFsDetails or JsonBlobDetails.</returns>
         ParsedEntry ParseBlob(ArchiveEntry& entry, std::stop_token stopToken)
         {
@@ -150,11 +150,11 @@ namespace Flense::Core
             {
                 // This is a tar file containing layer diffs.
                 NestedArchiveByteStream nestedStream(&entry, std::as_bytes(std::span(sniffBuffer)));
-                auto reader = ArchiveReader::CreateFromStream(nestedStream, stopToken);
+                auto reader = ArchiveReader::CreateFromStream(nestedStream);
 
                 return BlobFsDetails{
                     .archivePath = std::string(entry.Pathname()),
-                    .filesystemChanges = ParseLayerFilesystem(&reader),
+                    .filesystemChanges = ParseLayerFilesystem(&reader, stopToken),
                 };
             }
         }

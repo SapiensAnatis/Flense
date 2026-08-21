@@ -31,8 +31,9 @@ namespace Flense::Core
         /// </summary>
         /// <param name="entry">The archive entry.</param>
         /// <param name="stopToken">The token to check for cancellation. Parsing a layer blob can take a long time, so
-        /// it is checked as the layer's nested archive is read rather than only between entries. If cancellation is
-        /// requested part-way through, the parser is left holding partial state and Build() must not be called.</param>
+        /// it is checked once per entry within the layer's nested archive rather than only between top-level entries.
+        /// If cancellation is requested part-way through, the parser is left holding partial state and Build() must
+        /// not be called.</param>
         void ProcessEntry(ArchiveEntry& entry, std::stop_token stopToken);
 
         /// <summary>

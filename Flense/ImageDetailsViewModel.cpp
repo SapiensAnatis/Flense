@@ -128,7 +128,7 @@ namespace winrt::Flense::implementation
         IsLoading(true);
 
         // Bridge the coroutine's cancellation into a stop_token, which is what Flense.Core reads. Without this the
-        // only cancellation check would be the one between entries below, and a single multi-gigabyte layer blob
+        // only cancellation check would be the one between top-level entries below, and a multi-gigabyte layer blob
         // would have to be parsed to completion before we noticed.
         std::stop_source stopSource;
         cancellation.callback([&stopSource] { stopSource.request_stop(); });
@@ -137,12 +137,12 @@ namespace winrt::Flense::implementation
 
         const std::stop_token stopToken = stopSource.get_token();
 
-        auto reader = ::Flense::Core::ArchiveReader::CreateFromStream(stream, stopToken);
+        auto reader = ::Flense::Core::ArchiveReader::CreateFromStream(stream);
 
         ::Flense::Core::ImageParser imageParser;
 
         double lastReportedPercent = 0;
-        while (auto entry = reader.Next())
+        while (auto entry = reader.Next(stopToken))
         {
             imageParser.ProcessEntry(*entry, stopToken);
 
