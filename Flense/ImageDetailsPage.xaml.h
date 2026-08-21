@@ -15,10 +15,14 @@ namespace winrt::Flense::implementation
 
         winrt::Flense::ImageDetailsViewModel ViewModel();
 
-        winrt::fire_and_forget OnNavigatedTo(winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs const& e);
+        winrt::fire_and_forget OnNavigatedTo(const winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs& e);
+
+        void CancelLoadingButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
+                                       const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
 
       private:
         winrt::Flense::ImageDetailsViewModel m_viewModel;
+        winrt::Windows::Foundation::IAsyncAction m_loadAsyncAction{nullptr};
     };
 } // namespace winrt::Flense::implementation
 

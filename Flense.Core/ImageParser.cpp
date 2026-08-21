@@ -14,6 +14,7 @@
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <span>
+#include <stop_token>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -117,8 +118,10 @@ namespace Flense::Core
         /// Parses a blob found under sha256/blobs/.
         /// </summary>
         /// <param name="entry">The archive entry.</param>
+        /// <param name="stopToken">The token to check for cancellation, handed to the nested archive reader so a
+        /// large layer blob can be abandoned part-way through rather than only between entries.</param>
         /// <returns>A BlobFsDetails or JsonBlobDetails.</returns>
-        ParsedEntry ParseBlob(ArchiveEntry& entry)
+        ParsedEntry ParseBlob(ArchiveEntry& entry, std::stop_token stopToken)
         {
             // Sniff a small, bounded prefix first - large layer blobs must never be buffered in
             // full just to find out they're not JSON.
@@ -147,7 +150,7 @@ namespace Flense::Core
             {
                 // This is a tar file containing layer diffs.
                 NestedArchiveByteStream nestedStream(&entry, std::as_bytes(std::span(sniffBuffer)));
-                auto reader = ArchiveReader::CreateFromStream(nestedStream, std::stop_token{});
+                auto reader = ArchiveReader::CreateFromStream(nestedStream, stopToken);
 
                 return BlobFsDetails{
                     .archivePath = std::string(entry.Pathname()),
@@ -160,8 +163,9 @@ namespace Flense::Core
         /// Parses an archive entry into one of a number of possible entry types.
         /// </summary>
         /// <param name="entry">The archive entry.</param>
+        /// <param name="stopToken">The token to check for cancellation.</param>
         /// <returns>A variant over the possible types.</returns>
-        ParsedEntry ParseEntry(ArchiveEntry& entry)
+        ParsedEntry ParseEntry(ArchiveEntry& entry, std::stop_token stopToken)
         {
             const std::string_view pathname = entry.Pathname();
 
@@ -172,7 +176,7 @@ namespace Flense::Core
 
             if (pathname.starts_with(BlobPrefix))
             {
-                return ParseBlob(entry);
+                return ParseBlob(entry, stopToken);
             }
 
             return std::monostate{};
@@ -207,9 +211,9 @@ namespace Flense::Core
         }
     } // namespace
 
-    void ImageParser::ProcessEntry(ArchiveEntry& entry)
+    void ImageParser::ProcessEntry(ArchiveEntry& entry, std::stop_token stopToken)
     {
-        ParsedEntry parsed = ParseEntry(entry);
+        ParsedEntry parsed = ParseEntry(entry, stopToken);
 
         std::visit(
             [this]<typename T>(T& value) {

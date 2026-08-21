@@ -21,17 +21,40 @@ namespace winrt::Flense::implementation
         return m_viewModel;
     }
 
-    winrt::fire_and_forget ImageDetailsPage::OnNavigatedTo(NavigationEventArgs const& e)
+    winrt::fire_and_forget ImageDetailsPage::OnNavigatedTo(const NavigationEventArgs& e)
     {
         if (auto imageArchive = e.Parameter().try_as<StorageFile>())
         {
             m_viewModel.ImageArchive(imageArchive);
             MessageTextBlock().Text(L"Loading image: " + imageArchive.Name());
-            co_await m_viewModel.LoadAsync();
+            m_loadAsyncAction = m_viewModel.LoadAsync();
+
+            try
+            {
+                co_await m_loadAsyncAction;
+            }
+            catch (const winrt::hresult_canceled&)
+            {
+                // TODO: check this doesn't conflict with the back button when it's added
+                if (Frame().CanGoBack())
+                {
+                    Frame().GoBack();
+                }
+            }
         }
         else
         {
             MessageTextBlock().Text(L"Invalid parameter passed to ImageDetailsPage.");
+        }
+
+        m_loadAsyncAction = nullptr;
+    }
+
+    void ImageDetailsPage::CancelLoadingButton_Click(const IInspectable& /* sender */, const RoutedEventArgs& /* e */)
+    {
+        if (m_loadAsyncAction)
+        {
+            m_loadAsyncAction.Cancel();
         }
     }
 } // namespace winrt::Flense::implementation

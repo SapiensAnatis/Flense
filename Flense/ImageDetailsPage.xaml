@@ -73,11 +73,15 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="1" Spacing="16">
+                <StackPanel
+                    Grid.Row="1"
+                    Padding="200,0"
+                    Spacing="16">
                     <TextBlock
                         x:Name="MessageTextBlock"
                         Margin="16"
                         HorizontalAlignment="Center"
+                        Style="{ThemeResource BodyLargeTextBlockStyle}"
                         TextWrapping="Wrap" />
                     <ProgressBar
                         Margin="16"
@@ -85,6 +89,12 @@
                         Minimum="0"
                         Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
                         Value="{x:Bind ViewModel.LoadingProgress, Mode=OneWay}" />
+                    <Button
+                        x:Name="CancelLoadingButton"
+                        Click="CancelLoadingButton_Click"
+                        MinWidth="100"
+                        HorizontalAlignment="Center"
+                        Content="Cancel" />
                 </StackPanel>
             </Grid>
         </UserControl>

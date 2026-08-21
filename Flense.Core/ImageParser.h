@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <stop_token>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -29,7 +30,10 @@ namespace Flense::Core
         /// Processes an individual archive entry, and store it in the parser's internal state for a later Build() call.
         /// </summary>
         /// <param name="entry">The archive entry.</param>
-        void ProcessEntry(ArchiveEntry& entry);
+        /// <param name="stopToken">The token to check for cancellation. Parsing a layer blob can take a long time, so
+        /// it is checked as the layer's nested archive is read rather than only between entries. If cancellation is
+        /// requested part-way through, the parser is left holding partial state and Build() must not be called.</param>
+        void ProcessEntry(ArchiveEntry& entry, std::stop_token stopToken);
 
         /// <summary>
         /// Assembles a vector of image layers once all archive entries have been handed to ProcessEntry().

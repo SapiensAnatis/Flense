@@ -103,6 +103,8 @@ namespace winrt::Flense::implementation
         auto lifetime = get_strong();
         auto dispatcher = DispatcherQueue::GetForCurrentThread();
 
+        auto cancellation = co_await get_cancellation_token();
+
         auto archive = m_imageFile;
         auto rawStream = co_await archive.OpenReadAsync();
 
@@ -111,25 +113,34 @@ namespace winrt::Flense::implementation
         LoadingProgress(0);
         IsLoading(true);
 
+        // Bridge the coroutine's cancellation into a stop_token, which is what Flense.Core reads. Without this the
+        // only cancellation check would be the one between entries below, and a single multi-gigabyte layer blob
+        // would have to be parsed to completion before we noticed.
         std::stop_source stopSource;
+        cancellation.callback([&stopSource] { stopSource.request_stop(); });
 
         co_await winrt::resume_background();
 
-        auto reader = ::Flense::Core::ArchiveReader::CreateFromStream(stream, stopSource.get_token());
+        const std::stop_token stopToken = stopSource.get_token();
+
+        auto reader = ::Flense::Core::ArchiveReader::CreateFromStream(stream, stopToken);
 
         ::Flense::Core::ImageParser imageParser;
 
-        double lastReportedPercent = -1.0;
+        double lastReportedPercent = 0;
         while (auto entry = reader.Next())
         {
-            imageParser.ProcessEntry(*entry);
+            imageParser.ProcessEntry(*entry, stopToken);
 
-            const double percent = (static_cast<double>(stream.Position()) / static_cast<double>(stream.Size())) * 50.0;
+            if (stopToken.stop_requested())
+            {
+                co_return;
+            }
 
-            // Only report on meaningful (>=5%) changes - TryEnqueue marshals to the UI thread,
-            // and posting on every entry (there can be thousands in a large archive) can flood it
-            // badly enough to look and behave like a hang.
-            if (percent - lastReportedPercent >= 5.0)
+            const double percent = (static_cast<double>(stream.Position()) / static_cast<double>(stream.Size())) * 90.0;
+
+            // Don't flood the UI with updates
+            if (percent - lastReportedPercent >= 1.0)
             {
                 lastReportedPercent = percent;
                 dispatcher.TryEnqueue([weak = get_weak(), percent] {
@@ -139,6 +150,11 @@ namespace winrt::Flense::implementation
                     }
                 });
             }
+        }
+
+        if (stopToken.stop_requested())
+        {
+            co_return;
         }
 
         co_await wil::resume_foreground(dispatcher);
