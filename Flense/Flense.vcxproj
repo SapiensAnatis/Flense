@@ -141,6 +141,10 @@
       <DependentUpon>FilesystemTreeNode.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="FilesystemChangesView.xaml.h">
+      <DependentUpon>FilesystemChangesView.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="ImageDetailsPage.xaml.h">
       <DependentUpon>ImageDetailsPage.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -166,6 +170,9 @@
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
+    <Page Include="FilesystemChangesView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="ImageDetailsPage.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -189,6 +196,10 @@
     </ClCompile>
     <ClCompile Include="FilesystemTreeNode.cpp">
       <DependentUpon>FilesystemTreeNode.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="FilesystemChangesView.xaml.cpp">
+      <DependentUpon>FilesystemChangesView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="ImageDetailsPage.xaml.cpp">
@@ -231,6 +242,10 @@
     </Midl>
     <Midl Include="FilesystemTreeNode.idl">
       <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="FilesystemChangesView.idl">
+      <DependentUpon>FilesystemChangesView.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Midl>
     <Midl Include="ImageDetailsPage.idl">
       <DependentUpon>ImageDetailsPage.xaml</DependentUpon>

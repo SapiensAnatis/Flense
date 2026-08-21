@@ -1,0 +1,13 @@
+namespace Flense
+{
+    [default_interface]
+    runtimeclass FilesystemChangesView : Microsoft.UI.Xaml.Controls.UserControl
+    {
+        FilesystemChangesView();
+
+        // The root nodes to display, e.g. an ImageLayerWrapper's FilesystemChanges.Children.
+        // Not a DependencyProperty: x:Bind is compiled and assigns through this setter, so the
+        // only caller that needs it is the page's x:Bind.
+        Object ItemsSource;
+    }
+}
