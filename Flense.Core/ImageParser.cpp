@@ -271,22 +271,30 @@ namespace Flense::Core
                 const std::string& layerPath = m_layerPaths.at(layerNum);
                 const FilesystemChangeTreeNodeRef& diff = m_filesystemsByLayerDigest.at(layerPath);
 
-                FilesystemChangeTreeNodeRef fs;
+                FilesystemChangeTreeNodeRef thisLayerFsSnapshot;
 
                 if (currentFsSnapshot)
                 {
-                    fs = ApplyFilesystemChanges(currentFsSnapshot, diff);
+                    thisLayerFsSnapshot = ApplyFilesystemChanges(currentFsSnapshot, diff);
                 }
                 else
                 {
-                    fs = diff;
+                    thisLayerFsSnapshot = diff;
                 }
 
-                layers.emplace_back(CollapseWhitespace(command), fs);
+                layers.emplace_back(CollapseWhitespace(command), thisLayerFsSnapshot);
 
                 layerNum += 1;
 
-                currentFsSnapshot = Visit(fs, [](const FilesystemChangeInfo& info) {
+                // After showing values as removed, actually remove them from subsequent layers
+
+                const auto removed = Prune(thisLayerFsSnapshot, [](const FilesystemChangeInfo& info) {
+                    return info.changeKind == FilesystemChangeKind::Removed;
+                });
+
+                // For the remaining diffs, 'accept' the changes to now show them as None in the next layer
+
+                currentFsSnapshot = Visit(removed, [](const FilesystemChangeInfo& info) {
                     if (info.changeKind != FilesystemChangeKind::None)
                     {
                         return FilesystemChangeInfo{

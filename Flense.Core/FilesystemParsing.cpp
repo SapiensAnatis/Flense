@@ -41,45 +41,6 @@ namespace Flense::Core
                                               const FilesystemChangeTreeNodeRef& diff);
 
         /// <summary>
-        /// Recursively drops any nodes marked FilesystemChangeKind::Removed from a diff subtree that is being
-        /// inserted wholesale, since there is nothing in the (absent) base for them to remove.
-        /// </summary>
-        FilesystemChangeTreeNodeRef PruneRemoved(const FilesystemChangeTreeNodeRef& node)
-        {
-            const auto& keys = node->Children().keys();
-            const auto& values = node->Children().values();
-
-            std::vector<std::string> prunedKeys;
-            std::vector<FilesystemChangeTreeNodeRef> prunedValues;
-
-            bool changed = false;
-
-            for (size_t i = 0; i < keys.size(); ++i)
-            {
-                if (values[i]->Data().changeKind == FilesystemChangeKind::Removed)
-                {
-                    changed = true;
-                    continue;
-                }
-
-                auto prunedChild = PruneRemoved(values[i]);
-                changed = changed || (prunedChild.get() != values[i].get());
-
-                prunedKeys.push_back(keys[i]);
-                prunedValues.push_back(std::move(prunedChild));
-            }
-
-            if (!changed)
-            {
-                return node; // no removed descendants, alias the existing subtree
-            }
-
-            return FilesystemChangeTreeNode::Create(
-                node->Data(), FilesystemChangeTreeNode::ChildrenContainer(std::sorted_unique, std::move(prunedKeys),
-                                                                          std::move(prunedValues)));
-        }
-
-        /// <summary>
         /// Merges a base node's children with a diff node's children: entries only in base carry over unchanged,
         /// entries only in diff are inserted wholesale, and entries in both are recursively patched.
         /// </summary>
@@ -118,18 +79,16 @@ namespace Flense::Core
                     if (diffValues[diffIndex]->Data().changeKind != FilesystemChangeKind::Removed)
                     {
                         outKeys.push_back(diffKeys[diffIndex]);
-                        outValues.push_back(PruneRemoved(diffValues[diffIndex]));
+                        outValues.push_back(diffValues[diffIndex]);
                     }
                     ++diffIndex;
                 }
                 else
                 {
-                    // Present in both: recursively patch, unless the diff removes this node entirely.
-                    if (auto patched = PatchNode(baseValues[baseIndex], diffValues[diffIndex]))
-                    {
-                        outKeys.push_back(baseKeys[baseIndex]);
-                        outValues.push_back(std::move(patched));
-                    }
+                    // Present in both: recursively patch;
+                    auto patched = PatchNode(baseValues[baseIndex], diffValues[diffIndex]);
+                    outKeys.push_back(baseKeys[baseIndex]);
+                    outValues.push_back(std::move(patched));
 
                     ++baseIndex;
                     ++diffIndex;
@@ -143,13 +102,20 @@ namespace Flense::Core
         /// <summary>
         /// Patches a single base node with its corresponding diff node.
         /// </summary>
-        /// <returns>The patched node, or nullptr if the diff removes this node entirely.</returns>
+        /// <returns>The patched node.</returns>
         FilesystemChangeTreeNodeRef PatchNode(const FilesystemChangeTreeNodeRef& base,
                                               const FilesystemChangeTreeNodeRef& diff)
         {
             if (diff->Data().changeKind == FilesystemChangeKind::Removed)
             {
-                return nullptr;
+                // Set all children to be removed
+                return Visit(base, [](const FilesystemChangeInfo& info) {
+                    return FilesystemChangeInfo{
+                        .kind = info.kind,
+                        .size = info.size,
+                        .changeKind = FilesystemChangeKind::Removed,
+                    };
+                });
             }
 
             // The root node exists in both trees, so it is not strictly added but rather modified.
@@ -174,6 +140,8 @@ namespace Flense::Core
 
     FilesystemChangeTreeNodeRef ParseLayerFilesystem(ArchiveReader* nestedTarReader)
     {
+        static constexpr std::string_view WhiteoutPrefix = ".wh.";
+
         auto root = FilesystemChangeInfo{
             .kind = FileKind::Directory,
             .size = 0,
@@ -188,6 +156,12 @@ namespace Flense::Core
         {
             std::string_view path = entry->Pathname();
 
+            // TODO: handle opaque whiteouts, which hide every entry a lower layer put in this directory.
+            if (path.ends_with("/.wh..wh..opq"))
+            {
+                continue;
+            }
+
             auto split = std::views::split(path, '/') |
                          std::views::transform([](auto t) { return std::string_view(t); }) |
                          std::views::filter([](std::string_view c) { return !c.empty() && c != "."; });
@@ -196,24 +170,32 @@ namespace Flense::Core
 
             for (const std::string_view pathComponent : split)
             {
-                auto pathString = std::string(pathComponent.begin(), pathComponent.end());
+                std::string pathString;
+                FilesystemChangeKind changeKind{};
+
+                if (pathComponent.starts_with(WhiteoutPrefix) && pathComponent.size() > WhiteoutPrefix.size())
+                {
+                    pathString = std::string(pathComponent.begin() + WhiteoutPrefix.size(), pathComponent.end());
+                    changeKind = FilesystemChangeKind::Removed;
+                }
+                else
+                {
+                    pathString = std::string(pathComponent);
+                    changeKind = FilesystemChangeKind::Added;
+                }
 
                 auto [it, added] = node->children.try_emplace(pathString, FilesystemChangeInfo{
                                                                               .kind = FileKind::Directory,
                                                                               .size = 0,
-                                                                              .changeKind = FilesystemChangeKind::Added,
+                                                                              .changeKind = changeKind,
                                                                           });
 
                 node = &it->second;
             }
 
-            // TODO: handle symlinks and whiteouts
-
-            node->info = FilesystemChangeInfo{
-                .kind = entry->FileKind(),
-                .size = entry->Size(),
-                .changeKind = FilesystemChangeKind::Added,
-            };
+            // TODO: handle symlinks
+            node->info.kind = entry->FileKind();
+            node->info.size = entry->Size();
         }
 
         return Freeze(std::move(rootNode));

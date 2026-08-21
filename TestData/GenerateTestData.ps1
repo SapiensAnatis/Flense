@@ -1,4 +1,4 @@
-$Images = @(
+$CotsImages = @(
     'postgres:latest',
     'mcr.microsoft.com/devcontainers/cpp:latest'
 )
@@ -9,7 +9,7 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-foreach ($ImageName in $Images) {
+foreach ($ImageName in $CotsImages) {
     $OutputFile = Join-Path $PSScriptRoot (($ImageName -replace '[:/.]', '-') + '.tar')
 
     if (Test-Path $OutputFile) {
@@ -26,4 +26,16 @@ foreach ($ImageName in $Images) {
     }
 
     Write-Host "Saved $ImageName to $OutputFile"
+}
+
+Get-ChildItem -Path $PSScriptRoot -Filter "*.dockerfile" | ForEach-Object {
+    $dest = (Join-Path $PSScriptRoot "$($_.BaseName).tar")
+    docker build -f $_.FullName -o "type=docker,dest=$dest" $PSScriptRoot
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "docker build failed for $($_.Name)."
+        exit 1
+    }
+
+    Write-Host "Saved $($_.Name) to $dest"
 }
