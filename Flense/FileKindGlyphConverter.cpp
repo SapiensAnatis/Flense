@@ -24,6 +24,10 @@ namespace winrt::Flense::implementation
     IInspectable FileKindGlyphConverter::Convert(const IInspectable& value, const TypeName& /* targetType */,
                                                  const IInspectable& /* parameter */, const hstring& /* language */)
     {
+        static const IInspectable folderGlyph = winrt::box_value(winrt::hstring(FolderGlyph));
+        static const IInspectable linkGlyph = winrt::box_value(winrt::hstring(LinkGlyph));
+        static const IInspectable documentGlyph = winrt::box_value(winrt::hstring(DocumentGlyph));
+
         const auto kind = value.as<Flense::FileKind>();
 
         using enum Flense::FileKind;
@@ -31,11 +35,11 @@ namespace winrt::Flense::implementation
         switch (kind)
         {
         case Directory:
-            return winrt::box_value(winrt::hstring(FolderGlyph));
+            return folderGlyph;
         case Symlink:
-            return winrt::box_value(winrt::hstring(LinkGlyph));
+            return linkGlyph;
         default:
-            return winrt::box_value(winrt::hstring(DocumentGlyph));
+            return documentGlyph;
         }
     }
 
