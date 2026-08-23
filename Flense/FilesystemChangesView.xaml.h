@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FilesystemChangesView.g.h"
+#include "FilesystemChangesViewModel.h"
 
 namespace winrt::Flense::implementation
 {
@@ -8,11 +9,23 @@ namespace winrt::Flense::implementation
     {
         FilesystemChangesView();
 
-        winrt::Windows::Foundation::IInspectable ItemsSource();
-        void ItemsSource(const winrt::Windows::Foundation::IInspectable& value);
+        winrt::Flense::FilesystemChangesViewModel ViewModel();
+
+        static winrt::Microsoft::UI::Xaml::DependencyProperty ItemsSourceProperty();
+
+        winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> ItemsSource();
+        void ItemsSource(
+            const winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode>& value);
 
       private:
-        winrt::Windows::Foundation::IInspectable m_itemsSource{nullptr};
+        static void InitializeProperties();
+
+        static void OnItemsSourceChanged(const winrt::Microsoft::UI::Xaml::DependencyObject& sender,
+                                         const winrt::Microsoft::UI::Xaml::DependencyPropertyChangedEventArgs& args);
+
+        static winrt::Microsoft::UI::Xaml::DependencyProperty s_itemsSourceProperty;
+
+        winrt::Flense::FilesystemChangesViewModel m_viewModel;
     };
 } // namespace winrt::Flense::implementation
 

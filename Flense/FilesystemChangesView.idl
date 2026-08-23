@@ -1,3 +1,6 @@
+import "FilesystemChangesViewModel.idl";
+import "FilesystemTreeNode.idl";
+
 namespace Flense
 {
     [default_interface]
@@ -5,9 +8,9 @@ namespace Flense
     {
         FilesystemChangesView();
 
-        // The root nodes to display, e.g. an ImageLayerWrapper's FilesystemChanges.Children.
-        // Not a DependencyProperty: x:Bind is compiled and assigns through this setter, so the
-        // only caller that needs it is the page's x:Bind.
-        Object ItemsSource;
+        FilesystemChangesViewModel ViewModel { get; };
+
+        static Microsoft.UI.Xaml.DependencyProperty ItemsSourceProperty { get; };
+        Windows.Foundation.Collections.IObservableVector<Flense.FilesystemTreeNode> ItemsSource;
     }
 }

@@ -6,26 +6,59 @@
 #endif
 
 using namespace winrt;
-using namespace winrt::Windows::Foundation;
+using namespace winrt::Microsoft::UI::Xaml;
+using namespace winrt::Windows::Foundation::Collections;
 
 namespace winrt::Flense::implementation
 {
+    DependencyProperty FilesystemChangesView::s_itemsSourceProperty{nullptr};
+
     FilesystemChangesView::FilesystemChangesView()
     {
+        InitializeProperties();
         InitializeComponent();
     }
 
-    IInspectable FilesystemChangesView::ItemsSource()
+    void FilesystemChangesView::InitializeProperties()
     {
-        return m_itemsSource;
+        // Registered on first construction rather than at namespace scope: static initialisers run
+        // when the module loads, before the XAML runtime is up.
+        if (!s_itemsSourceProperty)
+        {
+            s_itemsSourceProperty = DependencyProperty::Register(
+                L"ItemsSource",
+                winrt::xaml_typename<IObservableVector<winrt::Flense::FilesystemTreeNode>>(),
+                winrt::xaml_typename<winrt::Flense::FilesystemChangesView>(),
+                PropertyMetadata{nullptr, PropertyChangedCallback{&FilesystemChangesView::OnItemsSourceChanged}});
+        }
     }
 
-    void FilesystemChangesView::ItemsSource(const IInspectable& value)
+    winrt::Flense::FilesystemChangesViewModel FilesystemChangesView::ViewModel()
     {
-        if (m_itemsSource != value)
-        {
-            m_itemsSource = value;
-            FilesystemTree().ItemsSource(value);
-        }
+        return m_viewModel;
+    }
+
+    DependencyProperty FilesystemChangesView::ItemsSourceProperty()
+    {
+        return s_itemsSourceProperty;
+    }
+
+    IObservableVector<winrt::Flense::FilesystemTreeNode> FilesystemChangesView::ItemsSource()
+    {
+        return GetValue(ItemsSourceProperty()).try_as<IObservableVector<winrt::Flense::FilesystemTreeNode>>();
+    }
+
+    void FilesystemChangesView::ItemsSource(const IObservableVector<winrt::Flense::FilesystemTreeNode>& value)
+    {
+        SetValue(ItemsSourceProperty(), value);
+    }
+
+    void FilesystemChangesView::OnItemsSourceChanged(const DependencyObject& sender,
+                                                     const DependencyPropertyChangedEventArgs& args)
+    {
+        const auto view = winrt::get_self<FilesystemChangesView>(sender.as<winrt::Flense::FilesystemChangesView>());
+        const auto nodes = args.NewValue().try_as<IObservableVector<winrt::Flense::FilesystemTreeNode>>();
+
+        view->m_viewModel.Nodes(nodes);
     }
 } // namespace winrt::Flense::implementation

@@ -100,10 +100,10 @@
                 </StackPanel>
             </Grid>
             <TreeView
-                x:Name="FilesystemTree"
                 Grid.Row="1"
                 CanDragItems="False"
                 CanReorderItems="False"
+                ItemsSource="{x:Bind ViewModel.Nodes, Mode=OneWay}"
                 ItemTemplate="{StaticResource FilesystemItemTemplate}">
                 <TreeView.Resources>
                     <Thickness x:Key="TreeViewItemPresenterPadding">0</Thickness>

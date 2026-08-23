@@ -157,6 +157,10 @@
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="FilesystemChangesViewModel.h">
+      <DependentUpon>FilesystemChangesViewModel.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="ImageDetailsViewModel.h">
       <DependentUpon>ImageDetailsViewModel.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -221,6 +225,10 @@
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="FilesystemChangesViewModel.cpp">
+      <DependentUpon>FilesystemChangesViewModel.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="ImageDetailsViewModel.cpp">
       <DependentUpon>ImageDetailsViewModel.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -271,6 +279,9 @@
     <Midl Include="LandingPage.idl">
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="FilesystemChangesViewModel.idl">
+      <SubType>Designer</SubType>
     </Midl>
     <Midl Include="ImageDetailsViewModel.idl">
       <SubType>Designer</SubType>

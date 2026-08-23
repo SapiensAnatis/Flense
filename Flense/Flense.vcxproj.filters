@@ -17,6 +17,9 @@
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />
+    <Midl Include="FilesystemChangesViewModel.idl">
+      <Filter>ViewModels</Filter>
+    </Midl>
     <Midl Include="ImageDetailsViewModel.idl">
       <Filter>ViewModels</Filter>
     </Midl>

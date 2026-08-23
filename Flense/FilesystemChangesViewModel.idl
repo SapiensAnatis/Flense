@@ -1,0 +1,13 @@
+import "FilesystemTreeNode.idl";
+
+namespace Flense
+{
+    [bindable]
+    [default_interface]
+    runtimeclass FilesystemChangesViewModel : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        FilesystemChangesViewModel();
+
+        Windows.Foundation.Collections.IObservableVector<Flense.FilesystemTreeNode> Nodes;
+    }
+}
