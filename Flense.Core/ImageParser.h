@@ -15,6 +15,12 @@ namespace Flense::Core
     class ArchiveEntry;
     class ImageLayer;
 
+    struct ImageDetails
+    {
+        std::optional<std::string> repoTag;
+        std::vector<ImageLayer> layers;
+    };
+
     /// <summary>
     /// Accumulates OCI image manifest/config details from an archive's entries, fed one at a time.
     /// </summary>
@@ -37,13 +43,14 @@ namespace Flense::Core
         void ProcessEntry(ArchiveEntry& entry, std::stop_token stopToken);
 
         /// <summary>
-        /// Assembles a vector of image layers once all archive entries have been handed to ProcessEntry().
+        /// Assembles ImageDetails once all archive entries have been handed to ProcessEntry().
         /// </summary>
-        /// <returns>A vector of image layers.</returns>
-        std::vector<ImageLayer> Build() const;
+        /// <returns>An ImageDetails struct.</returns>
+        ImageDetails Build() const;
 
       private:
         std::optional<std::string> m_configPath;
+        std::optional<std::string> m_repoTag;
         std::vector<std::string> m_layerPaths;
 
         // Raw, not-yet-parsed JSON text keyed by digest hashes

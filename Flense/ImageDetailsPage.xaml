@@ -34,67 +34,60 @@
                     Value="{x:Bind ViewModel.LoadingProgress, Mode=OneWay}" />
                 <Button
                     x:Name="CancelLoadingButton"
-                    Click="CancelLoadingButton_Click"
                     MinWidth="100"
                     HorizontalAlignment="Center"
+                    Click="CancelLoadingButton_Click"
                     Content="Cancel" />
             </StackPanel>
         </Grid>
-        <Grid Padding="36,16,36,40" Visibility="{x:Bind ViewModel.IsLoaded, Mode=OneWay}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <TextBlock
-                Margin="0,0,0,36"
-                Style="{ThemeResource TitleLargeTextBlockStyle}"
-                Text="Image analysis" />
-            <Grid Grid.Row="1" ColumnSpacing="16">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="500" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
 
-                <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}">
-                    <Grid Padding="16" RowSpacing="12">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="Layers" />
-                        <ListView
-                            Grid.Row="1"
-                            ItemsSource="{x:Bind ViewModel.Layers, Mode=OneWay}"
-                            SelectedItem="{x:Bind ViewModel.SelectedLayer, Mode=TwoWay}">
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="local:ImageLayerWrapper">
-                                    <StackPanel>
-                                        <TextBlock Text="{x:Bind Command}" TextTrimming="CharacterEllipsis" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </Grid>
-                </Border>
 
-                <Border
-                    Grid.Column="1"
-                    Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                    CornerRadius="{ThemeResource OverlayCornerRadius}">
-                    <Grid Padding="16" RowSpacing="12">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
+        <Grid
+            Padding="36,16,36,40"
+            ColumnSpacing="16"
+            Visibility="{x:Bind ViewModel.IsLoaded, Mode=OneWay}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="500" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-                        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="Filesystem changes" />
+            <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}">
+                <Grid Padding="16" RowSpacing="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="Layers" />
+                    <ListView
+                        Grid.Row="1"
+                        ItemsSource="{x:Bind ViewModel.Layers, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.SelectedLayer, Mode=TwoWay}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:ImageLayerWrapper">
+                                <StackPanel>
+                                    <TextBlock Text="{x:Bind Command}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
 
-                        <local:FilesystemChangesView
-                            Grid.Row="1"
-                            ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}" />
-                    </Grid>
-                </Border>
-            </Grid>
+            <Border
+                Grid.Column="1"
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                CornerRadius="{ThemeResource OverlayCornerRadius}">
+                <Grid Padding="16" RowSpacing="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="Filesystem changes" />
+
+                    <local:FilesystemChangesView Grid.Row="1" ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}" />
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </Page>

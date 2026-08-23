@@ -13,6 +13,8 @@ namespace winrt::Flense::implementation
         }
 
         void InitializeComponent();
+
+        winrt::Flense::TitleBarService TitleBarService();
     };
 } // namespace winrt::Flense::implementation
 

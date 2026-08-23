@@ -1,0 +1,15 @@
+namespace Flense
+{
+    [default_interface]
+    runtimeclass TitleBarService : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        static Flense.TitleBarService Instance { get; };
+
+        String Title;
+
+        /// <summary>
+        /// Restores the title to the default application name.
+        /// </summary>
+        void Reset();
+    }
+}

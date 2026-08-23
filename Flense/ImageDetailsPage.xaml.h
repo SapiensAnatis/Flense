@@ -17,6 +17,8 @@ namespace winrt::Flense::implementation
 
         winrt::fire_and_forget OnNavigatedTo(const winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs& e);
 
+        void OnNavigatedFrom(const winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs& e);
+
         void CancelLoadingButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
                                        const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
 

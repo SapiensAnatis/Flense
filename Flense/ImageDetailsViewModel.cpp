@@ -8,6 +8,7 @@
 #include "ArchiveReader.h"
 #include "ImageLayerWrapper.h"
 #include "ImageParser.h"
+#include "TitleBarService.h"
 #include "WinRtByteStream.h"
 
 #include <ranges>
@@ -171,14 +172,22 @@ namespace winrt::Flense::implementation
             co_return;
         }
 
-        co_await wil::resume_foreground(dispatcher);
+        auto details = imageParser.Build();
 
-        auto parsedLayers = imageParser.Build() | std::views::transform([](const auto& layer) {
+        auto parsedLayers = details.layers | std::views::transform([](const auto& layer) {
                                 return winrt::make<implementation::ImageLayerWrapper>(layer);
                             }) |
                             std::ranges::to<std::vector>();
 
+        co_await wil::resume_foreground(dispatcher);
+
         Layers(winrt::single_threaded_observable_vector<winrt::Flense::ImageLayerWrapper>(std::move(parsedLayers)));
+
+        const winrt::hstring name =
+            details.repoTag.transform([](const std::string& value) { return winrt::to_hstring(value); })
+                .value_or(m_imageFile.Name());
+
+        TitleBarService::Instance().Title(name + L" - Flense");
 
         if (m_layers.Size() > 0)
         {

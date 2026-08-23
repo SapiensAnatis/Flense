@@ -160,6 +160,10 @@
     <ClInclude Include="ImageDetailsViewModel.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="TitleBarService.h">
+      <DependentUpon>TitleBarService.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="WinRtByteStream.h" />
     <ClInclude Include="App.xaml.h">
       <DependentUpon>App.xaml</DependentUpon>
@@ -218,6 +222,10 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TitleBarService.cpp">
+      <DependentUpon>TitleBarService.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="WinRtByteStream.cpp" />
     <ClCompile Include="App.xaml.cpp">
       <DependentUpon>App.xaml</DependentUpon>
@@ -266,6 +274,9 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Midl>
     <Midl Include="FilesystemChangeKind.idl" />
+    <Midl Include="TitleBarService.idl">
+      <SubType>Designer</SubType>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt">

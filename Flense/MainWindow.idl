@@ -1,8 +1,12 @@
+import "TitleBarService.idl";
+
 namespace Flense
 {
     [default_interface]
     runtimeclass MainWindow : Microsoft.UI.Xaml.Window
     {
         MainWindow();
+
+        Flense.TitleBarService TitleBarService { get; };
     }
 }

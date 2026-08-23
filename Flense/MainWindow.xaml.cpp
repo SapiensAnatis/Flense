@@ -19,4 +19,9 @@ namespace winrt::Flense::implementation
         ExtendsContentIntoTitleBar(true);
         SetTitleBar(AppTitleBar());
     }
+
+    winrt::Flense::TitleBarService MainWindow::TitleBarService()
+    {
+        return winrt::Flense::TitleBarService::Instance();
+    }
 } // namespace winrt::Flense::implementation

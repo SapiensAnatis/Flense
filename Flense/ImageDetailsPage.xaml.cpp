@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "ImageDetailsPage.xaml.h"
+#include "TitleBarService.h"
 #if __has_include("ImageDetailsPage.g.cpp")
 #include "ImageDetailsPage.g.cpp"
 #endif
@@ -48,6 +49,12 @@ namespace winrt::Flense::implementation
         }
 
         m_loadAsyncAction = nullptr;
+    }
+
+    void ImageDetailsPage::OnNavigatedFrom(const NavigationEventArgs& /* e */)
+    {
+        // The title reflects the image this page is showing, so it must not outlive the navigation.
+        TitleBarService::Instance().Reset();
     }
 
     void ImageDetailsPage::CancelLoadingButton_Click(const IInspectable& /* sender */, const RoutedEventArgs& /* e */)

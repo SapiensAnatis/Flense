@@ -32,6 +32,7 @@ namespace Flense::Core
         struct ManifestDetails
         {
             std::string configPath;
+            std::optional<std::string> repoTag;
             std::vector<std::string> layerPaths;
         };
 
@@ -102,6 +103,19 @@ namespace Flense::Core
             // for now we just take the first one.
             const nlohmann::json& manifest = manifests.at(0);
 
+            const std::string configPath = manifest.at("Config").get<std::string>();
+            const std::optional<std::string> repoTag = [&manifest]() -> std::optional<std::string> {
+                const auto& tags = manifest.at("RepoTags");
+
+                // If an image is untagged, "RepoTags" will be null.
+                if (tags.is_array() && !tags.empty())
+                {
+                    return tags.at(0).get<std::string>();
+                }
+
+                return std::nullopt;
+            }();
+
             std::vector<std::string> layerPaths;
             for (const auto& layerPath : manifest.at("Layers"))
             {
@@ -109,7 +123,8 @@ namespace Flense::Core
             }
 
             return ManifestDetails{
-                .configPath = manifest.at("Config").get<std::string>(),
+                .configPath = configPath,
+                .repoTag = repoTag,
                 .layerPaths = std::move(layerPaths),
             };
         }
@@ -220,6 +235,7 @@ namespace Flense::Core
                 if constexpr (std::is_same_v<T, ManifestDetails>)
                 {
                     m_configPath = std::move(value.configPath);
+                    m_repoTag = std::move(value.repoTag);
                     m_layerPaths = std::move(value.layerPaths);
                 }
                 else if constexpr (std::is_same_v<T, JsonBlobDetails>)
@@ -243,14 +259,14 @@ namespace Flense::Core
             parsed);
     }
 
-    std::vector<ImageLayer> ImageParser::Build() const
+    ImageDetails ImageParser::Build() const
     {
-        std::vector<ImageLayer> layers;
-
         if (!m_configPath)
         {
-            return layers;
+            return ImageDetails{};
         }
+
+        std::vector<ImageLayer> layers;
 
         const auto configIt = m_jsonBlobsByDigest.find(*m_configPath);
         if (configIt != m_jsonBlobsByDigest.end())
@@ -315,6 +331,9 @@ namespace Flense::Core
             }
         }
 
-        return layers;
+        return ImageDetails{
+            .repoTag = m_repoTag,
+            .layers = std::move(layers),
+        };
     }
 } // namespace Flense::Core
