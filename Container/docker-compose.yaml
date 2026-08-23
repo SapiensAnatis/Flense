@@ -1,0 +1,23 @@
+services:
+  dev:
+    build:
+      context: .
+
+    # Hyper-V and its memory limits are too restrictive for MSVC gargling on pch.cpp  
+    isolation: process
+
+    working_dir: C:\src
+
+    command: ["powershell", "-NoProfile", "-Command", "Wait-Event"]
+    stdin_open: true
+    tty: true
+
+    volumes:
+      - type: bind
+        source: ..
+        target: C:\src
+
+      - claude-data:C:\Users\ContainerUser\.claude
+
+volumes:
+  claude-data:

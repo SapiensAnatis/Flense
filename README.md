@@ -59,3 +59,35 @@ want to use CMake or Bazel to build this library and their own native GUIs.
 
 - **Running:** Flense is an MSIX-packaged app (`Package.appxmanifest`, `AppxPackage=true`) — run it via Visual Studio (F5/deploy) rather than 
   launching the `.exe` directly. Requires Developer Mode enabled to sideload/debug locally.
+
+## Sandboxed build container
+
+There is an optional Windows container that carries the whole toolchain, intended for running
+Claude Code (or any agent) against the repo without giving it the rest of the machine. It builds
+Flense; it can't run it, since Windows containers have no GUI.
+
+Everything lives in `Container/`, three files:
+
+| File | |
+| --- | --- |
+| `vs.vsconfig` | The toolchain definition — which VS components the build needs. Edit this when the toolchain moves. |
+| `Dockerfile` | Two stages: `toolchain` (VS Build Tools, slow) and `dev` (git, Claude Code, NuGet, vcpkg). |
+| `compose.yaml` | Build and run configuration — isolation, mounts, volumes. |
+
+Requires Docker Desktop switched to Windows containers, which in turn requires Windows 11 Pro and the Containers feature enabled.
+
+```
+# One-time, ~20 min. Repeats only when vs.vsconfig or a pinned version changes.
+docker compose -f Container/compose.yaml build
+
+# Thereafter -- the default command is Claude Code
+docker compose -f Container/compose.yaml run --rm claude
+
+# Or override it
+docker compose -f Container/compose.yaml run --rm claude powershell
+```
+
+The build script is not part of the container: `build-app.ps1` lives at the repo root and
+arrives via the bind mount, so it can be edited without rebuilding anything, and the same
+script builds on the host. It is the only thing that needs the MSVC environment and it
+locates Visual Studio itself, so Claude can just run `.\build-app.ps1` after editing.

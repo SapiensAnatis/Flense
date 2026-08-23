@@ -9,7 +9,17 @@
     <File Path="LICENSE.md" />
     <File Path="README.md" />
     <File Path="THIRD-PARTY-NOTICES.md" />
+    <File Path="build-app.ps1" />
     <File Path="vcpkg.json" />
+  </Folder>
+  <Folder Name="/Solution Items/Container/">
+    <File Path="Container/Dockerfile" />
+    <File Path="Container/docker-compose.yaml" />
+    <File Path="Container/vs.vsconfig" />
+  </Folder>
+  <Folder Name="/Solution Items/Scripts/">
+    <File Path="Scripts/build-app.ps1" />
+    <File Path="Scripts/enter-claude-container.ps1" />
   </Folder>
   <Project Path="Flense.Core/Flense.Core.vcxproj" Id="257839dd-36da-47d5-b884-9118c972f916">
     <Platform Solution="*|ARM64" Project="x64" />
