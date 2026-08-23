@@ -157,7 +157,10 @@
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
-    <ClInclude Include="ImageDetailsViewModel.h" />
+    <ClInclude Include="ImageDetailsViewModel.h">
+      <DependentUpon>ImageDetailsViewModel.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="TitleBarService.h">
@@ -218,7 +221,10 @@
       <DependentUpon>LandingPage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
-    <ClCompile Include="ImageDetailsViewModel.cpp" />
+    <ClCompile Include="ImageDetailsViewModel.cpp">
+      <DependentUpon>ImageDetailsViewModel.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -267,7 +273,7 @@
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="ImageDetailsViewModel.idl">
-      <SubType>Code</SubType>
+      <SubType>Designer</SubType>
     </Midl>
     <Midl Include="MainWindow.idl">
       <SubType>Code</SubType>

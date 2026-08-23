@@ -11,7 +11,9 @@
     <Page Include="ImageDetailsPage.xaml">
       <Filter>Views</Filter>
     </Page>
-    <Page Include="FilesystemChangesView.xaml" />
+    <Page Include="FilesystemChangesView.xaml">
+      <Filter>Views</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />
@@ -46,9 +48,6 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
-    <ClCompile Include="ImageDetailsViewModel.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
     <ClCompile Include="WinRtByteStream.cpp">
       <Filter>Helpers</Filter>
     </ClCompile>
@@ -56,9 +55,6 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="ImageDetailsViewModel.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
     <ClInclude Include="WinRtByteStream.h">
       <Filter>Helpers</Filter>
     </ClInclude>
