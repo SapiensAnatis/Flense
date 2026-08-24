@@ -17,13 +17,22 @@ namespace winrt::Flense::implementation
         void ItemsSource(
             const winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode>& value);
 
+        static winrt::Microsoft::UI::Xaml::DependencyProperty SearchQueryProperty();
+
+        winrt::hstring SearchQuery();
+        void SearchQuery(const winrt::hstring& value);
+
       private:
         static void InitializeProperties();
 
         static void OnItemsSourceChanged(const winrt::Microsoft::UI::Xaml::DependencyObject& sender,
                                          const winrt::Microsoft::UI::Xaml::DependencyPropertyChangedEventArgs& args);
 
+        static void OnSearchQueryChanged(const winrt::Microsoft::UI::Xaml::DependencyObject& sender,
+                                         const winrt::Microsoft::UI::Xaml::DependencyPropertyChangedEventArgs& args);
+
         static winrt::Microsoft::UI::Xaml::DependencyProperty s_itemsSourceProperty;
+        static winrt::Microsoft::UI::Xaml::DependencyProperty s_searchQueryProperty;
 
         winrt::Flense::FilesystemChangesViewModel m_viewModel;
     };

@@ -12,5 +12,8 @@ namespace Flense
 
         static Microsoft.UI.Xaml.DependencyProperty ItemsSourceProperty { get; };
         Windows.Foundation.Collections.IObservableVector<Flense.FilesystemTreeNode> ItemsSource;
+
+        static Microsoft.UI.Xaml.DependencyProperty SearchQueryProperty { get; };
+        String SearchQuery;
     }
 }

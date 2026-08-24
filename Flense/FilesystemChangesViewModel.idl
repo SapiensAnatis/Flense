@@ -9,5 +9,6 @@ namespace Flense
         FilesystemChangesViewModel();
 
         Windows.Foundation.Collections.IObservableVector<Flense.FilesystemTreeNode> Nodes;
+        String SearchQuery;
     }
 }

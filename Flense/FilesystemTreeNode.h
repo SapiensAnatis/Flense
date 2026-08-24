@@ -16,6 +16,8 @@ namespace winrt::Flense::implementation
         winrt::Flense::FilesystemChangeKind ChangeKind();
         uint64_t Size();
         bool Visible();
+        bool IsExpanded();
+        void IsExpanded(bool value);
         Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> Children();
 
         winrt::event_token PropertyChanged(
@@ -34,6 +36,7 @@ namespace winrt::Flense::implementation
         ::Flense::Core::FilesystemChangeTreeNodeRef m_node;
         Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> m_children{nullptr};
         bool m_visible{true};
+        bool m_isExpanded{false};
 
         winrt::event<winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
     };

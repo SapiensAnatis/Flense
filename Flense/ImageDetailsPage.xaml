@@ -83,9 +83,26 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="Filesystem changes" />
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="200" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Style="{ThemeResource SubtitleTextBlockStyle}"
+                            Text="Filesystem changes" />
+                        <TextBox
+                            x:Name="FilesystemSearchBox"
+                            Grid.Column="1"
+                            PlaceholderText="Search" />
+                    </Grid>
 
-                    <local:FilesystemChangesView Grid.Row="1" ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}" />
+                    <local:FilesystemChangesView
+                        Grid.Row="1"
+                        ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}"
+                        SearchQuery="{x:Bind FilesystemSearchBox.Text, Mode=OneWay}" />
                 </Grid>
             </Border>
         </Grid>

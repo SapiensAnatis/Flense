@@ -12,6 +12,7 @@ using namespace winrt::Windows::Foundation::Collections;
 namespace winrt::Flense::implementation
 {
     DependencyProperty FilesystemChangesView::s_itemsSourceProperty{nullptr};
+    DependencyProperty FilesystemChangesView::s_searchQueryProperty{nullptr};
 
     FilesystemChangesView::FilesystemChangesView()
     {
@@ -30,6 +31,15 @@ namespace winrt::Flense::implementation
                 winrt::xaml_typename<IObservableVector<winrt::Flense::FilesystemTreeNode>>(),
                 winrt::xaml_typename<winrt::Flense::FilesystemChangesView>(),
                 PropertyMetadata{nullptr, PropertyChangedCallback{&FilesystemChangesView::OnItemsSourceChanged}});
+        }
+
+        if (!s_searchQueryProperty)
+        {
+            s_searchQueryProperty = DependencyProperty::Register(
+                L"SearchQuery", winrt::xaml_typename<hstring>(),
+                winrt::xaml_typename<winrt::Flense::FilesystemChangesView>(),
+                PropertyMetadata{
+                    winrt::box_value(hstring{}), PropertyChangedCallback{&FilesystemChangesView::OnSearchQueryChanged}});
         }
     }
 
@@ -60,5 +70,27 @@ namespace winrt::Flense::implementation
         const auto nodes = args.NewValue().try_as<IObservableVector<winrt::Flense::FilesystemTreeNode>>();
 
         view->m_viewModel.Nodes(nodes);
+    }
+
+    DependencyProperty FilesystemChangesView::SearchQueryProperty()
+    {
+        return s_searchQueryProperty;
+    }
+
+    hstring FilesystemChangesView::SearchQuery()
+    {
+        return winrt::unbox_value<hstring>(GetValue(SearchQueryProperty()));
+    }
+
+    void FilesystemChangesView::SearchQuery(const hstring& value)
+    {
+        SetValue(SearchQueryProperty(), winrt::box_value(value));
+    }
+
+    void FilesystemChangesView::OnSearchQueryChanged(const DependencyObject& sender,
+                                                     const DependencyPropertyChangedEventArgs& args)
+    {
+        const auto view = winrt::get_self<FilesystemChangesView>(sender.as<winrt::Flense::FilesystemChangesView>());
+        view->m_viewModel.SearchQuery(winrt::unbox_value<hstring>(args.NewValue()));
     }
 } // namespace winrt::Flense::implementation

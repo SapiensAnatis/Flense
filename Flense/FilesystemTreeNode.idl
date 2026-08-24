@@ -12,6 +12,7 @@ namespace Flense
         FilesystemChangeKind ChangeKind { get; };
         UInt64 Size { get; };
         Boolean Visible { get; };
+        Boolean IsExpanded;
         Windows.Foundation.Collections.IObservableVector<FilesystemTreeNode> Children { get; };
     }
 }

@@ -61,6 +61,20 @@ namespace winrt::Flense::implementation
         return m_visible;
     }
 
+    bool FilesystemTreeNode::IsExpanded()
+    {
+        return m_isExpanded;
+    }
+
+    void FilesystemTreeNode::IsExpanded(bool value)
+    {
+        if (m_isExpanded != value)
+        {
+            m_isExpanded = value;
+            m_propertyChanged(*this, winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{L"IsExpanded"});
+        }
+    }
+
     Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> FilesystemTreeNode::
         Children()
     {

@@ -5,6 +5,8 @@
 #include "FilesystemChangesViewModel.g.cpp"
 #endif
 
+#include "FilesystemTreeNode.h"
+
 using namespace winrt;
 using namespace winrt::Microsoft::UI::Xaml::Data;
 using namespace winrt::Windows::Foundation::Collections;
@@ -21,7 +23,36 @@ namespace winrt::Flense::implementation
         if (m_nodes != value)
         {
             m_nodes = value;
+            ApplySearchQuery();
             m_propertyChanged(*this, PropertyChangedEventArgs{L"Nodes"});
+        }
+    }
+
+    hstring FilesystemChangesViewModel::SearchQuery()
+    {
+        return m_searchQuery;
+    }
+
+    void FilesystemChangesViewModel::SearchQuery(const hstring& value)
+    {
+        if (m_searchQuery != value)
+        {
+            m_searchQuery = value;
+            ApplySearchQuery();
+            m_propertyChanged(*this, PropertyChangedEventArgs{L"SearchQuery"});
+        }
+    }
+
+    void FilesystemChangesViewModel::ApplySearchQuery()
+    {
+        if (!m_nodes)
+        {
+            return;
+        }
+
+        for (const auto& node : m_nodes)
+        {
+            get_self<FilesystemTreeNode>(node)->UpdateVisibility(m_searchQuery);
         }
     }
 

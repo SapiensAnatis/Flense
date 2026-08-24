@@ -16,7 +16,11 @@
             </Style>
 
             <DataTemplate x:Key="FilesystemItemTemplate" x:DataType="local:FilesystemTreeNode">
-                <TreeViewItem VerticalContentAlignment="Stretch" ItemsSource="{x:Bind Children}">
+                <TreeViewItem
+                    VerticalContentAlignment="Stretch"
+                    IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
+                    ItemsSource="{x:Bind Children}"
+                    Visibility="{x:Bind Visible, Mode=OneWay}">
                     <Grid HorizontalAlignment="Stretch" ColumnSpacing="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
