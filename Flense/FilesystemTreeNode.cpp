@@ -56,6 +56,11 @@ namespace winrt::Flense::implementation
         return m_node->Data().size;
     }
 
+    bool FilesystemTreeNode::Visible()
+    {
+        return m_visible;
+    }
+
     Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> FilesystemTreeNode::
         Children()
     {
@@ -74,5 +79,36 @@ namespace winrt::Flense::implementation
         }
 
         return m_children;
+    }
+
+    winrt::event_token FilesystemTreeNode::PropertyChanged(
+        const winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler& handler)
+    {
+        return m_propertyChanged.add(handler);
+    }
+
+    void FilesystemTreeNode::PropertyChanged(const winrt::event_token& token) noexcept
+    {
+        m_propertyChanged.remove(token);
+    }
+
+    bool FilesystemTreeNode::UpdateVisibility(std::wstring_view query)
+    {
+        bool anyChildVisible = false;
+
+        for (const auto& child : Children())
+        {
+            anyChildVisible |= winrt::get_self<FilesystemTreeNode>(child)->UpdateVisibility(query);
+        }
+
+        bool visible = anyChildVisible || query.empty() || std::wstring_view{m_name}.contains(query);
+
+        if (m_visible != visible)
+        {
+            m_visible = visible;
+            m_propertyChanged(*this, winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{L"Visible"});
+        }
+
+        return visible;
     }
 } // namespace winrt::Flense::implementation

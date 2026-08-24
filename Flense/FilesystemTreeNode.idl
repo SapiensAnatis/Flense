@@ -3,12 +3,15 @@ import "FilesystemChangeKind.idl";
 
 namespace Flense
 {
-    runtimeclass FilesystemTreeNode
+    [bindable]
+    [default_interface]
+    runtimeclass FilesystemTreeNode : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
     {
         String Name { get; };
         FileKind Kind { get; };
         FilesystemChangeKind ChangeKind { get; };
         UInt64 Size { get; };
+        Boolean Visible { get; };
         Windows.Foundation.Collections.IObservableVector<FilesystemTreeNode> Children { get; };
     }
 }
