@@ -54,11 +54,6 @@ RUN Invoke-WebRequest -Uri 'https://github.com/git-for-windows/git/releases/down
     Remove-Item C:\TEMP\git.zip; `
     git config --global --add safe.directory C:/src
 
-# NuGet CLI. VS ships NuGet targets but no nuget.exe, and "msbuild -t:restore"
-# does not handle packages.config: it reports "Nothing to do" and exits 0, so
-# dropping this would surface much later as missing ..\packages\... imports.
-RUN Invoke-WebRequest -Uri 'https://dist.nuget.org/win-x86-commandline/v6.14.0/nuget.exe' -OutFile C:\tools\nuget.exe
-
 RUN git clone https://github.com/microsoft/vcpkg C:\vcpkg; `
     & C:\vcpkg\bootstrap-vcpkg.bat -disableMetrics; `
     vcpkg integrate install

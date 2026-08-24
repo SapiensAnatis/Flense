@@ -40,19 +40,9 @@ if (-not $env:VSCMD_VER) {
         -Arch amd64 -HostArch amd64 -SkipAutomaticLocation -NoLogo
 }
 
-# Restore the config directly rather than the solution: NuGet does not understand
-# .slnx ("Invalid input. The file type was not recognized"). -PackagesDirectory
-# must be the repo's packages/ because Flense.vcxproj hardcodes ~14
-# <Import Project="..\packages\..."> paths relative to the repo root.
-if (-not (Get-Command nuget.exe -ErrorAction SilentlyContinue)) {
-    throw 'nuget.exe not found on PATH -- needed to restore packages.config.'
-}
-nuget.exe restore (Join-Path $repoRoot 'Flense\packages.config') `
-    -PackagesDirectory (Join-Path $repoRoot 'packages')
-if ($LASTEXITCODE -ne 0) { throw "NuGet restore failed ($LASTEXITCODE)" }
-
 $msbuildArgs = @(
     (Join-Path $repoRoot 'Flense.slnx')
+    '/restore'
     "/p:Configuration=$Configuration"
     "/p:Platform=$Platform"
     '/p:AppxPackageSigningEnabled=false'

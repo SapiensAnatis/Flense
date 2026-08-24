@@ -18,6 +18,8 @@ services:
         target: C:\src
 
       - claude-data:C:\Users\ContainerUser\.claude
+      - nuget-cache:C:\Users\ContainerUser\.nuget\packages
 
 volumes:
   claude-data:
+  nuget-cache:

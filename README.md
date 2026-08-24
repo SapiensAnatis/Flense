@@ -71,7 +71,7 @@ Everything lives in `Container/`, three files:
 | File | |
 | --- | --- |
 | `vs.vsconfig` | The toolchain definition — which VS components the build needs. Edit this when the toolchain moves. |
-| `Dockerfile` | Two stages: `toolchain` (VS Build Tools, slow) and `dev` (git, Claude Code, NuGet, vcpkg). |
+| `Dockerfile` | Two stages: `toolchain` (VS Build Tools, slow) and `dev` (git, Claude Code, vcpkg). |
 | `compose.yaml` | Build and run configuration — isolation, mounts, volumes. |
 
 Requires Docker Desktop switched to Windows containers, which in turn requires Windows 11 Pro and the Containers feature enabled.
