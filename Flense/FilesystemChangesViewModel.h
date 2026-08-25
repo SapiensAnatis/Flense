@@ -21,9 +21,12 @@ namespace winrt::Flense::implementation
 
       private:
         void ApplySearchQuery();
+        void ScheduleApplySearchQuery();
 
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> m_nodes{nullptr};
         winrt::hstring m_searchQuery;
+
+        winrt::Microsoft::UI::Dispatching::DispatcherQueueTimer m_searchDebounceTimer{nullptr};
 
         winrt::event<winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
     };

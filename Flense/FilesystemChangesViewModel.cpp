@@ -7,8 +7,12 @@
 
 #include "FilesystemTreeNode.h"
 
+#include <chrono>
+
 using namespace winrt;
+using namespace winrt::Microsoft::UI::Dispatching;
 using namespace winrt::Microsoft::UI::Xaml::Data;
+using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Foundation::Collections;
 
 namespace winrt::Flense::implementation
@@ -38,9 +42,32 @@ namespace winrt::Flense::implementation
         if (m_searchQuery != value)
         {
             m_searchQuery = value;
-            ApplySearchQuery();
+            ScheduleApplySearchQuery();
             m_propertyChanged(*this, PropertyChangedEventArgs{L"SearchQuery"});
         }
+    }
+
+    void FilesystemChangesViewModel::ScheduleApplySearchQuery()
+    {
+        static constexpr auto SearchDebounceTimeSpan = TimeSpan{std::chrono::milliseconds(300)};
+
+        if (!m_searchDebounceTimer)
+        {
+            m_searchDebounceTimer = DispatcherQueue::GetForCurrentThread().CreateTimer();
+            m_searchDebounceTimer.Interval(SearchDebounceTimeSpan);
+            m_searchDebounceTimer.IsRepeating(false);
+
+            auto weakThis = get_weak();
+            m_searchDebounceTimer.Tick([weakThis](auto&&, auto&&) {
+                if (auto strongThis = weakThis.get())
+                {
+                    strongThis->ApplySearchQuery();
+                }
+            });
+        }
+
+        m_searchDebounceTimer.Stop();
+        m_searchDebounceTimer.Start();
     }
 
     void FilesystemChangesViewModel::ApplySearchQuery()
