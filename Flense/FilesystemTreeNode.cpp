@@ -106,16 +106,26 @@ namespace winrt::Flense::implementation
         m_propertyChanged.remove(token);
     }
 
-    bool FilesystemTreeNode::UpdateVisibility(std::wstring_view query)
+    /// <summary>
+    /// Recomputes visibility for this node and its descendants against a search query. A node is visible if its
+    /// name matches, or if it is a descendant of any directory that matches, or if any descendant is visible.
+    /// </summary>
+    /// <returns>
+    /// A boolean indicating whether this node was determined to be visible.
+    /// </returns>
+    bool FilesystemTreeNode::UpdateVisibility(std::wstring_view query, bool parentMatches)
     {
         bool anyChildVisible = false;
 
+        bool thisNodeMatch = std::wstring_view{m_name}.contains(query);
+
         for (const auto& child : Children())
         {
-            anyChildVisible |= winrt::get_self<FilesystemTreeNode>(child)->UpdateVisibility(query);
+            anyChildVisible |=
+                winrt::get_self<FilesystemTreeNode>(child)->UpdateVisibility(query, parentMatches || thisNodeMatch);
         }
 
-        bool visible = anyChildVisible || query.empty() || std::wstring_view{m_name}.contains(query);
+        bool visible = anyChildVisible || parentMatches || query.empty() || thisNodeMatch;
 
         if (m_visible != visible)
         {

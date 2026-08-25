@@ -79,7 +79,7 @@ namespace winrt::Flense::implementation
 
         for (const auto& node : m_nodes)
         {
-            get_self<FilesystemTreeNode>(node)->UpdateVisibility(m_searchQuery);
+            get_self<FilesystemTreeNode>(node)->UpdateVisibility(m_searchQuery, false);
         }
     }
 

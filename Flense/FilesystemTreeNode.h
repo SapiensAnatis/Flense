@@ -24,12 +24,7 @@ namespace winrt::Flense::implementation
             const winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler& handler);
         void PropertyChanged(const winrt::event_token& token) noexcept;
 
-        /// <summary>
-        /// Not exposed via IDL. Recomputes visibility for this node and its descendants against a search query (a
-        /// node is visible if its name matches, or any descendant is visible), raising <see cref="PropertyChanged"/>
-        /// only where a node's <see cref="Visible"/> actually flips. Returns whether this node ended up visible.
-        /// </summary>
-        bool UpdateVisibility(std::wstring_view query);
+        bool UpdateVisibility(std::wstring_view query, bool parentMatches);
 
       private:
         winrt::hstring m_name;
