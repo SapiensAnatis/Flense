@@ -5,6 +5,9 @@
 #include "FilesystemTreeNode.g.cpp"
 #endif
 
+using namespace winrt::Windows::Foundation::Collections;
+using namespace winrt::Microsoft::UI::Xaml::Data;
+
 namespace winrt::Flense::implementation
 {
     FilesystemTreeNode::FilesystemTreeNode(winrt::hstring name, ::Flense::Core::FilesystemChangeTreeNodeRef node)
@@ -75,8 +78,7 @@ namespace winrt::Flense::implementation
         }
     }
 
-    Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> FilesystemTreeNode::
-        Children()
+    IObservableVector<winrt::Flense::FilesystemTreeNode> FilesystemTreeNode::Children()
     {
         if (!m_children)
         {
@@ -95,8 +97,12 @@ namespace winrt::Flense::implementation
         return m_children;
     }
 
-    winrt::event_token FilesystemTreeNode::PropertyChanged(
-        const winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler& handler)
+    bool FilesystemTreeNode::HasChildren()
+    {
+        return !m_node->Children().empty();
+    }
+
+    winrt::event_token FilesystemTreeNode::PropertyChanged(const PropertyChangedEventHandler& handler)
     {
         return m_propertyChanged.add(handler);
     }

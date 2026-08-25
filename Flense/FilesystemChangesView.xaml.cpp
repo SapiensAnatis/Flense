@@ -8,6 +8,8 @@
 using namespace winrt;
 using namespace winrt::Microsoft::UI::Xaml;
 using namespace winrt::Windows::Foundation::Collections;
+using namespace winrt::Windows::Foundation;
+using namespace winrt::Microsoft::UI::Xaml::Controls;
 
 namespace winrt::Flense::implementation
 {
@@ -27,8 +29,7 @@ namespace winrt::Flense::implementation
         if (!s_itemsSourceProperty)
         {
             s_itemsSourceProperty = DependencyProperty::Register(
-                L"ItemsSource",
-                winrt::xaml_typename<IObservableVector<winrt::Flense::FilesystemTreeNode>>(),
+                L"ItemsSource", winrt::xaml_typename<IObservableVector<winrt::Flense::FilesystemTreeNode>>(),
                 winrt::xaml_typename<winrt::Flense::FilesystemChangesView>(),
                 PropertyMetadata{nullptr, PropertyChangedCallback{&FilesystemChangesView::OnItemsSourceChanged}});
         }
@@ -38,8 +39,8 @@ namespace winrt::Flense::implementation
             s_searchQueryProperty = DependencyProperty::Register(
                 L"SearchQuery", winrt::xaml_typename<hstring>(),
                 winrt::xaml_typename<winrt::Flense::FilesystemChangesView>(),
-                PropertyMetadata{
-                    winrt::box_value(hstring{}), PropertyChangedCallback{&FilesystemChangesView::OnSearchQueryChanged}});
+                PropertyMetadata{winrt::box_value(hstring{}),
+                                 PropertyChangedCallback{&FilesystemChangesView::OnSearchQueryChanged}});
         }
     }
 
@@ -85,6 +86,14 @@ namespace winrt::Flense::implementation
     void FilesystemChangesView::SearchQuery(const hstring& value)
     {
         SetValue(SearchQueryProperty(), winrt::box_value(value));
+    }
+
+    void FilesystemChangesView::TreeView_Expanding(const TreeView& sender, const TreeViewExpandingEventArgs& args)
+    {
+        const auto node = args.Item().as<winrt::Flense::FilesystemTreeNode>();
+        const auto container = sender.ContainerFromItem(args.Item()).as<TreeViewItem>();
+
+        container.ItemsSource(node.Children());
     }
 
     void FilesystemChangesView::OnSearchQueryChanged(const DependencyObject& sender,

@@ -18,8 +18,8 @@
             <DataTemplate x:Key="FilesystemItemTemplate" x:DataType="local:FilesystemTreeNode">
                 <TreeViewItem
                     VerticalContentAlignment="Stretch"
+                    HasUnrealizedChildren="{x:Bind HasChildren, Mode=OneTime}"
                     IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
-                    ItemsSource="{x:Bind Children}"
                     Visibility="{x:Bind Visible, Mode=OneWay}">
                     <Grid HorizontalAlignment="Stretch" ColumnSpacing="10">
                         <Grid.ColumnDefinitions>
@@ -107,8 +107,9 @@
                 Grid.Row="1"
                 CanDragItems="False"
                 CanReorderItems="False"
-                ItemsSource="{x:Bind ViewModel.Nodes, Mode=OneWay}"
-                ItemTemplate="{StaticResource FilesystemItemTemplate}">
+                Expanding="TreeView_Expanding"
+                ItemTemplate="{StaticResource FilesystemItemTemplate}"
+                ItemsSource="{x:Bind ViewModel.Nodes, Mode=OneWay}">
                 <TreeView.Resources>
                     <Thickness x:Key="TreeViewItemPresenterPadding">0</Thickness>
                 </TreeView.Resources>

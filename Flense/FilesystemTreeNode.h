@@ -18,6 +18,7 @@ namespace winrt::Flense::implementation
         bool Visible();
         bool IsExpanded();
         void IsExpanded(bool value);
+        bool HasChildren();
         Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> Children();
 
         winrt::event_token PropertyChanged(
