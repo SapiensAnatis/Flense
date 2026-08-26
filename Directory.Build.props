@@ -5,18 +5,15 @@
     <VcpkgUseStatic>true</VcpkgUseStatic>
     <VcpkgUseMD>true</VcpkgUseMD>
   </PropertyGroup>
-  <!--
-      Keeps NuGet restore output (project.assets.json, nuget.g.props/targets) outside the repo tree when set.
-      This repo is shared between the host and a container checkout under different accounts/NuGet caches;
-      whichever side restores last clobbers the other's cached paths, defeating incremental builds for both.
-      Per-project (via $(MSBuildProjectName)) so Flense and Flense.Core don't collide. Set by build-app.ps1.
-  -->
-  <PropertyGroup Condition="'$(FlenseIntermediateOutputRoot)' != ''">
-    <BaseIntermediateOutputPath>$(FlenseIntermediateOutputRoot)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <LanguageStandard>stdcpp23</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
+
+  <!-- Set FlenseBaseOutputPath to avoid container builds and VS builds overwriting each other -->
+  <PropertyGroup Condition="'$(FlenseBaseOutputPath)' != ''">
+    <BaseIntermediateOutputPath>$(FlenseBaseOutputPath)\out\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(FlenseBaseOutputPath)\bin\$(MSBuildProjectName)\</BaseOutputPath>
+  </PropertyGroup>
 </Project>

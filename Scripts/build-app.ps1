@@ -6,16 +6,13 @@
     inside the dev container. Finds Visual Studio itself if the MSVC environment
     is not already set, and resolves all paths relative to this script.
 
-    Compiled binaries land in-tree, exactly as Visual Studio would place them, but NuGet restore output
-    (project.assets.json etc.) goes to a dedicated folder under the repo -- see -IntermediateOutputRoot
-    below -- rather than each project's own obj\, since this repo can be built by more than one Windows
-    account against the same checkout (e.g. a host user and a sandboxed coding-agent account), and those
-    accounts can't read each other's NuGet package cache. Restore output keyed to one account left in
-    place for another to find looks like a normal, unchanged file, but its cached package paths are
-    unreadable -- forcing a full re-restore and rebuild that has nothing to do with what actually changed.
+    By default, compiled binaries land in-tree, exactly as Visual Studio would place them, but you can 
+    pass -OutputRoot to also move compiled binaries out from under the repo, e.g. so builds from
+    this script never touch (or get clobbered by) a Visual Studio build of the same checkout.
 .EXAMPLE
     .\build-app.ps1
     .\build-app.ps1 -Configuration Release
+    .\build-app.ps1 -OutputRoot C:\build\x64
 #>
 [CmdletBinding()]
 param(
@@ -25,9 +22,7 @@ param(
     [ValidateSet('x64', 'Win32', 'ARM64')]
     [string]$Platform = 'x64',
 
-    # See Directory.Build.props: redirected per-project (via $(MSBuildProjectName)) so different projects
-    # in the solution don't collide here. Gitignored via the existing [Oo]bj/ rule.
-    [string]$IntermediateOutputRoot = (Join-Path (Split-Path -Parent $PSScriptRoot) '.msbuild\obj')
+    [string]$OutputRoot
 )
 
 $ErrorActionPreference = 'Stop'
@@ -62,8 +57,13 @@ $msbuildArgs = @(
     '/v:minimal'
 )
 
+if ($OutputDirectory) {
+    $msbuildArgs += "/p:FlenseOutputRoot=$OutputDirectory"
+}
+
 msbuild @msbuildArgs
 if ($LASTEXITCODE -ne 0) { throw "Build failed ($LASTEXITCODE)" }
 
+$outputRoot = if ($OutputDirectory) { $OutputDirectory } else { $repoRoot }
 Write-Host ''
-Write-Host "Output: $repoRoot\$Platform\$Configuration" -ForegroundColor Green
+Write-Host "Output: $outputRoot\$Platform\$Configuration" -ForegroundColor Green
