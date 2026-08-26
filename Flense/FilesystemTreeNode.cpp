@@ -15,6 +15,10 @@ namespace winrt::Flense::implementation
     {
     }
 
+    FilesystemTreeNode::~FilesystemTreeNode()
+    {
+    }
+
     winrt::hstring FilesystemTreeNode::Name()
     {
         return m_name;
@@ -64,6 +68,16 @@ namespace winrt::Flense::implementation
         return m_visible;
     }
 
+    /// <remarks>Not exposed via IDL, intended for internal use only</remarks>
+    void FilesystemTreeNode::Visible(bool value)
+    {
+        if (m_visible != value)
+        {
+            m_visible = value;
+            m_propertyChanged(*this, winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{L"Visible"});
+        }
+    }
+
     bool FilesystemTreeNode::IsExpanded()
     {
         return m_isExpanded;
@@ -75,6 +89,7 @@ namespace winrt::Flense::implementation
         {
             m_isExpanded = value;
             m_propertyChanged(*this, winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{L"IsExpanded"});
+            m_propertyChanged(*this, winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{L"ChildrenIfExpanded"});
         }
     }
 
@@ -95,6 +110,16 @@ namespace winrt::Flense::implementation
         }
 
         return m_children;
+    }
+
+    IObservableVector<winrt::Flense::FilesystemTreeNode> FilesystemTreeNode::ChildrenIfExpanded()
+    {
+        if (!m_isExpanded)
+        {
+            return nullptr;
+        }
+
+        return Children();
     }
 
     bool FilesystemTreeNode::HasChildren()
@@ -121,6 +146,8 @@ namespace winrt::Flense::implementation
     /// </returns>
     bool FilesystemTreeNode::UpdateVisibility(std::wstring_view query, bool parentMatches)
     {
+        // TODO: This causes the entire tree to be materialized by calling Children() on every node, we could find a
+        // way to improve this, e.g. searching over the core tree type and materializing only matching nodes.
         bool anyChildVisible = false;
 
         bool thisNodeMatch = std::wstring_view{m_name}.contains(query);
@@ -133,11 +160,7 @@ namespace winrt::Flense::implementation
 
         bool visible = anyChildVisible || parentMatches || query.empty() || thisNodeMatch;
 
-        if (m_visible != visible)
-        {
-            m_visible = visible;
-            m_propertyChanged(*this, winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{L"Visible"});
-        }
+        Visible(visible);
 
         return visible;
     }

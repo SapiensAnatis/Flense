@@ -15,6 +15,8 @@ namespace winrt::Flense::implementation
         winrt::hstring Command();
         winrt::Flense::FilesystemTreeNode FilesystemChanges();
 
+        void UnloadTree();
+
       private:
         ::Flense::Core::ImageLayer m_layer;
         winrt::Flense::FilesystemTreeNode m_filesystemChanges{nullptr};

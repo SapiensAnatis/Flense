@@ -10,16 +10,19 @@ namespace winrt::Flense::implementation
     struct FilesystemTreeNode : FilesystemTreeNodeT<FilesystemTreeNode>
     {
         FilesystemTreeNode(winrt::hstring name, ::Flense::Core::FilesystemChangeTreeNodeRef node);
+        ~FilesystemTreeNode();
 
         winrt::hstring Name();
         winrt::Flense::FileKind Kind();
         winrt::Flense::FilesystemChangeKind ChangeKind();
         uint64_t Size();
         bool Visible();
+        void Visible(bool value);
         bool IsExpanded();
         void IsExpanded(bool value);
         bool HasChildren();
         Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> Children();
+        Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> ChildrenIfExpanded();
 
         winrt::event_token PropertyChanged(
             const winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler& handler);

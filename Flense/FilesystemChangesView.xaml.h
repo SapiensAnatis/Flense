@@ -22,9 +22,6 @@ namespace winrt::Flense::implementation
         winrt::hstring SearchQuery();
         void SearchQuery(const winrt::hstring& value);
 
-        void TreeView_Expanding(const winrt::Microsoft::UI::Xaml::Controls::TreeView& sender,
-                                const winrt::Microsoft::UI::Xaml::Controls::TreeViewExpandingEventArgs& args);
-
       private:
         static void InitializeProperties();
 

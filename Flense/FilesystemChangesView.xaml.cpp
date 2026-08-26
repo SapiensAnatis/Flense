@@ -88,14 +88,6 @@ namespace winrt::Flense::implementation
         SetValue(SearchQueryProperty(), winrt::box_value(value));
     }
 
-    void FilesystemChangesView::TreeView_Expanding(const TreeView& sender, const TreeViewExpandingEventArgs& args)
-    {
-        const auto node = args.Item().as<winrt::Flense::FilesystemTreeNode>();
-        const auto container = sender.ContainerFromItem(args.Item()).as<TreeViewItem>();
-
-        container.ItemsSource(node.Children());
-    }
-
     void FilesystemChangesView::OnSearchQueryChanged(const DependencyObject& sender,
                                                      const DependencyPropertyChangedEventArgs& args)
     {

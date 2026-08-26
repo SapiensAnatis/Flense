@@ -28,4 +28,9 @@ namespace winrt::Flense::implementation
 
         return m_filesystemChanges;
     }
+
+    void ImageLayerWrapper::UnloadTree()
+    {
+        m_filesystemChanges = nullptr;
+    }
 } // namespace winrt::Flense::implementation

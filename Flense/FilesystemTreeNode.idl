@@ -14,6 +14,7 @@ namespace Flense
         Boolean Visible { get; };
         Boolean IsExpanded;
         Windows.Foundation.Collections.IObservableVector<FilesystemTreeNode> Children { get; };
+        Windows.Foundation.Collections.IObservableVector<FilesystemTreeNode> ChildrenIfExpanded { get; };
         Boolean HasChildren { get; };
     }
 }

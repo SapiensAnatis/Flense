@@ -60,6 +60,11 @@ namespace winrt::Flense::implementation
     {
         if (m_selectedLayer != value)
         {
+            if (m_selectedLayer)
+            {
+                get_self<ImageLayerWrapper>(m_selectedLayer)->UnloadTree();
+            }
+
             m_selectedLayer = value;
             m_propertyChanged(*this, PropertyChangedEventArgs{L"SelectedLayer"});
         }

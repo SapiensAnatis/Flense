@@ -72,9 +72,32 @@ namespace winrt::Flense::implementation
 
     void FilesystemChangesViewModel::ApplySearchQuery()
     {
+        // Early returning if m_searchQuery.empty() has a bug where clearing your search query won't make all nodes
+        // visible again.
         if (!m_nodes)
         {
             return;
+        }
+
+        if (m_searchQuery.empty())
+        {
+            // Make all realised children visible again
+            auto makeVisible = [](const winrt::Flense::FilesystemTreeNode& node, auto&& makeVisible) -> void {
+                if (node.IsExpanded())
+                {
+                    for (const auto& child : node.Children())
+                    {
+                        makeVisible(child, makeVisible);
+                    }
+                }
+
+                get_self<FilesystemTreeNode>(node)->Visible(true);
+            };
+
+            for (const auto& node : m_nodes)
+            {
+                makeVisible(node, makeVisible);
+            }
         }
 
         for (const auto& node : m_nodes)
