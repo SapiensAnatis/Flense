@@ -11,7 +11,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
 
-  <!-- Set FlenseBaseOutputPath to avoid container builds and VS builds overwriting each other -->
+  <!-- Set FlenseOutputDirectory to avoid container builds and VS builds overwriting each other -->
   <PropertyGroup Condition="'$(FlenseOutputDirectory)' != ''">
     <BaseIntermediateOutputPath>$(FlenseOutputDirectory)\$(MSBuildProjectName)\obj\</BaseIntermediateOutputPath>
     <IntDir>$(FlenseOutputDirectory)\$(MSBuildProjectName)\obj\</IntDir>
