@@ -24,6 +24,8 @@ namespace winrt::Flense::implementation
 
     winrt::fire_and_forget ImageDetailsPage::OnNavigatedTo(const NavigationEventArgs& e)
     {
+        auto lifetime = get_strong();
+
         if (auto imageArchive = e.Parameter().try_as<StorageFile>())
         {
             m_viewModel.ImageArchive(imageArchive);
