@@ -12,8 +12,8 @@
   </ItemDefinitionGroup>
 
   <!-- Set FlenseBaseOutputPath to avoid container builds and VS builds overwriting each other -->
-  <PropertyGroup Condition="'$(FlenseBaseOutputPath)' != ''">
-    <BaseIntermediateOutputPath>$(FlenseBaseOutputPath)\out\$(MSBuildProjectName)</BaseIntermediateOutputPath>
-    <BaseOutputPath>$(FlenseBaseOutputPath)\bin\$(MSBuildProjectName)\</BaseOutputPath>
+  <PropertyGroup Condition="'$(FlenseOutputDirectory)' != ''">
+    <OutDir>$(FlenseOutputDirectory)\$(MSBuildProjectName)\$(Platform)\$(Configuration)\bin\</OutDir>
+    <IntDir>$(FlenseOutputDirectory)\$(MSBuildProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
 </Project>

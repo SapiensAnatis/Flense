@@ -7,12 +7,12 @@
     is not already set, and resolves all paths relative to this script.
 
     By default, compiled binaries land in-tree, exactly as Visual Studio would place them, but you can 
-    pass -OutputRoot to also move compiled binaries out from under the repo, e.g. so builds from
+    pass -OutputDirectory to also move compiled binaries out from under the repo, e.g. so builds from
     this script never touch (or get clobbered by) a Visual Studio build of the same checkout.
 .EXAMPLE
     .\build-app.ps1
     .\build-app.ps1 -Configuration Release
-    .\build-app.ps1 -OutputRoot C:\build\x64
+    .\build-app.ps1 OutputDirectory C:\build\x64
 #>
 [CmdletBinding()]
 param(
@@ -22,7 +22,7 @@ param(
     [ValidateSet('x64', 'Win32', 'ARM64')]
     [string]$Platform = 'x64',
 
-    [string]$OutputRoot
+    [string]$OutputDirectory
 )
 
 $ErrorActionPreference = 'Stop'
@@ -50,7 +50,6 @@ $msbuildArgs = @(
     '/restore'
     "/p:Configuration=$Configuration"
     "/p:Platform=$Platform"
-    "/p:FlenseIntermediateOutputRoot=$IntermediateOutputRoot"
     '/p:AppxPackageSigningEnabled=false'
     '/p:GenerateAppxPackageOnBuild=false'
     '/m'
@@ -58,12 +57,9 @@ $msbuildArgs = @(
 )
 
 if ($OutputDirectory) {
-    $msbuildArgs += "/p:FlenseOutputRoot=$OutputDirectory"
+    $msbuildArgs += "/p:FlenseOutputDirectory=$OutputDirectory"
 }
 
 msbuild @msbuildArgs
 if ($LASTEXITCODE -ne 0) { throw "Build failed ($LASTEXITCODE)" }
 
-$outputRoot = if ($OutputDirectory) { $OutputDirectory } else { $repoRoot }
-Write-Host ''
-Write-Host "Output: $outputRoot\$Platform\$Configuration" -ForegroundColor Green
