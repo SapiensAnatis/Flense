@@ -114,7 +114,7 @@ namespace winrt::Flense::implementation
 
     IObservableVector<winrt::Flense::FilesystemTreeNode> FilesystemTreeNode::ChildrenIfExpanded()
     {
-        if (!m_isExpanded)
+        if (!m_isExpanded && !m_children)
         {
             return nullptr;
         }
