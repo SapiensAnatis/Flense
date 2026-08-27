@@ -9,6 +9,8 @@ namespace Flense
         ImageDetailsPage();
         ImageDetailsViewModel ViewModel{ get; };
 
+        void CancelLoading();
+
         static FilesystemChangeVisibility BuildChangeVisibility(
             Windows.Foundation.IReference<Boolean> showUnchanged,
             Windows.Foundation.IReference<Boolean> showAdded,

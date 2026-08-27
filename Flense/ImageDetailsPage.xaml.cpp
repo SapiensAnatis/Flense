@@ -38,7 +38,6 @@ namespace winrt::Flense::implementation
             }
             catch (const winrt::hresult_canceled&)
             {
-                // TODO: check this doesn't conflict with the back button when it's added
                 if (Frame().CanGoBack())
                 {
                     Frame().GoBack();
@@ -60,6 +59,11 @@ namespace winrt::Flense::implementation
     }
 
     void ImageDetailsPage::CancelLoadingButton_Click(const IInspectable& /* sender */, const RoutedEventArgs& /* e */)
+    {
+        CancelLoading();
+    }
+
+    void ImageDetailsPage::CancelLoading()
     {
         if (m_loadAsyncAction)
         {

@@ -22,6 +22,8 @@ namespace winrt::Flense::implementation
         void CancelLoadingButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
                                        const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
 
+        void CancelLoading();
+
         static winrt::Flense::FilesystemChangeVisibility BuildChangeVisibility(
             const winrt::Windows::Foundation::IReference<bool>& showUnchanged,
             const winrt::Windows::Foundation::IReference<bool>& showAdded,
