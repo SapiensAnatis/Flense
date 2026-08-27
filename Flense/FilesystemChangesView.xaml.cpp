@@ -15,6 +15,7 @@ namespace winrt::Flense::implementation
 {
     DependencyProperty FilesystemChangesView::s_itemsSourceProperty{nullptr};
     DependencyProperty FilesystemChangesView::s_searchQueryProperty{nullptr};
+    DependencyProperty FilesystemChangesView::s_changeVisibilityProperty{nullptr};
 
     FilesystemChangesView::FilesystemChangesView()
     {
@@ -41,6 +42,17 @@ namespace winrt::Flense::implementation
                 winrt::xaml_typename<winrt::Flense::FilesystemChangesView>(),
                 PropertyMetadata{winrt::box_value(hstring{}),
                                  PropertyChangedCallback{&FilesystemChangesView::OnSearchQueryChanged}});
+        }
+
+        if (!s_changeVisibilityProperty)
+        {
+            static constexpr winrt::Flense::FilesystemChangeVisibility DefaultChangeVisibility{true, true, true, true};
+
+            s_changeVisibilityProperty = DependencyProperty::Register(
+                L"ChangeVisibility", winrt::xaml_typename<winrt::Flense::FilesystemChangeVisibility>(),
+                winrt::xaml_typename<winrt::Flense::FilesystemChangesView>(),
+                PropertyMetadata{winrt::box_value(DefaultChangeVisibility),
+                                 PropertyChangedCallback{&FilesystemChangesView::OnChangeVisibilityChanged}});
         }
     }
 
@@ -93,5 +105,28 @@ namespace winrt::Flense::implementation
     {
         const auto view = winrt::get_self<FilesystemChangesView>(sender.as<winrt::Flense::FilesystemChangesView>());
         view->m_viewModel.SearchQuery(winrt::unbox_value<hstring>(args.NewValue()));
+    }
+
+    DependencyProperty FilesystemChangesView::ChangeVisibilityProperty()
+    {
+        return s_changeVisibilityProperty;
+    }
+
+    winrt::Flense::FilesystemChangeVisibility FilesystemChangesView::ChangeVisibility()
+    {
+        return winrt::unbox_value<winrt::Flense::FilesystemChangeVisibility>(GetValue(ChangeVisibilityProperty()));
+    }
+
+    void FilesystemChangesView::ChangeVisibility(const winrt::Flense::FilesystemChangeVisibility& value)
+    {
+        SetValue(ChangeVisibilityProperty(), winrt::box_value(value));
+    }
+
+    void FilesystemChangesView::OnChangeVisibilityChanged(const DependencyObject& sender,
+                                                           const DependencyPropertyChangedEventArgs& args)
+    {
+        const auto view = winrt::get_self<FilesystemChangesView>(sender.as<winrt::Flense::FilesystemChangesView>());
+        view->m_viewModel.ChangeVisibility(
+            winrt::unbox_value<winrt::Flense::FilesystemChangeVisibility>(args.NewValue()));
     }
 } // namespace winrt::Flense::implementation

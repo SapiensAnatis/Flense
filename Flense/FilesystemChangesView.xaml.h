@@ -22,6 +22,11 @@ namespace winrt::Flense::implementation
         winrt::hstring SearchQuery();
         void SearchQuery(const winrt::hstring& value);
 
+        static winrt::Microsoft::UI::Xaml::DependencyProperty ChangeVisibilityProperty();
+
+        winrt::Flense::FilesystemChangeVisibility ChangeVisibility();
+        void ChangeVisibility(const winrt::Flense::FilesystemChangeVisibility& value);
+
       private:
         static void InitializeProperties();
 
@@ -31,8 +36,12 @@ namespace winrt::Flense::implementation
         static void OnSearchQueryChanged(const winrt::Microsoft::UI::Xaml::DependencyObject& sender,
                                          const winrt::Microsoft::UI::Xaml::DependencyPropertyChangedEventArgs& args);
 
+        static void OnChangeVisibilityChanged(const winrt::Microsoft::UI::Xaml::DependencyObject& sender,
+                                              const winrt::Microsoft::UI::Xaml::DependencyPropertyChangedEventArgs& args);
+
         static winrt::Microsoft::UI::Xaml::DependencyProperty s_itemsSourceProperty;
         static winrt::Microsoft::UI::Xaml::DependencyProperty s_searchQueryProperty;
+        static winrt::Microsoft::UI::Xaml::DependencyProperty s_changeVisibilityProperty;
 
         winrt::Flense::FilesystemChangesViewModel m_viewModel;
     };

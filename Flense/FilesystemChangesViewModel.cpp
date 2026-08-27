@@ -27,7 +27,7 @@ namespace winrt::Flense::implementation
         if (m_nodes != value)
         {
             m_nodes = value;
-            ApplySearchQuery();
+            ApplyFilters();
             m_propertyChanged(*this, PropertyChangedEventArgs{L"Nodes"});
         }
     }
@@ -42,12 +42,32 @@ namespace winrt::Flense::implementation
         if (m_searchQuery != value)
         {
             m_searchQuery = value;
-            ScheduleApplySearchQuery();
+            ScheduleApplyFilters();
             m_propertyChanged(*this, PropertyChangedEventArgs{L"SearchQuery"});
         }
     }
 
-    void FilesystemChangesViewModel::ScheduleApplySearchQuery()
+    winrt::Flense::FilesystemChangeVisibility FilesystemChangesViewModel::ChangeVisibility()
+    {
+        return m_changeVisibility;
+    }
+
+    void FilesystemChangesViewModel::ChangeVisibility(const winrt::Flense::FilesystemChangeVisibility& value)
+    {
+        bool changed = m_changeVisibility.ShowUnchanged != value.ShowUnchanged ||
+                       m_changeVisibility.ShowAdded != value.ShowAdded ||
+                       m_changeVisibility.ShowModified != value.ShowModified ||
+                       m_changeVisibility.ShowRemoved != value.ShowRemoved;
+
+        if (changed)
+        {
+            m_changeVisibility = value;
+            ApplyFilters();
+            m_propertyChanged(*this, PropertyChangedEventArgs{L"ChangeVisibility"});
+        }
+    }
+
+    void FilesystemChangesViewModel::ScheduleApplyFilters()
     {
         static constexpr auto SearchDebounceTimeSpan = TimeSpan{std::chrono::milliseconds(300)};
 
@@ -61,7 +81,7 @@ namespace winrt::Flense::implementation
             m_searchDebounceTimer.Tick([weakThis](auto&&, auto&&) {
                 if (auto strongThis = weakThis.get())
                 {
-                    strongThis->ApplySearchQuery();
+                    strongThis->ApplyFilters();
                 }
             });
         }
@@ -70,16 +90,20 @@ namespace winrt::Flense::implementation
         m_searchDebounceTimer.Start();
     }
 
-    void FilesystemChangesViewModel::ApplySearchQuery()
+    void FilesystemChangesViewModel::ApplyFilters()
     {
-        // Early returning if m_searchQuery.empty() has a bug where clearing your search query won't make all nodes
-        // visible again.
         if (!m_nodes)
         {
             return;
         }
 
-        if (m_searchQuery.empty())
+        bool noFilteringActive = m_searchQuery.empty() && m_changeVisibility.ShowUnchanged &&
+                                 m_changeVisibility.ShowAdded && m_changeVisibility.ShowModified &&
+                                 m_changeVisibility.ShowRemoved;
+
+        // Early returning if noFilteringActive has a bug where clearing your filters won't make all nodes visible
+        // again.
+        if (noFilteringActive)
         {
             // Make all realised children visible again
             auto makeVisible = [](const winrt::Flense::FilesystemTreeNode& node, auto&& makeVisible) -> void {
@@ -102,7 +126,7 @@ namespace winrt::Flense::implementation
 
         for (const auto& node : m_nodes)
         {
-            get_self<FilesystemTreeNode>(node)->UpdateVisibility(m_searchQuery, false);
+            get_self<FilesystemTreeNode>(node)->UpdateVisibility(m_searchQuery, m_changeVisibility, false);
         }
     }
 

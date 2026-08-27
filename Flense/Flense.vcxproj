@@ -275,6 +275,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Midl>
     <Midl Include="FilesystemChangeKind.idl" />
+    <Midl Include="FilesystemChangeVisibility.idl" />
     <Midl Include="TitleBarService.idl">
       <SubType>Designer</SubType>
     </Midl>

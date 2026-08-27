@@ -66,4 +66,17 @@ namespace winrt::Flense::implementation
             m_loadAsyncAction.Cancel();
         }
     }
+
+    bool ImageDetailsPage::UnboxChecked(const IReference<bool>& value)
+    {
+        return value && value.Value();
+    }
+
+    winrt::Flense::FilesystemChangeVisibility ImageDetailsPage::BuildChangeVisibility(
+        const IReference<bool>& showUnchanged, const IReference<bool>& showAdded, const IReference<bool>& showModified,
+        const IReference<bool>& showRemoved)
+    {
+        return {UnboxChecked(showUnchanged), UnboxChecked(showAdded), UnboxChecked(showModified),
+                UnboxChecked(showRemoved)};
+    }
 } // namespace winrt::Flense::implementation

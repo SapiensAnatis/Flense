@@ -2,6 +2,7 @@
 
 #include "FilesystemTree.h"
 #include "FilesystemTreeNode.g.h"
+#include "winrt/Flense.h"
 
 #include <string_view>
 
@@ -28,9 +29,12 @@ namespace winrt::Flense::implementation
             const winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler& handler);
         void PropertyChanged(const winrt::event_token& token) noexcept;
 
-        bool UpdateVisibility(std::wstring_view query, bool parentMatches);
+        bool UpdateVisibility(std::wstring_view query, const winrt::Flense::FilesystemChangeVisibility& filter,
+                              bool parentMatches);
 
       private:
+        bool MatchesChangeKindFilter(const winrt::Flense::FilesystemChangeVisibility& filter);
+
         winrt::hstring m_name;
         ::Flense::Core::FilesystemChangeTreeNodeRef m_node;
         Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> m_children{nullptr};

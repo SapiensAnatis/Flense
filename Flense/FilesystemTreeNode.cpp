@@ -137,14 +137,31 @@ namespace winrt::Flense::implementation
         m_propertyChanged.remove(token);
     }
 
+    bool FilesystemTreeNode::MatchesChangeKindFilter(const winrt::Flense::FilesystemChangeVisibility& filter)
+    {
+        switch (ChangeKind())
+        {
+        case winrt::Flense::FilesystemChangeKind::Added:
+            return filter.ShowAdded;
+        case winrt::Flense::FilesystemChangeKind::Removed:
+            return filter.ShowRemoved;
+        case winrt::Flense::FilesystemChangeKind::Modified:
+            return filter.ShowModified;
+        default:
+            return filter.ShowUnchanged;
+        }
+    }
+
     /// <summary>
-    /// Recomputes visibility for this node and its descendants against a search query. A node is visible if its
-    /// name matches, or if it is a descendant of any directory that matches, or if any descendant is visible.
+    /// Recomputes visibility for this node and its descendants against a search query and a change-kind filter. A
+    /// node is visible if its name matches the query and its own change kind is enabled in the filter, or if it is
+    /// a descendant of any directory that matches the query, or if any descendant is visible.
     /// </summary>
     /// <returns>
     /// A boolean indicating whether this node was determined to be visible.
     /// </returns>
-    bool FilesystemTreeNode::UpdateVisibility(std::wstring_view query, bool parentMatches)
+    bool FilesystemTreeNode::UpdateVisibility(std::wstring_view query, const winrt::Flense::FilesystemChangeVisibility& filter,
+                                              bool parentMatches)
     {
         // TODO: This causes the entire tree to be materialized by calling Children() on every node, we could find a
         // way to improve this, e.g. searching over the core tree type and materializing only matching nodes.
@@ -154,11 +171,14 @@ namespace winrt::Flense::implementation
 
         for (const auto& child : Children())
         {
-            anyChildVisible |=
-                winrt::get_self<FilesystemTreeNode>(child)->UpdateVisibility(query, parentMatches || thisNodeMatch);
+            anyChildVisible |= winrt::get_self<FilesystemTreeNode>(child)->UpdateVisibility(
+                query, filter, parentMatches || thisNodeMatch);
         }
 
-        bool visible = anyChildVisible || parentMatches || query.empty() || thisNodeMatch;
+        bool searchVisible = parentMatches || query.empty() || thisNodeMatch;
+        bool ownVisible = searchVisible && MatchesChangeKindFilter(filter);
+
+        bool visible = anyChildVisible || ownVisible;
 
         Visible(visible);
 

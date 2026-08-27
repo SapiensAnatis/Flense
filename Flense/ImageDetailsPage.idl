@@ -1,4 +1,5 @@
 import "ImageDetailsViewModel.idl";
+import "FilesystemChangeVisibility.idl";
 
 namespace Flense
 {
@@ -7,5 +8,11 @@ namespace Flense
     {
         ImageDetailsPage();
         ImageDetailsViewModel ViewModel{ get; };
+
+        static FilesystemChangeVisibility BuildChangeVisibility(
+            Windows.Foundation.IReference<Boolean> showUnchanged,
+            Windows.Foundation.IReference<Boolean> showAdded,
+            Windows.Foundation.IReference<Boolean> showModified,
+            Windows.Foundation.IReference<Boolean> showRemoved);
     }
 }

@@ -38,6 +38,9 @@
     <Midl Include="FilesystemChangeKind.idl">
       <Filter>Wrappers</Filter>
     </Midl>
+    <Midl Include="FilesystemChangeVisibility.idl">
+      <Filter>Wrappers</Filter>
+    </Midl>
     <Midl Include="FileKind.idl">
       <Filter>Wrappers</Filter>
     </Midl>

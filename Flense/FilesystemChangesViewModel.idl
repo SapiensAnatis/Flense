@@ -1,3 +1,4 @@
+import "FilesystemChangeVisibility.idl";
 import "FilesystemTreeNode.idl";
 
 namespace Flense
@@ -10,5 +11,6 @@ namespace Flense
 
         Windows.Foundation.Collections.IObservableVector<Flense.FilesystemTreeNode> Nodes;
         String SearchQuery;
+        FilesystemChangeVisibility ChangeVisibility;
     }
 }

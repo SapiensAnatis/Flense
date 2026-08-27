@@ -1,4 +1,5 @@
 import "FilesystemChangesViewModel.idl";
+import "FilesystemChangeVisibility.idl";
 import "FilesystemTreeNode.idl";
 
 namespace Flense
@@ -15,5 +16,8 @@ namespace Flense
 
         static Microsoft.UI.Xaml.DependencyProperty SearchQueryProperty { get; };
         String SearchQuery;
+
+        static Microsoft.UI.Xaml.DependencyProperty ChangeVisibilityProperty { get; };
+        FilesystemChangeVisibility ChangeVisibility;
     }
 }

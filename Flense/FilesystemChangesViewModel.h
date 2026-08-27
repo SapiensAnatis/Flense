@@ -15,16 +15,20 @@ namespace winrt::Flense::implementation
         winrt::hstring SearchQuery();
         void SearchQuery(const winrt::hstring& value);
 
+        winrt::Flense::FilesystemChangeVisibility ChangeVisibility();
+        void ChangeVisibility(const winrt::Flense::FilesystemChangeVisibility& value);
+
         winrt::event_token PropertyChanged(
             const winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler& handler);
         void PropertyChanged(const winrt::event_token& token) noexcept;
 
       private:
-        void ApplySearchQuery();
-        void ScheduleApplySearchQuery();
+        void ApplyFilters();
+        void ScheduleApplyFilters();
 
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> m_nodes{nullptr};
         winrt::hstring m_searchQuery;
+        winrt::Flense::FilesystemChangeVisibility m_changeVisibility{true, true, true, true};
 
         winrt::Microsoft::UI::Dispatching::DispatcherQueueTimer m_searchDebounceTimer{nullptr};
 

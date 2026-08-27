@@ -22,7 +22,15 @@ namespace winrt::Flense::implementation
         void CancelLoadingButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
                                        const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
 
+        static winrt::Flense::FilesystemChangeVisibility BuildChangeVisibility(
+            const winrt::Windows::Foundation::IReference<bool>& showUnchanged,
+            const winrt::Windows::Foundation::IReference<bool>& showAdded,
+            const winrt::Windows::Foundation::IReference<bool>& showModified,
+            const winrt::Windows::Foundation::IReference<bool>& showRemoved);
+
       private:
+        static bool UnboxChecked(const winrt::Windows::Foundation::IReference<bool>& value);
+
         winrt::Flense::ImageDetailsViewModel m_viewModel;
         winrt::Windows::Foundation::IAsyncAction m_loadAsyncAction{nullptr};
     };

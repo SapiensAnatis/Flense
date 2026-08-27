@@ -1,0 +1,10 @@
+namespace Flense
+{
+    struct FilesystemChangeVisibility
+    {
+        Boolean ShowUnchanged;
+        Boolean ShowAdded;
+        Boolean ShowModified;
+        Boolean ShowRemoved;
+    };
+}
