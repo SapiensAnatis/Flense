@@ -58,7 +58,7 @@ RUN git clone https://github.com/microsoft/vcpkg C:\vcpkg; `
     & C:\vcpkg\bootstrap-vcpkg.bat -disableMetrics; `
     vcpkg integrate install
 
-ARG CLAUDE_CODE_VERSION=2.1.241
+ARG CLAUDE_CODE_VERSION=2.1.251
 
 RUN Invoke-WebRequest https://claude.ai/install.ps1 -OutFile C:\TEMP\claude-install.ps1; `
     & C:\TEMP\claude-install.ps1 $env:CLAUDE_CODE_VERSION; `
