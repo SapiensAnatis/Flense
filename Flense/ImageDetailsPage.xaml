@@ -129,9 +129,9 @@
 
                     <local:FilesystemChangesView
                         Grid.Row="1"
+                        ChangeVisibility="{x:Bind BuildChangeVisibility(UnchangedFilterItem.IsChecked, AddedFilterItem.IsChecked, ModifiedFilterItem.IsChecked, RemovedFilterItem.IsChecked), Mode=OneWay}"
                         ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}"
-                        SearchQuery="{x:Bind FilesystemSearchBox.Text, Mode=OneWay}"
-                        ChangeVisibility="{x:Bind BuildChangeVisibility(UnchangedFilterItem.IsChecked, AddedFilterItem.IsChecked, ModifiedFilterItem.IsChecked, RemovedFilterItem.IsChecked), Mode=OneWay}" />
+                        SearchQuery="{x:Bind FilesystemSearchBox.Text, Mode=OneWay}" />
                 </Grid>
             </Border>
         </Grid>
