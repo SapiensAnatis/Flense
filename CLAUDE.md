@@ -1,6 +1,6 @@
 # Flense
 
-Flense is a WinUI 3 app for analysing Docker images.
+Flense is a WinUI 3 app for analysing Docker images, written in C++/WinRT (not C#).
 
 ## Instructions
 
