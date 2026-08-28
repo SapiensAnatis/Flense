@@ -80,6 +80,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <Grid ColumnSpacing="12">
@@ -132,6 +133,35 @@
                         ChangeVisibility="{x:Bind BuildChangeVisibility(UnchangedFilterItem.IsChecked, AddedFilterItem.IsChecked, ModifiedFilterItem.IsChecked, RemovedFilterItem.IsChecked), Mode=OneWay}"
                         ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}"
                         SearchQuery="{x:Bind FilesystemSearchBox.Text, Mode=OneWay}" />
+
+
+                    <Border
+                        Grid.Row="2"
+                        Padding="12"
+                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        CornerRadius="{ThemeResource ControlCornerRadius}">
+                        <Border.Resources>
+                            <Style x:Key="CodeTextBlockStyle" TargetType="TextBlock">
+                                <Setter Property="FontFamily" Value="Consolas" />
+                            </Style>
+                        </Border.Resources>
+                        <StackPanel Spacing="12">
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                Text="Command" />
+                            <ScrollViewer
+                                Height="75"
+                                HorizontalScrollMode="Disabled"
+                                VerticalScrollBarVisibility="Auto">
+                                <TextBlock
+                                    IsTextSelectionEnabled="True"
+                                    Style="{StaticResource CodeTextBlockStyle}"
+                                    Text="{x:Bind ViewModel.SelectedLayer.Command, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Border>
                 </Grid>
             </Border>
         </Grid>

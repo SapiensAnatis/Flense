@@ -69,11 +69,13 @@
     </UserControl.Resources>
 
     <Border
-        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+        Background="{ThemeResource LayerFillColorAltBrush}"
         BorderThickness="1"
         CornerRadius="{ThemeResource ControlCornerRadius}">
-        <Grid CornerRadius="{ThemeResource ControlCornerRadius}" RowSpacing="8">
+        <Grid
+            Padding="0,0,0,12"
+            CornerRadius="{ThemeResource ControlCornerRadius}"
+            RowSpacing="8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
