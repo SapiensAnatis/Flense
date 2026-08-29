@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "ModulePreamble.h"
 
 #include "ImageDetailsPage.xaml.h"
 #include "TitleBarService.h"

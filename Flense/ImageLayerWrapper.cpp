@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include "ModulePreamble.h"
 
 #include "ImageLayerWrapper.h"
 #if __has_include("ImageLayerWrapper.g.cpp")

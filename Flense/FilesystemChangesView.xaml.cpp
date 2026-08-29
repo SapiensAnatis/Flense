@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "ModulePreamble.h"
 
 #include "FilesystemChangesView.xaml.h"
 #if __has_include("FilesystemChangesView.g.cpp")

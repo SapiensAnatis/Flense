@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "ModulePreamble.h"
 
 #include "ImageDetailsViewModel.h"
 #if __has_include("ImageDetailsViewModel.g.cpp")

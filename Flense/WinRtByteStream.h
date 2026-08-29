@@ -1,7 +1,6 @@
 #pragma once
 
-#include <winrt/Windows.Foundation.h>
-#include <winrt/Windows.Storage.Streams.h>
+#include "ModulePreamble.h"
 
 #include <cstddef>
 #include <cstdint>

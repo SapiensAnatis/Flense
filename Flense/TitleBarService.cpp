@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include "ModulePreamble.h"
 
 #include "TitleBarService.h"
 #if __has_include("TitleBarService.g.cpp")

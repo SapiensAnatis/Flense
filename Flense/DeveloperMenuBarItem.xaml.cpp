@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "ModulePreamble.h"
 
 #include "DeveloperMenuBarItem.xaml.h"
 #if __has_include("DeveloperMenuBarItem.g.cpp")

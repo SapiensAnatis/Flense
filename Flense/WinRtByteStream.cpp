@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "ModulePreamble.h"
 
 #include "ArchiveReader.h"
 #include "WinRtByteStream.h"

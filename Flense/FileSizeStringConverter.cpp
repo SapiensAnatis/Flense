@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include "ModulePreamble.h"
 
 #include "FileSizeStringConverter.h"
 #if __has_include("FileSizeStringConverter.g.cpp")

@@ -2,7 +2,6 @@
 
 #include "FilesystemTree.h"
 #include "FilesystemTreeNode.g.h"
-#include "winrt/Flense.h"
 
 #include <string_view>
 

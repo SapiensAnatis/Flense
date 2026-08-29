@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include "ModulePreamble.h"
 
 #include "FilesystemItemColourConverter.h"
 #if __has_include("FilesystemItemColourConverter.g.cpp")
@@ -9,8 +10,6 @@ using namespace winrt::Windows::Foundation;
 using namespace winrt::Microsoft::UI::Xaml;
 using namespace winrt::Windows::UI::Xaml::Interop;
 using namespace winrt::Microsoft::UI::Xaml::Media;
-
-#include "winrt/Flense.h"
 
 namespace winrt::Flense::implementation
 {

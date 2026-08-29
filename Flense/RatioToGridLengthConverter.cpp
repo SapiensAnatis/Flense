@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "ModulePreamble.h"
 
 #include "RatioToGridLengthConverter.h"
 #if __has_include("RatioToGridLengthConverter.g.cpp")

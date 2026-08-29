@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "ModulePreamble.h"
 
 #include "ImageDetailsPage.xaml.h"
 #include "LandingPage.xaml.h"
@@ -8,11 +9,6 @@
 #endif
 
 #include <ShObjIdl.h>
-#include <winrt/Microsoft.UI.Content.h>
-#include <winrt/Microsoft.UI.Interop.h>
-#include <winrt/Microsoft.UI.Windowing.h>
-#include <winrt/Windows.Storage.Pickers.h>
-#include <winrt/Windows.UI.Xaml.Interop.h>
 
 using namespace winrt;
 using namespace Microsoft::UI;

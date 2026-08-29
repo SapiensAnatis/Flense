@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "ModulePreamble.h"
 
 #include "FileKindGlyphConverter.h"
 #if __has_include("FileKindGlyphConverter.g.cpp")
@@ -6,7 +7,6 @@
 #endif
 
 #include "FileKind.h"
-#include "winrt/Flense.h"
 
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::UI::Xaml::Interop;

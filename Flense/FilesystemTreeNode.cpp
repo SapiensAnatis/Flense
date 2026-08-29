@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include "ModulePreamble.h"
 
 #include "FilesystemTreeNode.h"
 #if __has_include("FilesystemTreeNode.g.cpp")

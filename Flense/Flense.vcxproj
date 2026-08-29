@@ -84,6 +84,9 @@
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
       <AdditionalIncludeDirectories>$(GeneratedFilesDir)\Views;..\Flense.Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BuildStlModules>true</BuildStlModules>
+      <!-- XamlUserType implements IXamlType/IXamlUserType, a classic-COM-style interface; without this the
+           winrt_base module is built without <unknwn.h>/<inspectable.h> support baked in (see modules.md). -->
+      <PreprocessorDefinitions>WINRT_ENABLE_LEGACY_COM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
@@ -160,6 +163,7 @@
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ModulePreamble.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="TitleBarService.h">
       <DependentUpon>TitleBarService.idl</DependentUpon>

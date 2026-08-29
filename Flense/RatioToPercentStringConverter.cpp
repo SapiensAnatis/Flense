@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "ModulePreamble.h"
 
 #include "RatioToPercentStringConverter.h"
 #if __has_include("RatioToPercentStringConverter.g.cpp")
