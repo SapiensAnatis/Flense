@@ -170,6 +170,10 @@
     <ClInclude Include="MainWindow.xaml.h">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="DeveloperMenuBarItem.xaml.h" Condition="'$(Configuration)'=='Debug'">
+      <DependentUpon>DeveloperMenuBarItem.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
@@ -183,6 +187,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml" />
+    <Page Include="DeveloperMenuBarItem.xaml" Condition="'$(Configuration)'=='Debug'">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileSizeStringConverter.cpp">
@@ -247,6 +254,10 @@
     <ClCompile Include="MainWindow.xaml.cpp">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClCompile>
+    <ClCompile Include="DeveloperMenuBarItem.xaml.cpp" Condition="'$(Configuration)'=='Debug'">
+      <DependentUpon>DeveloperMenuBarItem.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -300,6 +311,10 @@
     <Midl Include="FilesystemChangeVisibility.idl" />
     <Midl Include="TitleBarService.idl">
       <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="DeveloperMenuBarItem.idl" Condition="'$(Configuration)'=='Debug'">
+      <DependentUpon>DeveloperMenuBarItem.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Midl>
   </ItemGroup>
   <ItemGroup>

@@ -17,6 +17,8 @@
         <Grid.RowDefinitions>
             <!--  Title Bar  -->
             <RowDefinition Height="Auto" />
+            <!--  Menu Bar  -->
+            <RowDefinition Height="Auto" />
             <!--  App Content  -->
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -30,10 +32,16 @@
             </TitleBar.IconSource>
         </TitleBar>
 
+        <MenuBar x:Name="AppMenuBar" Grid.Row="1">
+            <MenuBarItem Title="File">
+                <MenuFlyoutItem Click="Exit_Click" Text="Exit" />
+            </MenuBarItem>
+        </MenuBar>
+
         <!--  App content  -->
         <Frame
             x:Name="rootFrame"
-            Grid.Row="1"
+            Grid.Row="2"
             Navigated="RootFrame_Navigated"
             SourcePageType="local:LandingPage" />
     </Grid>

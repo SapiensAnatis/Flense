@@ -21,11 +21,20 @@ namespace winrt::Flense::implementation
         MainWindowT::InitializeComponent();
         ExtendsContentIntoTitleBar(true);
         SetTitleBar(AppTitleBar());
+
+#if defined(_DEBUG)
+        AppMenuBar().Items().Append(winrt::Flense::DeveloperMenuBarItem());
+#endif
     }
 
     winrt::Flense::TitleBarService MainWindow::TitleBarService()
     {
         return winrt::Flense::TitleBarService::Instance();
+    }
+
+    void MainWindow::Exit_Click(const IInspectable& /* sender */, const RoutedEventArgs& /* e */)
+    {
+        Application::Current().Exit();
     }
 
     void MainWindow::RootFrame_Navigated(const IInspectable& /* sender */, const NavigationEventArgs& /* e */)
@@ -34,7 +43,7 @@ namespace winrt::Flense::implementation
     }
 
     winrt::fire_and_forget MainWindow::AppTitleBar_BackRequested(const Controls::TitleBar& /* sender */,
-                                                                  const IInspectable& /* args */)
+                                                                 const IInspectable& /* args */)
     {
         auto lifetime = get_strong();
 

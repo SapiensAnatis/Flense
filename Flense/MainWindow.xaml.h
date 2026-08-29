@@ -21,6 +21,9 @@ namespace winrt::Flense::implementation
 
         winrt::fire_and_forget AppTitleBar_BackRequested(const winrt::Microsoft::UI::Xaml::Controls::TitleBar& sender,
                                                           const winrt::Windows::Foundation::IInspectable& args);
+
+        void Exit_Click(const winrt::Windows::Foundation::IInspectable& sender,
+                        const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
     };
 } // namespace winrt::Flense::implementation
 
