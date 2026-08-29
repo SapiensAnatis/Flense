@@ -13,9 +13,9 @@
 
   <!-- Set FlenseOutputDirectory to avoid container builds and VS builds overwriting each other -->
   <PropertyGroup Condition="'$(FlenseOutputDirectory)' != ''">
-    <BaseIntermediateOutputPath>$(FlenseOutputDirectory)\$(MSBuildProjectName)\obj\</BaseIntermediateOutputPath>
-    <IntDir>$(FlenseOutputDirectory)\$(MSBuildProjectName)\obj\</IntDir>
+    <BaseIntermediateOutputPath>$(FlenseOutputDirectory)\$(MSBuildProjectName)\obj\$(Platform)\$(Configuration)\</BaseIntermediateOutputPath>
+    <IntDir>$(FlenseOutputDirectory)\$(MSBuildProjectName)\obj\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(FlenseOutputDirectory)\$(MSBuildProjectName)\$(Platform)\$(Configuration)\</OutDir>
-    <GeneratedFilesDir>$(FlenseOutputDirectory)\$(MSBuildProjectName)\Generated Files\</GeneratedFilesDir>
+    <GeneratedFilesDir>$(FlenseOutputDirectory)\$(MSBuildProjectName)\Generated Files\$(Platform)\$(Configuration)\</GeneratedFilesDir>
   </PropertyGroup>
 </Project>
