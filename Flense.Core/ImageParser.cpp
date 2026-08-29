@@ -1,14 +1,12 @@
-#include "pch.h"
+module Flense.Core:ImageParser;
 
-#include "ArchiveReader.h"
-#include "FilesystemParsing.h"
-#include "FilesystemTree.h"
-#include "ImageLayer.h"
-#include "ImageParser.h"
-#include "NestedArchiveByteStream.h"
-
+import :ArchiveReader;
+import :FilesystemParsing;
+import :FilesystemTree;
+import :ImageLayer;
+import :NestedArchiveByteStream;
 import nlohmann_json;
-import std;
+import std.compat;
 
 namespace Flense::Core
 {

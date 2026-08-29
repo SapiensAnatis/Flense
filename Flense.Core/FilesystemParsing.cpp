@@ -1,10 +1,9 @@
-#include "pch.h"
+module Flense.Core:FilesystemParsing;
 
-#include "ArchiveReader.h"
-#include "FilesystemParsing.h"
-#include "FilesystemTree.h"
-
-import std;
+import :ArchiveReader;
+import :FilesystemTree;
+import :Tree;
+import std.compat;
 
 namespace Flense::Core
 {

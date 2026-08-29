@@ -1,9 +1,7 @@
-#include "pch.h"
+module Flense.Core:NestedArchiveByteStream;
 
-#include "ArchiveReader.h"
-#include "NestedArchiveByteStream.h"
-
-import std;
+import :ArchiveReader;
+import std.compat;
 
 namespace Flense::Core
 {

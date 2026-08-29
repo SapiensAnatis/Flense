@@ -1,8 +1,8 @@
-#pragma once
+export module Flense.Core:Tree;
 
-import std;
+import std.compat;
 
-namespace Flense::Core
+export namespace Flense::Core
 {
     template <typename T> class TreeNode;
 

@@ -1,11 +1,10 @@
-#pragma once
+export module Flense.Core:FilesystemTree;
 
-#include "FileKind.h"
-#include "Tree.h"
+import :FileKind;
+import :Tree;
+import std.compat;
 
-import std;
-
-namespace Flense::Core
+export namespace Flense::Core
 {
 
     /// <summary>

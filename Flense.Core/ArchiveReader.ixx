@@ -1,13 +1,12 @@
-#pragma once
-
-#include "FileKind.h"
-
+module;
 #include <archive.h>
 #include <archive_entry.h>
+export module Flense.Core:ArchiveReader;
 
-import std;
+import :FileKind;
+import std.compat;
 
-namespace Flense::Core
+export namespace Flense::Core
 {
     /// <summary>
     /// A source libarchive can pull compressed bytes from.

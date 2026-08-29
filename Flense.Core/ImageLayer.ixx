@@ -1,10 +1,9 @@
-#pragma once
+export module Flense.Core:ImageLayer;
 
-#include "FilesystemTree.h"
+import :FilesystemTree;
+import std.compat;
 
-import std;
-
-namespace Flense::Core
+export namespace Flense::Core
 {
     class ImageLayer
     {
