@@ -35,6 +35,12 @@
     <Midl Include="FileKindGlyphConverter.idl">
       <Filter>Converters</Filter>
     </Midl>
+    <Midl Include="RatioToPercentStringConverter.idl">
+      <Filter>Converters</Filter>
+    </Midl>
+    <Midl Include="RatioToGridLengthConverter.idl">
+      <Filter>Converters</Filter>
+    </Midl>
     <Midl Include="FilesystemChangeKind.idl">
       <Filter>Wrappers</Filter>
     </Midl>

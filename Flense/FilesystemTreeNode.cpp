@@ -7,6 +7,7 @@
 
 using namespace winrt::Windows::Foundation::Collections;
 using namespace winrt::Microsoft::UI::Xaml::Data;
+using namespace winrt::Microsoft::UI::Xaml;
 
 namespace winrt::Flense::implementation
 {
@@ -14,6 +15,10 @@ namespace winrt::Flense::implementation
                                            winrt::weak_ref<winrt::Flense::implementation::FilesystemTreeNode> parent)
         : m_name(std::move(name)), m_node(std::move(node)), m_parent(parent)
     {
+        if (auto parentImpl = m_parent.get())
+        {
+            m_depth = parentImpl->m_depth + 1;
+        }
     }
 
     FilesystemTreeNode::~FilesystemTreeNode()
@@ -78,6 +83,12 @@ namespace winrt::Flense::implementation
         }
     }
 
+    Thickness FilesystemTreeNode::IndentMargin() const
+    {
+        static constexpr double IndentSizeInPixels = 12.0;
+        return {m_depth * IndentSizeInPixels, 0, 0, 0};
+    }
+
     bool FilesystemTreeNode::Visible() const
     {
         return m_visible;
@@ -89,7 +100,7 @@ namespace winrt::Flense::implementation
         if (m_visible != value)
         {
             m_visible = value;
-            m_propertyChanged(*this, winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{L"Visible"});
+            m_propertyChanged(*this, PropertyChangedEventArgs{L"Visible"});
         }
     }
 
@@ -103,8 +114,8 @@ namespace winrt::Flense::implementation
         if (m_isExpanded != value)
         {
             m_isExpanded = value;
-            m_propertyChanged(*this, winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{L"IsExpanded"});
-            m_propertyChanged(*this, winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventArgs{L"ChildrenIfExpanded"});
+            m_propertyChanged(*this, PropertyChangedEventArgs{L"IsExpanded"});
+            m_propertyChanged(*this, PropertyChangedEventArgs{L"ChildrenIfExpanded"});
         }
     }
 

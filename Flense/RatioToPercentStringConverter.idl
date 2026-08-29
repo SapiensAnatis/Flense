@@ -1,0 +1,7 @@
+namespace Flense
+{
+    runtimeclass RatioToPercentStringConverter : [default] Microsoft.UI.Xaml.Data.IValueConverter
+    {
+        RatioToPercentStringConverter();
+    }
+}

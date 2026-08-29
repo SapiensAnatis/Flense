@@ -27,7 +27,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="125" />
                         </Grid.ColumnDefinitions>
 
                         <!--  Background for first two columns  -->
@@ -52,21 +52,39 @@
                             Grid.Column="2"
                             Padding="0,0,8,0"
                             Style="{StaticResource FilesystemItemContentStyle}">
-                            <TextBlock
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="{x:Bind Size, Converter={StaticResource FileSizeStringConverter}}"
-                                TextAlignment="Right" />
+                            <TextBlock Text="{x:Bind Size, Converter={StaticResource FileSizeStringConverter}}" TextAlignment="Right" />
                         </Border>
 
                         <Border
                             Grid.Column="3"
                             Padding="0,0,8,0"
                             Style="{StaticResource FilesystemItemContentStyle}">
-                            <TextBlock
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="{x:Bind SizeAsProportionOfParent}"
-                                TextAlignment="Right" />
+
+                            <Grid Height="20" Margin="{x:Bind IndentMargin, Mode=OneTime}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{x:Bind SizeAsProportionOfParent, Mode=OneWay, Converter={StaticResource RatioToGridLengthConverter}}" />
+                                    <ColumnDefinition Width="{x:Bind SizeAsProportionOfParent, Mode=OneWay, Converter={StaticResource RatioToGridLengthConverter}, ConverterParameter=Invert}" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border
+                                    Grid.ColumnSpan="2"
+                                    BorderBrush="{ThemeResource ControlStrokeColorSecondaryBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="4" />
+                                <Border
+                                    Grid.Column="0"
+                                    Background="{ThemeResource ControlStrongFillColorDisabledBrush}"
+                                    CornerRadius="4" />
+                            </Grid>
                         </Border>
+
+                        <TextBlock
+                            Grid.Column="3"
+                            Margin="0,0,12,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="{x:Bind SizeAsProportionOfParent, Mode=OneWay, Converter={StaticResource RatioToPercentStringConverter}}" />
+
 
                     </Grid>
                 </TreeViewItem>
@@ -77,6 +95,10 @@
             <local:FileKindGlyphConverter x:Key="FileKindGlyphConverter" />
 
             <local:FileSizeStringConverter x:Key="FileSizeStringConverter" />
+
+            <local:RatioToPercentStringConverter x:Key="RatioToPercentStringConverter" />
+
+            <local:RatioToGridLengthConverter x:Key="RatioToGridLengthConverter" />
 
         </ResourceDictionary>
     </UserControl.Resources>
@@ -97,7 +119,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="100" />
-                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="125" />
                 </Grid.ColumnDefinitions>
                 <TextBlock
                     Grid.Column="0"

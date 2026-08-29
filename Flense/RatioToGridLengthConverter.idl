@@ -1,0 +1,7 @@
+namespace Flense
+{
+    runtimeclass RatioToGridLengthConverter : [default] Microsoft.UI.Xaml.Data.IValueConverter
+    {
+        RatioToGridLengthConverter();
+    }
+}
