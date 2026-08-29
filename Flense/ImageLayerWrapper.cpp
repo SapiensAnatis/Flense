@@ -23,7 +23,7 @@ namespace winrt::Flense::implementation
     {
         if (!m_filesystemChanges)
         {
-            m_filesystemChanges = winrt::make<FilesystemTreeNode>(L"", m_layer.FilesystemChanges());
+            m_filesystemChanges = winrt::make<FilesystemTreeNode>(L"", m_layer.FilesystemChanges(), nullptr);
         }
 
         return m_filesystemChanges;

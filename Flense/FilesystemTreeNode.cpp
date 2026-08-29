@@ -10,8 +10,9 @@ using namespace winrt::Microsoft::UI::Xaml::Data;
 
 namespace winrt::Flense::implementation
 {
-    FilesystemTreeNode::FilesystemTreeNode(winrt::hstring name, ::Flense::Core::FilesystemChangeTreeNodeRef node)
-        : m_name(std::move(name)), m_node(std::move(node))
+    FilesystemTreeNode::FilesystemTreeNode(winrt::hstring name, ::Flense::Core::FilesystemChangeTreeNodeRef node,
+                                           winrt::weak_ref<winrt::Flense::implementation::FilesystemTreeNode> parent)
+        : m_name(std::move(name)), m_node(std::move(node)), m_parent(parent)
     {
     }
 
@@ -19,12 +20,12 @@ namespace winrt::Flense::implementation
     {
     }
 
-    winrt::hstring FilesystemTreeNode::Name()
+    winrt::hstring FilesystemTreeNode::Name() const
     {
         return m_name;
     }
 
-    winrt::Flense::FileKind FilesystemTreeNode::Kind()
+    winrt::Flense::FileKind FilesystemTreeNode::Kind() const
     {
         switch (m_node->Data().kind)
         {
@@ -41,7 +42,7 @@ namespace winrt::Flense::implementation
         }
     }
 
-    winrt::Flense::FilesystemChangeKind FilesystemTreeNode::ChangeKind()
+    winrt::Flense::FilesystemChangeKind FilesystemTreeNode::ChangeKind() const
     {
         switch (m_node->Data().changeKind)
         {
@@ -58,12 +59,26 @@ namespace winrt::Flense::implementation
         }
     }
 
-    uint64_t FilesystemTreeNode::Size()
+    uint64_t FilesystemTreeNode::Size() const
     {
         return m_node->Data().size;
     }
 
-    bool FilesystemTreeNode::Visible()
+    float FilesystemTreeNode::SizeAsProportionOfParent() const
+    {
+        // This isn't implemented in the Flense::Core tree because it is bad for node reusability
+
+        if (auto parent = m_parent.get(); parent && parent->Size() != 0)
+        {
+            return static_cast<float>(m_node->Data().size) / static_cast<float>(parent->Size());
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    bool FilesystemTreeNode::Visible() const
     {
         return m_visible;
     }
@@ -78,7 +93,7 @@ namespace winrt::Flense::implementation
         }
     }
 
-    bool FilesystemTreeNode::IsExpanded()
+    bool FilesystemTreeNode::IsExpanded() const
     {
         return m_isExpanded;
     }
@@ -102,7 +117,7 @@ namespace winrt::Flense::implementation
 
             for (const auto& [name, child] : m_node->Children())
             {
-                children.push_back(winrt::make<FilesystemTreeNode>(winrt::to_hstring(name), child));
+                children.push_back(winrt::make<FilesystemTreeNode>(winrt::to_hstring(name), child, get_weak()));
             }
 
             m_children =
@@ -122,7 +137,7 @@ namespace winrt::Flense::implementation
         return Children();
     }
 
-    bool FilesystemTreeNode::HasChildren()
+    bool FilesystemTreeNode::HasChildren() const
     {
         return !m_node->Children().empty();
     }
@@ -160,7 +175,8 @@ namespace winrt::Flense::implementation
     /// <returns>
     /// A boolean indicating whether this node was determined to be visible.
     /// </returns>
-    bool FilesystemTreeNode::UpdateVisibility(std::wstring_view query, const winrt::Flense::FilesystemChangeVisibility& filter,
+    bool FilesystemTreeNode::UpdateVisibility(std::wstring_view query,
+                                              const winrt::Flense::FilesystemChangeVisibility& filter,
                                               bool parentMatches)
     {
         // TODO: This causes the entire tree to be materialized by calling Children() on every node, we could find a

@@ -10,18 +10,20 @@ namespace winrt::Flense::implementation
 {
     struct FilesystemTreeNode : FilesystemTreeNodeT<FilesystemTreeNode>
     {
-        FilesystemTreeNode(winrt::hstring name, ::Flense::Core::FilesystemChangeTreeNodeRef node);
+        FilesystemTreeNode(winrt::hstring name, ::Flense::Core::FilesystemChangeTreeNodeRef node,
+                           winrt::weak_ref<winrt::Flense::implementation::FilesystemTreeNode> parent);
         ~FilesystemTreeNode();
 
-        winrt::hstring Name();
-        winrt::Flense::FileKind Kind();
-        winrt::Flense::FilesystemChangeKind ChangeKind();
-        uint64_t Size();
-        bool Visible();
+        winrt::hstring Name() const;
+        winrt::Flense::FileKind Kind() const;
+        winrt::Flense::FilesystemChangeKind ChangeKind() const;
+        uint64_t Size() const;
+        float SizeAsProportionOfParent() const;
+        bool Visible() const;
         void Visible(bool value);
-        bool IsExpanded();
+        bool IsExpanded() const;
         void IsExpanded(bool value);
-        bool HasChildren();
+        bool HasChildren() const;
         Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> Children();
         Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> ChildrenIfExpanded();
 
@@ -42,5 +44,6 @@ namespace winrt::Flense::implementation
         bool m_isExpanded{false};
 
         winrt::event<winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
+        winrt::weak_ref<winrt::Flense::implementation::FilesystemTreeNode> m_parent;
     };
 } // namespace winrt::Flense::implementation
