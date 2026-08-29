@@ -363,5 +363,33 @@
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
+  <Target Name="InjectModuleImportsIntoXamlGenerated"
+          AfterTargets="ComputeXamlGeneratedCompileInputs"
+          BeforeTargets="ClCompile">
+    <ItemGroup>
+      <ClCompile Update="@(ClCompile)"
+                 Condition="'%(Filename)' == 'XamlTypeInfo.g'
+                         or '%(Filename)' == 'XamlTypeInfo.Impl.g'
+                         or '%(Filename)' == 'XamlMetaDataProvider'
+                         or '%(Filename)' == 'XamlLibMetadataProvider.g'">
+        <PrecompiledHeader>NotUsing</PrecompiledHeader>
+        <ForcedIncludeFiles>$(MSBuildProjectDirectory)\ModulePreamble.h</ForcedIncludeFiles>
+      </ClCompile>
+    </ItemGroup>
+  </Target>
+  <Target Name="InjectModuleImportsIntoXamlGeneratedPass2"
+          AfterTargets="ComputeXamlGeneratedCompileInputs"
+          BeforeTargets="CompileXamlGeneratedFiles">
+    <ItemGroup>
+      <ClCompile Update="@(ClCompile)"
+                 Condition="'%(Filename)' == 'XamlTypeInfo.g'
+                         or '%(Filename)' == 'XamlTypeInfo.Impl.g'
+                         or '%(Filename)' == 'XamlMetaDataProvider'
+                         or '%(Filename)' == 'XamlLibMetadataProvider.g'">
+        <PrecompiledHeader>NotUsing</PrecompiledHeader>
+        <ForcedIncludeFiles>$(MSBuildProjectDirectory)\ModulePreamble.h</ForcedIncludeFiles>
+      </ClCompile>
+    </ItemGroup>
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
