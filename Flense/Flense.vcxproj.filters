@@ -12,7 +12,10 @@
       <Filter>Views</Filter>
     </Page>
     <Page Include="FilesystemChangesView.xaml">
-      <Filter>Views</Filter>
+      <Filter>Controls</Filter>
+    </Page>
+    <Page Include="DeveloperMenuBarItem.xaml">
+      <Filter>Controls</Filter>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -115,6 +118,9 @@
     </Filter>
     <Filter Include="Services">
       <UniqueIdentifier>{e2ee47da-cec3-4c8d-90be-db8d615fa281}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls">
+      <UniqueIdentifier>{ab74f3b9-2c5d-4910-a334-1d205cc4c270}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
