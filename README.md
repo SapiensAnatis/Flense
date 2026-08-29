@@ -63,31 +63,15 @@ want to use CMake or Bazel to build this library and their own native GUIs.
 ## Sandboxed build container
 
 There is an optional Windows container that carries the whole toolchain, intended for running
-Claude Code (or any agent) against the repo without giving it the rest of the machine. It builds
-Flense; it can't run it, since Windows containers have no GUI.
+Claude Code (or any agent) against the repo without giving it access to the rest of the machine. It builds
+Flense but cannot run the app as there is no GUI stack in the container.
 
-Everything lives in `Container/`, three files:
-
-| File | |
-| --- | --- |
-| `vs.vsconfig` | The toolchain definition — which VS components the build needs. Edit this when the toolchain moves. |
-| `Dockerfile` | Two stages: `toolchain` (VS Build Tools, slow) and `dev` (git, Claude Code, vcpkg). |
-| `compose.yaml` | Build and run configuration — isolation, mounts, volumes. |
-
-Requires Docker Desktop switched to Windows containers, which in turn requires Windows 11 Pro and the Containers feature enabled.
+To use it, run the script:
 
 ```
-# One-time, ~20 min. Repeats only when vs.vsconfig or a pinned version changes.
-docker compose -f Container/compose.yaml build
-
-# Thereafter -- the default command is Claude Code
-docker compose -f Container/compose.yaml run --rm claude
-
-# Or override it
-docker compose -f Container/compose.yaml run --rm claude powershell
+.\Scripts\enter-claude.container.ps1
 ```
 
-The build script is not part of the container: `build-app.ps1` lives at the repo root and
-arrives via the bind mount, so it can be edited without rebuilding anything, and the same
-script builds on the host. It is the only thing that needs the MSVC environment and it
-locates Visual Studio itself, so Claude can just run `.\build-app.ps1` after editing.
+If you encounter permission issues with the mounted volumes (e.g. can't restore packages, can't write Claude transcripts), you
+may need to grant full access on C:\ProgramData\Docker\volumes to 'Everyone', as described in [this GitHub issue](https://github.com/docker/for-win/issues/13539)
+
