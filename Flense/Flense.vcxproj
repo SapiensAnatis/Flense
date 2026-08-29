@@ -4,6 +4,7 @@
     <EnableNativePackageReferenceSupport Condition="'$(DesignTimeBuild)' != 'true'">true</EnableNativePackageReferenceSupport>
     <CppWinRTOptimized>true</CppWinRTOptimized>
     <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
+    <CppWinRTBuildModule>true</CppWinRTBuildModule>
     <MinimalCoreWin>true</MinimalCoreWin>
     <ProjectGuid>{52ed318b-9ba0-455b-b9e1-8e1b5b3c366d}</ProjectGuid>
     <ProjectName>Flense</ProjectName>
@@ -82,6 +83,7 @@
       <WarningLevel>Level4</WarningLevel>
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
       <AdditionalIncludeDirectories>$(GeneratedFilesDir)\Views;..\Flense.Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
