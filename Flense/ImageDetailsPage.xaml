@@ -137,7 +137,7 @@
                     <Border
                         Grid.Row="2"
                         Padding="12"
-                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        Background="{ThemeResource LayerFillColorAltBrush}"
                         CornerRadius="{ThemeResource ControlCornerRadius}">
                         <Border.Resources>
                             <Style x:Key="CodeTextBlockStyle" TargetType="TextBlock">
