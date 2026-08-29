@@ -3,8 +3,6 @@
 #include "FilesystemTree.h"
 #include "FilesystemTreeNode.g.h"
 
-#include <string_view>
-
 namespace winrt::Flense::implementation
 {
     struct FilesystemTreeNode : FilesystemTreeNodeT<FilesystemTreeNode>

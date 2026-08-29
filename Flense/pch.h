@@ -8,8 +8,9 @@
 // conflict with Storyboard::GetCurrentTime
 #undef GetCurrentTime
 
-// Pre-included so later textual #includes of these headers (after ModulePreamble.h's
-// imports, which transitively import std) are inert rather than redefinition errors.
+// Pre-included so later imports of winrt platform modules (which themselves transitively
+// `import std;`) are inert rather than redefinition errors. Confirmed necessary independent
+// of Flense.Core's own STL usage - see cpp20-modules-migration.md Phase 6 for the full story.
 #include <algorithm>
 #include <chrono>
 #include <coroutine>

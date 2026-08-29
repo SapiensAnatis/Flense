@@ -2,10 +2,6 @@
 
 #include "ModulePreamble.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <span>
-
 namespace winrt::Flense::implementation
 {
     // Wraps a WinRT random-access stream so it satisfies Flense::Core::LibArchiveSource.

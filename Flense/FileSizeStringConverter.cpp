@@ -6,8 +6,6 @@
 #include "FileSizeStringConverter.g.cpp"
 #endif
 
-#include <format>
-
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::UI::Xaml::Interop;
 

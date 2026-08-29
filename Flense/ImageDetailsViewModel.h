@@ -3,8 +3,6 @@
 #include "ImageDetailsViewModel.g.h"
 #include "ImageParser.h"
 
-#include <vector>
-
 namespace winrt::Flense::implementation
 {
     struct ImageDetailsViewModel : ImageDetailsViewModelT<ImageDetailsViewModel>

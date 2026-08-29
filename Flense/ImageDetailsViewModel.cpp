@@ -12,9 +12,6 @@
 #include "TitleBarService.h"
 #include "WinRtByteStream.h"
 
-#include <ranges>
-#include <stop_token>
-
 using namespace winrt;
 using namespace winrt::Microsoft::UI::Dispatching;
 using namespace winrt::Microsoft::UI::Xaml::Data;

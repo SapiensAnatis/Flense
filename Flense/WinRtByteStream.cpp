@@ -4,8 +4,6 @@
 #include "ArchiveReader.h"
 #include "WinRtByteStream.h"
 
-#include <algorithm>
-
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Storage::Streams;
 

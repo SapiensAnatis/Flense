@@ -8,8 +8,6 @@
 
 #include "FilesystemTreeNode.h"
 
-#include <chrono>
-
 using namespace winrt;
 using namespace winrt::Microsoft::UI::Dispatching;
 using namespace winrt::Microsoft::UI::Xaml::Data;
