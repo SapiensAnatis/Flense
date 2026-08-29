@@ -1,7 +1,5 @@
 #include "pch.h"
 
-#include <nlohmann/json.hpp>
-
 #include "ArchiveReader.h"
 #include "FilesystemParsing.h"
 #include "FilesystemTree.h"
@@ -9,6 +7,7 @@
 #include "ImageParser.h"
 #include "NestedArchiveByteStream.h"
 
+import nlohmann_json;
 import std;
 
 namespace Flense::Core
