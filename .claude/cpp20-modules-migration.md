@@ -234,15 +234,6 @@ than in one place, which is a standing trap for a benefit that is real but modes
 
 Worth revisiting if the winrt surface grows or the WIL dependency goes away.
 
-**`WinRtByteStream.h`** deserves attention: it's the seam where the WinRT projection meets `Flense.Core`'s
-templates and concepts, and it includes `<winrt/Windows.Foundation.h>` /
-`<winrt/Windows.Storage.Streams.h>` directly in the *header*, not via the PCH. Since it's included by other
-headers, either include the preamble at the top of it, or leave its winrt includes inert under
-`WINRT_IMPORT_MODULE`. Convert this one first — if anything is going to expose an ordering problem, it's
-this file.
-
-Do this a few files at a time and rebuild — each conversion tends to surface one or two missing imports.
-
 ### Phase 5 — Prune generation for build time
 
 Only once it's green end-to-end, cut the generation set down. Start from:
@@ -261,14 +252,178 @@ then iterate. Two traps documented in the guide:
 Clean the output directory between filter changes. If pruning turns into a fight, Phase 1's unfiltered
 configuration is a perfectly valid resting place — you just pay the extra IFC compile time.
 
-### Phase 6 — Optional: `import std;` in Flense.Core
+### Phase 6 — `import std;` in Flense.Core
 
-Independent of everything above, and worth treating as a separate decision. `Flense.Core` is pure C++ with
-libarchive and nlohmann/json (vcpkg). Both of those `#include` STL headers textually, and STL headers
-included *after* `import std;` produce `C4348`/`C5028` — which, with `TreatWarningAsError` on `Debug|x64`
-in both projects, are hard errors. The workaround is pre-including the offending STL headers in
-`Flense.Core/pch.h`. Recommendation: **defer this.** It's a fight with third-party headers for very little
-gain.
+Originally deferred as low-value. **Promoted: this is the main remaining prize.**
+
+Phases 2-4 left 19 STL headers pre-included in `Flense/pch.h`. They are there because `Flense.Core`'s
+headers (`ArchiveReader.h`, `Tree.h`, `ImageParser.h`, `FilesystemTree.h`) are textual and include STL, and
+app TUs pull them in *after* `ModulePreamble.h` has transitively imported `std` — the unsupported
+import-then-include ordering.
+
+An experiment removing all 19 confirmed they are load-bearing, and showed the failure is coarser than
+expected. Every diagnostic lands in MSVC's internal `xtr1common`, not in any named header:
+
+```
+xtr1common(49,13):  warning C4348: 'std::enable_if': redefinition of default parameter: parameter 2
+xtr1common(218,43): error C2953: 'std::remove_reference': class template has already been defined
+xtr1common(239,1):  error C1116: unrecoverable error importing module 'winrt_numerics'.
+```
+
+Practically every STL header funnels through that core, so the collision is at the STL's foundation and the
+diagnostics cannot identify which include was the culprit. That also means the pre-include list can't be
+trimmed by reading errors — it would take a bisect (~5 build cycles) or a `/showIncludes` trace.
+
+Net effect of the migration so far on the PCH is therefore a lateral move: 15 winrt headers plus WIL
+replaced by 19 STL headers. **The only thing that deletes that block is stopping `Flense.Core` headers
+emitting textual STL.**
+
+Approach: replace the STL `#include`s in `Flense.Core`'s headers and sources with `import std;`, and set
+`BuildStlModules=true` on `Flense.Core`. Once no `Flense.Core` header carries textual STL, the pre-include
+block in `Flense/pch.h` can be deleted and the app PCH returns to just the four platform headers.
+
+`libarchive` is not a problem here: it is a C library whose headers pull in C headers, not STL, so it does
+not reintroduce the ordering issue.
+
+This phase is superseded in end-state by Phase 8 below (full modularization), but it's worth doing first
+regardless: it's small, self-contained, and immediately deletes the PCH pre-include block whether or not
+Phase 8 ever happens.
+
+### Phase 7 — nlohmann/json as a module
+
+**Finding: not available today, but coming.** nlohmann/json does have a documented C++20 module
+(https://json.nlohmann.me/features/modules/, backed by a real `src/modules/json.cppm` on the `develop`
+branch), but it's unreleased — confirmed absent from `CMakeLists.txt` at the tagged `v3.12.0` release, which
+is what vcpkg's port pins. It requires CMake ≥ 3.28 and an explicit opt-in
+(`NLOHMANN_JSON_BUILD_MODULES`, default `OFF`) even where it exists. vcpkg isn't withholding a shipped
+feature — there's no tagged release yet for its port to build from. Revisit once nlohmann/json cuts one and
+vcpkg's port exposes the option; until then, hand-wrap.
+
+**Scoping caveat, worth understanding before starting: this does not help the app's PCH block.**
+`<nlohmann/json.hpp>` appears in exactly one place, `Flense.Core/ImageParser.cpp:14` — a `.cpp`, never a
+header — so it never reaches an app translation unit. Phase 6 is what removes the PCH pre-includes. Phase 7
+is a smaller, self-contained win for `Flense.Core`'s own TU hygiene, and a template for wrapping other
+header-only dependencies (and for swapping in upstream's real module once it ships).
+
+The wrap is tractable because the usage surface is small and entirely macro-free. All of it, in
+`ImageParser.cpp`:
+
+- `nlohmann::json`, `nlohmann::json::parse`
+- `.at()`, `.get<std::string>()`, `.is_array()`, `.empty()`
+
+No `NLOHMANN_JSON_SERIALIZE_ENUM` or `DEFINE_TYPE_*` macros, no custom `to_json`/`from_json`, no `_json`
+UDL, and no `catch` of `nlohmann::json::exception` or `parse_error`. So the export surface is just the
+`basic_json` template and the `json` alias.
+
+Standard header-only wrap, as its own module interface unit in `Flense.Core`:
+
+```cpp
+module;
+#include <nlohmann/json.hpp>
+export module nlohmann_json;
+
+export namespace nlohmann
+{
+    using nlohmann::basic_json;
+    using nlohmann::json;
+}
+```
+
+Including in the global module fragment keeps the types attached to the global module, so they stay
+ODR-identical to a textual include anywhere else — important if any other consumer ever includes the header
+directly.
+
+Then `ImageParser.cpp` replaces its `#include <nlohmann/json.hpp>` with `import nlohmann_json;`.
+
+Risks to watch:
+
+- **Macros do not cross module boundaries.** Fine today (none used), but the wrapper silently stops being
+  sufficient the moment someone reaches for `NLOHMANN_JSON_SERIALIZE_ENUM`. Worth a comment in the wrapper
+  saying so.
+- **ADL customisation points don't re-export cleanly.** Again fine today — no custom serializers — but this
+  is the thing that would force a rethink if JSON usage grows.
+- **Ordering inside the module unit.** The GMF include pulls in textual STL; keep `import std;` out of the
+  GMF and let the wrapper be the one place that still includes STL textually.
+
+### Phase 8 — Modularize Flense.Core itself
+
+Goal, per explicit request: use `#include` only where it's genuinely unavoidable. By the end of this phase,
+the only `#include`s left inside `Flense.Core` (and between it and `Flense`) are for unmodularized third
+parties: `<archive.h>` / `<archive_entry.h>` (libarchive, a C library with no module story) and
+`<nlohmann/json.hpp>` inside Phase 7's wrapper. Everything else — every current header in `Flense.Core`, and
+every consumption of it from `Flense` — becomes a real named-module `import`.
+
+**This is a materially bigger job than Phase 6.** `import std;` only changes how `Flense.Core`'s headers
+pull in the STL — the headers stay headers, nothing about how they're consumed changes. This phase turns
+`Flense.Core` itself into a named module, which redesigns its export surface and touches every consumer in
+both projects. Two files carry the real risk:
+
+- **`ArchiveReader.h`**'s `concept ByteStream` and `template <ByteStream TStream> static ArchiveReader
+  CreateFromStream(TStream&)`. `WinRtByteStream` (in the *app* project) satisfies `ByteStream` structurally
+  — it never includes `ArchiveReader.h`, it just has the right member signatures — and the app instantiates
+  `CreateFromStream<WinRtByteStream>`. Today that's ordinary cross-header template instantiation. As a
+  module export, the constrained template body has to stay visible for instantiation from a *different
+  project* — a rougher, less-travelled path in MSVC's module support than importing SDK-shipped modules.
+- **`Tree.h`**'s exported class template `TreeNode<T>` and the `requires`-constrained free functions
+  `Visit`/`Prune` carry the same category of risk, but are self-contained within `Flense.Core` — nothing
+  outside it instantiates them today, so they're the safer place to find out whether MSVC's
+  constrained-template module export works at all before touching `ArchiveReader.h`.
+
+**Structure:** one primary module `Flense.Core` with a partition per existing header, so the current
+file-per-concern layout stays recognisable:
+
+```cpp
+// Flense.Core.ixx
+export module Flense.Core;
+export import :FileKind;
+export import :Tree;
+export import :FilesystemTree;
+export import :ImageLayer;
+export import :ArchiveReader;
+export import :NestedArchiveByteStream;
+export import :FilesystemParsing;
+export import :ImageParser;
+```
+
+**Order, chosen to put the risky cross-project case in the middle rather than last** — if it's a dead end,
+you've spent the least to find out, and everything after it can still land:
+
+1. `FileKind.h` → `:FileKind` — plain enum, trivial, no risk.
+2. `Tree.h` → `:Tree` — first real test of exported class/function templates with `requires` clauses.
+   Validate entirely within `Flense.Core`; nothing crosses the project boundary yet.
+3. `FilesystemTree.h` → `:FilesystemTree` (depends on `:FileKind`, `:Tree`).
+4. `ImageLayer.h` → `:ImageLayer` (depends on `:FilesystemTree`).
+5. `ArchiveReader.h` → `:ArchiveReader` — the actual test. Build `Flense.Core` alone first; only once
+   that's green, switch `Flense`'s call site over and confirm `CreateFromStream<WinRtByteStream>` still
+   instantiates across the project boundary. **If this doesn't work, `ArchiveReader.h` can stay the one
+   textual exception** (included, not imported) without blocking anything else in this phase.
+6. `NestedArchiveByteStream.h`/`.cpp` → `:NestedArchiveByteStream` (interface partition + implementation
+   unit).
+7. `FilesystemParsing.h`/`.cpp` → `:FilesystemParsing`.
+8. `ImageParser.h`/`.cpp` → `:ImageParser`, consuming Phase 7's `nlohmann_json` module via
+   `import nlohmann_json;` in the implementation unit instead of `#include <nlohmann/json.hpp>`.
+
+**Build model:**
+
+- `Flense.Core.vcxproj`: add the `.ixx` files as ordinary source items — MSVC infers module-interface-unit
+  compilation from the `.ixx` extension, no `CompileAs` needed. Set `BuildStlModules=true`; each partition
+  does its own `import std;`, which folds Phase 6 into this phase rather than needing it done first (though
+  doing Phase 6 first is still worthwhile as a smaller, earlier win — see above).
+- Implementation units (`NestedArchiveByteStream.cpp` etc.) replace their current `#include "pch.h"` +
+  `#include "X.h"` pair with `module Flense.Core:X;` at the top.
+- `Flense/Flense.vcxproj` (the app): its existing `ProjectReference` to `Flense.Core` already propagates
+  static-lib module IFCs automatically (`AllProjectBMIsArePublic` defaults `true` for static libraries) —
+  no extra metadata needed; that's specific to `CppWinRTConsumeModule` for cppwinrt namespaces, not this.
+  Every app file that currently does `#include "ArchiveReader.h"` / `"ImageLayer.h"` / etc. (via the
+  `..\Flense.Core` include path) switches to `import Flense.Core;`. Given the app-side decision already
+  made to keep imports blanket rather than precise (see Phase 4), the natural place for this is
+  `ModulePreamble.h`, alongside the winrt imports — the `..\Flense.Core` `AdditionalIncludeDirectories`
+  entry can then be removed as dead weight.
+
+**Success criterion:** after this phase, `#include` inside `Flense.Core` exists only for `<archive.h>` /
+`<archive_entry.h>` (inside `:ArchiveReader`, unless step 5 proves unworkable, in which case the whole
+header stays textual) and `<nlohmann/json.hpp>` (inside Phase 7's wrapper). Every internal and cross-project
+consumption of `Flense.Core`'s own types is `import`.
 
 ## Repo-specific risks
 
@@ -324,3 +479,16 @@ revertible:
 
 If Phase 3 or 5 turns into a swamp, abandoning is a clean `git checkout` — nothing else in the repo takes a
 dependency on it.
+
+Phases 6-8 are follow-on work in `Flense.Core`, touching:
+
+| File | Change |
+|---|---|
+| `Flense.Core/Flense.Core.vcxproj` | `BuildStlModules=true` (Phase 6); `.ixx` sources added (Phase 8) |
+| `Flense.Core/*.h`, `*.cpp` | STL `#include`s → `import std;` (Phase 6); rewritten as module partitions (Phase 8) |
+| `Flense.Core/NlohmannJson.ixx` | new — header-only wrap of nlohmann/json (Phase 7) |
+| `Flense.Core/ImageParser.cpp` | `#include <nlohmann/json.hpp>` → `import nlohmann_json;` (Phase 7) |
+| `Flense.Core/Flense.Core.ixx` | new — primary module unit re-exporting all partitions (Phase 8) |
+| `Flense/pch.h` | delete the 19-header pre-include block (Phase 6) |
+| `Flense/ModulePreamble.h` | add `import Flense.Core;` (Phase 8) |
+| ~20 app `.cpp` | `#include "ArchiveReader.h"` etc. → covered by the preamble's `Flense.Core` import (Phase 8) |
