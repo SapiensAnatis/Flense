@@ -42,15 +42,15 @@
 
 
         <Grid
-            Padding="36,16,36,40"
-            ColumnSpacing="16"
+            Padding="4,0,0,0"
+            ColumnSpacing="4"
             Visibility="{x:Bind ViewModel.IsLoaded, Mode=OneWay}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="500" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}">
+            <Border CornerRadius="{ThemeResource OverlayCornerRadius}">
                 <Grid Padding="16" RowSpacing="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -74,8 +74,10 @@
 
             <Border
                 Grid.Column="1"
-                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                CornerRadius="{ThemeResource OverlayCornerRadius}">
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8,0,0,0">
                 <Grid Padding="16" RowSpacing="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -138,6 +140,8 @@
                         Grid.Row="2"
                         Padding="12"
                         Background="{ThemeResource LayerFillColorAltBrush}"
+                        BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+                        BorderThickness="1"
                         CornerRadius="{ThemeResource ControlCornerRadius}">
                         <Border.Resources>
                             <Style x:Key="CodeTextBlockStyle" TargetType="TextBlock">

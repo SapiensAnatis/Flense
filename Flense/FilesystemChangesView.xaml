@@ -69,7 +69,7 @@
     </UserControl.Resources>
 
     <Border
-        Background="{ThemeResource LayerFillColorAltBrush}"
+        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
         BorderThickness="1"
         CornerRadius="{ThemeResource ControlCornerRadius}">
         <Grid
@@ -80,7 +80,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Grid Padding="8,6" Background="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}">
+            <Grid Padding="8,6" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="100" />
