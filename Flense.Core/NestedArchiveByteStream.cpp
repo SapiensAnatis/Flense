@@ -3,10 +3,7 @@
 #include "ArchiveReader.h"
 #include "NestedArchiveByteStream.h"
 
-#include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <span>
+import std;
 
 namespace Flense::Core
 {

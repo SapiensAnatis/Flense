@@ -5,18 +5,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 
-#include <array>
-#include <concepts>
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <optional>
-#include <span>
-#include <stop_token>
-#include <string>
-#include <string_view>
-#include <vector>
+import std;
 
 namespace Flense::Core
 {

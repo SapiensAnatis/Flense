@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
-#include <span>
+import std;
 
 namespace Flense::Core
 {

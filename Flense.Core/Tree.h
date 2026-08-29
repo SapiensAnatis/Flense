@@ -1,13 +1,6 @@
 #pragma once
 
-#include <algorithm>
-#include <concepts>
-#include <flat_map>
-#include <functional>
-#include <memory>
-#include <span>
-#include <string>
-#include <string_view>
+import std;
 
 namespace Flense::Core
 {

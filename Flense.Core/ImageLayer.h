@@ -2,8 +2,7 @@
 
 #include "FilesystemTree.h"
 
-#include <string>
-#include <string_view>
+import std;
 
 namespace Flense::Core
 {

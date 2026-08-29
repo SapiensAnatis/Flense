@@ -2,13 +2,7 @@
 
 #include "FilesystemTree.h"
 
-#include <cstdint>
-#include <optional>
-#include <stop_token>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <vector>
+import std;
 
 namespace Flense::Core
 {

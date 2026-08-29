@@ -4,8 +4,7 @@
 #include "FilesystemParsing.h"
 #include "FilesystemTree.h"
 
-#include <flat_map>
-#include <ranges>
+import std;
 
 namespace Flense::Core
 {

@@ -3,7 +3,7 @@
 #include "FileKind.h"
 #include "Tree.h"
 
-#include <string>
+import std;
 
 namespace Flense::Core
 {

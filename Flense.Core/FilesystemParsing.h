@@ -2,8 +2,7 @@
 
 #include "FilesystemTree.h"
 
-#include <span>
-#include <stop_token>
+import std;
 
 namespace Flense::Core
 {
