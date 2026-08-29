@@ -425,6 +425,45 @@ you've spent the least to find out, and everything after it can still land:
 header stays textual) and `<nlohmann/json.hpp>` (inside Phase 7's wrapper). Every internal and cross-project
 consumption of `Flense.Core`'s own types is `import`.
 
+## Build-time comparison (once Phase 8 lands)
+
+Not implementation work — a benchmark to answer the question this whole document keeps deferring: did any
+of this pay for itself? Do this only once Phase 8 is fully committed and green, and only as a standalone
+pass — don't run it while any migration work is still in progress in the same working tree.
+
+**Use a git worktree for the pre-migration baseline, not a branch switch.** Switching the main working
+tree's branch mid-comparison risks colliding with whatever state the migration work left behind. Instead:
+
+```
+git worktree add C:\src-baseline master
+```
+
+An independent checkout of the pre-migration code, untouched by anything on `experiments/modules`. Remove it
+afterwards with `git worktree remove C:\src-baseline`.
+
+**Same toolchain, separate output directories**, so neither build's intermediates can contaminate the other:
+
+- Baseline: `C:\src-baseline\Scripts\build-app.ps1 -OutputDirectory C:\build-baseline`
+- Final: `C:\src\Scripts\build-app.ps1 -OutputDirectory C:\build-final` — a directory not previously used by
+  any agent in this migration, so the first build against it is genuinely clean.
+
+**Three timings per revision, both Debug and Release** (six builds per revision, twelve total):
+
+1. **Clean, from scratch.** Fresh output directory, full `build-app.ps1` invocation, timed with
+   `Measure-Command` or a stopwatch. (`Remove-Item C:\build -Recurse` is blocked in this sandbox — use a
+   fresh `-OutputDirectory` per clean measurement rather than fighting that restriction.)
+2. **Incremental, no-op.** Immediately rerun the same build with nothing changed — pure up-to-date-check
+   overhead. Worth measuring on its own because module IFC dependency scanning is exactly the kind of cost
+   that can regress even when nothing actually needs recompiling.
+3. **Incremental, one leaf change.** Touch the same single leaf `.cpp` in both revisions — e.g.
+   `Flense.Core/ImageParser.cpp` — and time the rebuild. This is the number modules are supposed to win: an
+   IFC only needs rebuilding when the interface it exports changes, so a leaf implementation edit shouldn't
+   cascade the way editing a widely-`#include`d header does today.
+
+Record all twelve numbers as a table in this document, alongside the honest note from the Context section up
+top: at ~20-30 translation units, don't be surprised if the answer is "roughly a wash" rather than a clear
+win — the value case here was always dependency hygiene and no macro leakage, not raw build speed.
+
 ## Repo-specific risks
 
 - **`TreatWarningAsError` on `Debug|x64`** (both vcxproj) turns the module/STL redefinition warnings into
