@@ -6,9 +6,7 @@
 #include "ImageDetailsViewModel.g.cpp"
 #endif
 
-#include "ArchiveReader.h"
 #include "ImageLayerWrapper.h"
-#include "ImageParser.h"
 #include "TitleBarService.h"
 #include "WinRtByteStream.h"
 

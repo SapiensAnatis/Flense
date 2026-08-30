@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "FilesystemTree.h"
 #include "FilesystemTreeNode.g.h"
 
 namespace winrt::Flense::implementation

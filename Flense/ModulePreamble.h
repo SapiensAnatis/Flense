@@ -25,6 +25,7 @@ import winrt.Microsoft.UI.Xaml.Navigation;
 import winrt.Microsoft.UI.Xaml.Shapes;
 import winrt.Microsoft.UI.Xaml.XamlTypeInfo;
 import winrt.Flense;
+import Flense.Core;
 
 #define WINRT_IMPORT_MODULE
 // Re-light WIL's cppwinrt support: including the now-inert winrt headers

@@ -82,7 +82,7 @@
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level4</WarningLevel>
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(GeneratedFilesDir)\Views;..\Flense.Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GeneratedFilesDir)\Views;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BuildStlModules>true</BuildStlModules>
       <!-- XamlUserType implements IXamlType/IXamlUserType, a classic-COM-style interface; without this the
            winrt_base module is built without <unknwn.h>/<inspectable.h> support baked in (see modules.md). -->

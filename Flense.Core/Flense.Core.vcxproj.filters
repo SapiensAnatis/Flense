@@ -59,5 +59,8 @@
     <ClCompile Include="ImageParser.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Flense.Core.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

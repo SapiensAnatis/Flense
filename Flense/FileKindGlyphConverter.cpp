@@ -6,8 +6,6 @@
 #include "FileKindGlyphConverter.g.cpp"
 #endif
 
-#include "FileKind.h"
-
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::UI::Xaml::Interop;
 

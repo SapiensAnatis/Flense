@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "ImageLayer.h"
 #include "ImageLayerWrapper.g.h"
 
 namespace winrt::Flense::implementation

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ImageDetailsViewModel.g.h"
-#include "ImageParser.h"
 
 namespace winrt::Flense::implementation
 {
