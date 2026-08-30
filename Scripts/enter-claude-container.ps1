@@ -10,4 +10,25 @@ $ErrorActionPreference = 'Stop'
 $composeFile = "$PSScriptRoot\..\Container\docker-compose.yaml"
 
 docker compose -f "$composeFile" up -d
-docker compose -f "$composeFile" exec dev claude
+
+function Invoke-InContainer {
+    param([string] $User, [Parameter(ValueFromRemainingArguments)] [string[]] $Args)
+    docker compose -f "$composeFile" exec -u $User dev @Args
+    return $LASTEXITCODE
+}
+
+$volumeMounts = @("C:\Users\ContainerUser\.claude", "C:\Users\ContainerUser\.nuget\packages")
+
+# The mounted volumes have the wrong permissions by default
+foreach ($volumeMount in $volumeMounts) {
+    Invoke-InContainer -User ContainerAdministrator icacls $volumeMount /grant 'ContainerUser:(OI)(CI)M' /T /C /Q
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "icacls grant failed on $volumeMount ($LASTEXITCODE); reassigning owner"
+
+        Invoke-InContainer -User ContainerAdministrator takeown /F $volumeMount /R
+        Invoke-InContainer -User ContainerAdministrator icacls $volumeMount /grant 'ContainerUser:(OI)(CI)M' /T /C /Q
+    }
+}
+
+Invoke-InContainer -User ContainerUser claude
