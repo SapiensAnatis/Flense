@@ -1,16 +1,14 @@
 #pragma once
-#include <windows.h>
-#include <unknwn.h>
-#include <restrictederrorinfo.h>
 #include <hstring.h>
+#include <restrictederrorinfo.h>
+#include <unknwn.h>
+#include <windows.h>
 
 // Undefine GetCurrentTime macro to prevent
 // conflict with Storyboard::GetCurrentTime
 #undef GetCurrentTime
 
-// Pre-included so later imports of winrt platform modules (which themselves transitively
-// `import std;`) are inert rather than redefinition errors. Confirmed necessary independent
-// of Flense.Core's own STL usage - see cpp20-modules-migration.md Phase 6 for the full story.
+// Pre-include STL dependencies of WIL headers
 #include <algorithm>
 #include <chrono>
 #include <coroutine>

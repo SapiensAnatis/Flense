@@ -1,5 +1,5 @@
 #pragma once
-#include "pch.h"          // needed because this is /FI-injected into XAML-generated files
+#include "pch.h" // needed because this is /FI-injected into XAML-generated files
 
 import winrt.Windows.Foundation;
 import winrt.Windows.Foundation.Collections;
@@ -27,16 +27,9 @@ import winrt.Microsoft.UI.Xaml.XamlTypeInfo;
 import winrt.Flense;
 import Flense.Core;
 
+// Re-enable wil::resume_foreground
 #define WINRT_IMPORT_MODULE
-// Re-light WIL's cppwinrt support: including the now-inert winrt headers
-// defines their include guards, which is what wil/cppwinrt_helpers.h keys off.
-// wil/cppwinrt.h itself is deliberately not included here: it pulls in
-// <inspectable.h>, whose global ::IInspectable is ambiguous with
-// winrt::Windows::Foundation::IInspectable wherever that namespace is
-// opened with a using-directive. Only cppwinrt_helpers.h is actually
-// needed for wil::resume_foreground.
-#include <winrt/Windows.Foundation.h>
-#include <winrt/Microsoft.UI.Dispatching.h>
+#define WINRT_Microsoft_UI_Dispatching_H
 #include <wil/cppwinrt_helpers.h>
 
 // Microsoft.UI.Interop.h is a hand-written WindowsAppSDK header, not a cppwinrt
