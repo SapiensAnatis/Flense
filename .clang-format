@@ -10,10 +10,12 @@ IncludeBlocks: Regroup
 IncludeCategories:
   - Regex: '^"pch.h"$'
     Priority: 0
-  - Regex: '^".*"$'
+  - Regex: '^"ModulePreamble.h"$'
     Priority: 1
-  - Regex: '^<.*\.h>$' # Third-party library headers
+  - Regex: '^".*"$'
     Priority: 2
-  - Regex: '^<.*>$'    # STL headers
+  - Regex: '^<.*\.h>$' # Third-party library headers
     Priority: 3
+  - Regex: '^<.*>$'    # STL headers
+    Priority: 4
 QualifierAlignment: Left

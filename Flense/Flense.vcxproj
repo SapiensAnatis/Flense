@@ -5,6 +5,7 @@
     <CppWinRTOptimized>true</CppWinRTOptimized>
     <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
     <CppWinRTBuildModule>true</CppWinRTBuildModule>
+    <CppWinRTModuleInclude>Windows;Microsoft.UI;Microsoft.Graphics;Microsoft.Web.WebView2;Microsoft.Windows.ApplicationModel;Flense</CppWinRTModuleInclude>
     <MinimalCoreWin>true</MinimalCoreWin>
     <ProjectGuid>{52ed318b-9ba0-455b-b9e1-8e1b5b3c366d}</ProjectGuid>
     <ProjectName>Flense</ProjectName>
@@ -91,14 +92,14 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WINRT_IMPORT_MODULE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir);$(GeneratedFilesDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatWarningAsError>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;WINRT_IMPORT_MODULE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -367,29 +368,17 @@
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
-  <Target Name="InjectModuleImportsIntoXamlGenerated"
-          AfterTargets="ComputeXamlGeneratedCompileInputs"
-          BeforeTargets="ClCompile">
+  <Target Name="InjectModuleImportsIntoXamlGenerated" AfterTargets="ComputeXamlGeneratedCompileInputs" BeforeTargets="ClCompile">
     <ItemGroup>
-      <ClCompile Update="@(ClCompile)"
-                 Condition="'%(Filename)' == 'XamlTypeInfo.g'
-                         or '%(Filename)' == 'XamlTypeInfo.Impl.g'
-                         or '%(Filename)' == 'XamlMetaDataProvider'
-                         or '%(Filename)' == 'XamlLibMetadataProvider.g'">
+      <ClCompile Update="@(ClCompile)" Condition="'%(Filename)' == 'XamlTypeInfo.g'&#xD;&#xA;                         or '%(Filename)' == 'XamlTypeInfo.Impl.g'&#xD;&#xA;                         or '%(Filename)' == 'XamlMetaDataProvider'&#xD;&#xA;                         or '%(Filename)' == 'XamlLibMetadataProvider.g'">
         <PrecompiledHeader>NotUsing</PrecompiledHeader>
         <ForcedIncludeFiles>$(MSBuildProjectDirectory)\ModulePreamble.h</ForcedIncludeFiles>
       </ClCompile>
     </ItemGroup>
   </Target>
-  <Target Name="InjectModuleImportsIntoXamlGeneratedPass2"
-          AfterTargets="ComputeXamlGeneratedCompileInputs"
-          BeforeTargets="CompileXamlGeneratedFiles">
+  <Target Name="InjectModuleImportsIntoXamlGeneratedPass2" AfterTargets="ComputeXamlGeneratedCompileInputs" BeforeTargets="CompileXamlGeneratedFiles">
     <ItemGroup>
-      <ClCompile Update="@(ClCompile)"
-                 Condition="'%(Filename)' == 'XamlTypeInfo.g'
-                         or '%(Filename)' == 'XamlTypeInfo.Impl.g'
-                         or '%(Filename)' == 'XamlMetaDataProvider'
-                         or '%(Filename)' == 'XamlLibMetadataProvider.g'">
+      <ClCompile Update="@(ClCompile)" Condition="'%(Filename)' == 'XamlTypeInfo.g'&#xD;&#xA;                         or '%(Filename)' == 'XamlTypeInfo.Impl.g'&#xD;&#xA;                         or '%(Filename)' == 'XamlMetaDataProvider'&#xD;&#xA;                         or '%(Filename)' == 'XamlLibMetadataProvider.g'">
         <PrecompiledHeader>NotUsing</PrecompiledHeader>
         <ForcedIncludeFiles>$(MSBuildProjectDirectory)\ModulePreamble.h</ForcedIncludeFiles>
       </ClCompile>
