@@ -275,8 +275,42 @@ diagnostics cannot identify which include was the culprit. That also means the p
 trimmed by reading errors — it would take a bisect (~5 build cycles) or a `/showIncludes` trace.
 
 Net effect of the migration so far on the PCH is therefore a lateral move: 15 winrt headers plus WIL
-replaced by 19 STL headers. **The only thing that deletes that block is stopping `Flense.Core` headers
-emitting textual STL.**
+replaced by 19 STL headers.
+
+**Root cause, established after two failed attempts to remove the block.** The trigger is
+`<wil/cppwinrt_helpers.h>`, and the ordering is over-constrained — there is no arrangement that avoids the
+pre-includes:
+
+- WIL must come **after** the module imports. It needs the real `winrt::` types, and under
+  `WINRT_IMPORT_MODULE` the textual winrt headers define only their include guards, not the types — those
+  exist solely via `import winrt.*`. It also uses `std::exchange`, which likewise only arrives with the
+  imported `std`.
+- Being after the imports, WIL's own textual `#include <coroutine>` / `<experimental/coroutine>` is
+  import-then-include — the unsupported direction — and `<coroutine>` transitively drags in `<compare>`,
+  `<type_traits>`, `__msvc_iter_core.hpp` and the rest of the STL core.
+
+Moving the WIL block into `pch.h` above all imports was tried and fails immediately, with WIL unable to see
+either namespace:
+
+```
+cppwinrt_helpers.h(77,76): error C2039: 'exchange': is not a member of 'std'
+cppwinrt_helpers.h(155,23): error C2065: 'winrt': undeclared identifier
+cppwinrt_helpers.h(219,8):  error C2923: 'wil::details::dispatcher_traits': 'DispatcherQueue' is not a
+                            valid template type argument for parameter 'Dispatcher'
+```
+
+So the 19 headers are not an arbitrary list — they approximate the **transitive STL closure of
+`wil/cppwinrt_helpers.h`**, pre-included textually before any import so that WIL's later includes hit
+satisfied guards and are inert. That is also why narrowing the list cascades (`<type_traits>` alone fails
+inside `<compare>`, adding that fails inside `<iterator>`): anything WIL reaches transitively must be in the
+set. This is exactly the workaround modules.md prescribes, and it is inherent to consuming a header-only
+library that both needs module-provided types and textually includes STL — not a defect in this project's
+setup.
+
+The block therefore stays until WIL itself adopts modules, or until the `wil::resume_foreground` dependency
+(a single call site, `ImageDetailsViewModel.cpp`) is replaced with something that doesn't require WIL. Note
+that `Flense.Core` adopting `import std;` (this phase's original premise) does **not** remove it — that was
+tested and made no difference.
 
 Approach: replace the STL `#include`s in `Flense.Core`'s headers and sources with `import std;`, and set
 `BuildStlModules=true` on `Flense.Core`. Once no `Flense.Core` header carries textual STL, the pre-include
