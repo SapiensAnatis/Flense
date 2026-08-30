@@ -2,7 +2,7 @@ export module Flense.Core:FilesystemParsing;
 
 import :ArchiveReader;
 import :FilesystemTree;
-import std.compat;
+import std;
 
 export namespace Flense::Core
 {

@@ -3,7 +3,7 @@ export module Flense.Core:ImageParser;
 import :ArchiveReader;
 import :FilesystemTree;
 import :ImageLayer;
-import std.compat;
+import std;
 
 export namespace Flense::Core
 {

@@ -1,7 +1,7 @@
 export module Flense.Core:NestedArchiveByteStream;
 
 import :ArchiveReader;
-import std.compat;
+import std;
 
 export namespace Flense::Core
 {
@@ -19,13 +19,13 @@ export namespace Flense::Core
         /// <param name="initialBuffer">An initial buffer that may have already been read from the entry.</param>
         NestedArchiveByteStream(ArchiveEntry* entry, std::span<const std::byte> initialBuffer);
 
-        size_t ReadSync(std::span<std::byte> buffer);
-        int64_t Skip(int64_t request);
-        uint64_t Size();
-        uint64_t Position();
+        std::size_t ReadSync(std::span<std::byte> buffer);
+        std::int64_t Skip(std::int64_t request);
+        std::uint64_t Size();
+        std::uint64_t Position();
 
       private:
-        uint64_t m_position{0};
+        std::uint64_t m_position{0};
         std::span<const std::byte> m_initialBuffer;
         ArchiveEntry* m_entry{nullptr};
     };

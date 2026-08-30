@@ -1,6 +1,6 @@
 export module Flense.Core:Tree;
 
-import std.compat;
+import std;
 
 export namespace Flense::Core
 {

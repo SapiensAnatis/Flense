@@ -1,7 +1,7 @@
 export module Flense.Core:ImageLayer;
 
 import :FilesystemTree;
-import std.compat;
+import std;
 
 export namespace Flense::Core
 {

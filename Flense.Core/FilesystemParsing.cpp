@@ -3,7 +3,7 @@ module Flense.Core:FilesystemParsing;
 import :ArchiveReader;
 import :FilesystemTree;
 import :Tree;
-import std.compat;
+import std;
 
 namespace Flense::Core
 {
@@ -56,8 +56,8 @@ namespace Flense::Core
             outKeys.reserve(baseKeys.size() + diffKeys.size());
             outValues.reserve(baseKeys.size() + diffKeys.size());
 
-            size_t baseIndex = 0;
-            size_t diffIndex = 0;
+            std::size_t baseIndex = 0;
+            std::size_t diffIndex = 0;
 
             while (baseIndex < baseKeys.size() || diffIndex < diffKeys.size())
             {
