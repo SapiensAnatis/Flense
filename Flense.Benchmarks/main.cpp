@@ -3,6 +3,8 @@
 #include "Benchmarks.h"
 #include "Progress.h"
 #include "Reporting.h"
+#include "Serialization.h"
+#include "Subprocess.h"
 
 #include <algorithm>
 #include <array>
@@ -23,6 +25,17 @@ namespace
 
     constexpr std::wstring_view TestDataDirectoryName = L"TestData";
     constexpr int MaxParentSearchDepth = 8;
+
+    /// <summary>
+    /// The flag that switches this executable into child mode: run one benchmark and print its
+    /// result as JSON, rather than discovering images and printing human-readable reports.
+    /// </summary>
+    /// <remarks>
+    /// Each image is benchmarked in its own child process because PeakWorkingSetSize is a process-wide
+    /// high-water mark with no way to reset it - run everything in one process and only the first
+    /// image's reading would mean anything.
+    /// </remarks>
+    constexpr std::wstring_view ChildModeFlag = L"--benchmark-child";
 
     /// <summary>
     /// Finds the TestData directory by walking up from the executable's own location.
@@ -68,9 +81,7 @@ namespace
     /// Collects the .tar files in a directory, smallest first.
     /// </summary>
     /// <remarks>
-    /// Ordering earns its keep twice over: a quick sanity check comes back before the multi-gigabyte
-    /// images are attempted, and the peak working set counter - which is process-wide, with no way to
-    /// reset it - is only meaningful for whichever image runs first.
+    /// Smallest first so a quick sanity check comes back before the multi-gigabyte images are attempted.
     /// </remarks>
     /// <param name="directory">The directory to scan.</param>
     /// <returns>The discovered image paths, smallest first.</returns>
@@ -98,11 +109,25 @@ namespace
 
         return paths;
     }
-} // namespace
 
-int main()
-{
-    try
+    /// <summary>
+    /// Runs one benchmark in-process and writes its result as JSON to stdout, for the orchestrator
+    /// process to read back. Entered via ChildModeFlag on the command line.
+    /// </summary>
+    /// <param name="imagePath">The image to benchmark.</param>
+    /// <param name="runs">The number of timed runs.</param>
+    void RunChild(const std::filesystem::path& imagePath, const int runs)
+    {
+        const BenchmarkResult result = RunBenchmark(imagePath, runs);
+        std::cout << SerializeResult(result);
+    }
+
+    /// <summary>
+    /// Discovers the test images and benchmarks each one in its own child process, printing a
+    /// human-readable report as each result comes back.
+    /// </summary>
+    /// <returns>The process exit code.</returns>
+    int RunOrchestrator()
     {
         ClearConsole();
 
@@ -126,13 +151,28 @@ int main()
         {
             std::cout << std::format("Benchmarking {}...\n", imagePath.filename().string()) << std::flush;
 
-            const BenchmarkResult result = RunBenchmark(imagePath, Runs);
+            const std::string json = RunSelfCapturingStdout(
+                {std::wstring{ChildModeFlag}, imagePath.wstring(), std::to_wstring(Runs)});
 
-            PrintReport(result);
+            PrintReport(DeserializeResult(json));
             std::cout << std::flush;
         }
 
         return 0;
+    }
+} // namespace
+
+int wmain(const int argc, wchar_t* argv[])
+{
+    try
+    {
+        if (argc == 4 && argv[1] == ChildModeFlag)
+        {
+            RunChild(argv[2], std::stoi(std::wstring{argv[3]}));
+            return 0;
+        }
+
+        return RunOrchestrator();
     }
     catch (const std::exception& exception)
     {

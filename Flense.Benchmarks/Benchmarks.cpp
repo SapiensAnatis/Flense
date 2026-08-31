@@ -1,19 +1,19 @@
 #include "pch.h"
 
+#include "ArchiveReader.h"
 #include "Benchmarks.h"
 #include "FileByteStream.h"
-#include "Progress.h"
-
-#include "ArchiveReader.h"
 #include "FilesystemTree.h"
 #include "ImageLayer.h"
 #include "ImageParser.h"
+#include "Progress.h"
 
 #include <psapi.h>
 
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <stdexcept>
 #include <stop_token>
 #include <unordered_set>
 #include <vector>
@@ -67,7 +67,7 @@ namespace Flense::Benchmarks
             double buildMs{0.0};
             size_t entryCount{0};
             std::vector<EntryTiming> entryTimings;
-            std::vector<Core::ImageLayer> layers;
+            Core::ImageDetails details;
         };
 
         /// <summary>
@@ -94,9 +94,9 @@ namespace Flense::Benchmarks
 
             const auto parseStart = Clock::now();
 
-            auto reader = Core::ArchiveReader::CreateFromStream(stream, std::stop_token{});
+            auto reader = Core::ArchiveReader::CreateFromStream(stream);
 
-            while (auto entry = reader.Next())
+            while (auto entry = reader.Next(std::stop_token{}))
             {
                 result.entryCount += 1;
 
@@ -108,20 +108,20 @@ namespace Flense::Benchmarks
                     const uint64_t size = entry->Size();
 
                     const auto entryStart = Clock::now();
-                    parser.ProcessEntry(*entry);
+                    parser.ProcessEntry(*entry, std::stop_token{});
 
                     result.entryTimings.emplace_back(std::move(pathname), size, ElapsedMs(entryStart));
                 }
                 else
                 {
-                    parser.ProcessEntry(*entry);
+                    parser.ProcessEntry(*entry, std::stop_token{});
                 }
             }
 
             result.parseMs = ElapsedMs(parseStart);
 
             const auto buildStart = Clock::now();
-            result.layers = parser.Build();
+            result.details = parser.Build();
             result.buildMs = ElapsedMs(buildStart);
 
             return result;
@@ -169,7 +169,7 @@ namespace Flense::Benchmarks
         }
 
         /// <summary>
-        /// Finds a phase's result in a result set, adding it if it isn't there yet.
+        /// Finds a phase's result in a result set that PhaseLayout() has already populated in display order.
         /// </summary>
         /// <param name="phases">The phase results.</param>
         /// <param name="phase">The phase to find.</param>
@@ -177,13 +177,28 @@ namespace Flense::Benchmarks
         PhaseResult& PhaseSlot(std::vector<PhaseResult>& phases, const Phase phase)
         {
             const auto it = std::ranges::find(phases, phase, &PhaseResult::phase);
-            if (it != phases.end())
+            if (it == phases.end())
             {
-                return *it;
+                throw std::logic_error("PhaseSlot: phase missing from PhaseLayout().");
             }
 
-            phases.push_back(PhaseResult{.phase = phase, .samplesMs = {}});
-            return phases.back();
+            return *it;
+        }
+
+        /// <summary>
+        /// The fixed, display-order set of phases a benchmark result reports - independent of whichever
+        /// order RunBenchmark happens to measure them in.
+        /// </summary>
+        /// <returns>One empty PhaseResult per Phase, in display order.</returns>
+        std::vector<PhaseResult> PhaseLayout()
+        {
+            std::vector<PhaseResult> phases;
+            for (const Phase phase : {Phase::Io, Phase::ParseEntries, Phase::Build, Phase::EndToEnd})
+            {
+                phases.push_back(PhaseResult{.phase = phase, .samplesMs = {}});
+            }
+
+            return phases;
         }
     } // namespace
 
@@ -202,6 +217,19 @@ namespace Flense::Benchmarks
         }
 
         return "unknown";
+    }
+
+    Phase ParsePhaseName(const std::string_view name)
+    {
+        for (const Phase phase : {Phase::Io, Phase::ParseEntries, Phase::Build, Phase::EndToEnd})
+        {
+            if (PhaseName(phase) == name)
+            {
+                return phase;
+            }
+        }
+
+        throw std::invalid_argument(std::format("Unknown phase name: {}", name));
     }
 
     double PhaseResult::MedianMs() const
@@ -239,6 +267,7 @@ namespace Flense::Benchmarks
         result.imagePath = imagePath;
         result.runs = runs;
         result.imageSizeBytes = std::filesystem::file_size(imagePath);
+        result.phases = PhaseLayout();
 
         ProgressReporter reporter{imagePath.filename().string(), runs + 1};
 
@@ -248,7 +277,7 @@ namespace Flense::Benchmarks
         RunIoPass(imagePath, reporter, 0);
         RunParsePass(imagePath, false, reporter, 0);
 
-        std::vector<Core::ImageLayer> lastLayers;
+        Core::ImageDetails lastDetails;
 
         for (int run = 0; run < runs; run += 1)
         {
@@ -267,7 +296,7 @@ namespace Flense::Benchmarks
 
             if (isFinalRun)
             {
-                lastLayers = std::move(pass.layers);
+                lastDetails = std::move(pass.details);
 
                 result.slowestEntries = std::move(pass.entryTimings);
                 std::ranges::sort(result.slowestEntries, std::ranges::greater{}, &EntryTiming::milliseconds);
@@ -279,10 +308,10 @@ namespace Flense::Benchmarks
             }
         }
 
-        result.counters.layerCount = lastLayers.size();
+        result.counters.layerCount = lastDetails.layers.size();
 
         std::unordered_set<const void*> uniqueNodes;
-        for (const Core::ImageLayer& layer : lastLayers)
+        for (const Core::ImageLayer& layer : lastDetails.layers)
         {
             CountTreeNodes(layer.FilesystemChanges(), result.counters.treeNodeCount, uniqueNodes);
         }

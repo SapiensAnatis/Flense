@@ -60,6 +60,7 @@ namespace Flense::Benchmarks
         uint64_t Position() const;
 
       private:
+        std::filesystem::path m_path;
         void* m_handle;
         uint64_t m_size{0};
         uint64_t m_position{0};

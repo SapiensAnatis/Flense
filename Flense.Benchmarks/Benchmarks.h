@@ -35,6 +35,14 @@ namespace Flense::Benchmarks
     std::string_view PhaseName(Phase phase);
 
     /// <summary>
+    /// Parses a phase's stable name back into a Phase, the inverse of PhaseName.
+    /// </summary>
+    /// <param name="name">The phase's name.</param>
+    /// <returns>The corresponding Phase.</returns>
+    /// <exception cref="std::invalid_argument">The name did not match any known phase.</exception>
+    Phase ParsePhaseName(std::string_view name);
+
+    /// <summary>
     /// The timings collected for one phase across all runs.
     /// </summary>
     struct PhaseResult

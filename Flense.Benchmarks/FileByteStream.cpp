@@ -20,7 +20,7 @@ namespace Flense::Benchmarks
         }
     } // namespace
 
-    FileByteStream::FileByteStream(const std::filesystem::path& path) : m_handle(INVALID_HANDLE_VALUE)
+    FileByteStream::FileByteStream(const std::filesystem::path& path) : m_path(path), m_handle(INVALID_HANDLE_VALUE)
     {
         // FILE_FLAG_SEQUENTIAL_SCAN is a hint that matches how the archive reader actually walks the
         // file, and keeps the page cache behaviour representative of the real app's access pattern.
@@ -60,7 +60,7 @@ namespace Flense::Benchmarks
         DWORD bytesRead = 0;
         if (!ReadFile(m_handle, buffer.data(), toRead, &bytesRead, nullptr))
         {
-            return 0;
+            ThrowLastError(m_path, "ReadFile");
         }
 
         m_position += bytesRead;
