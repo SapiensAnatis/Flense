@@ -77,9 +77,24 @@ namespace Flense::Core
 
                 if (diffExhausted || (!baseExhausted && baseKeys.at(baseIndex) < diffKeys.at(diffIndex)))
                 {
-                    // Only in base: not touched by this diff, carry over unchanged.
-                    outKeys.push_back(baseKeys.at(baseIndex));
-                    outValues.push_back(baseValues.at(baseIndex));
+                    // Only in base.
+                    const FilesystemChangeTreeNodeRef& baseValue = baseValues.at(baseIndex);
+
+                    // If a node was removed in the base snapshot, and is not present in the following snapshot, it
+                    // should be removed from the tree for subsequent layers.
+                    if (baseValue->Data().changeKind != FilesystemChangeKind::Removed)
+                    {
+                        // Otherwise, the node is now considered to be unchanged, as it has survived one layer.
+                        auto newValue = Visit(baseValue, [](const FilesystemChangeInfo& info) {
+                            FilesystemChangeInfo infoCopy = info;
+                            infoCopy.changeKind = FilesystemChangeKind::None;
+                            return infoCopy;
+                        });
+
+                        outKeys.push_back(baseKeys.at(baseIndex));
+                        outValues.push_back(std::move(newValue));
+                    }
+
                     ++baseIndex;
                 }
                 else if (baseExhausted || diffKeys.at(diffIndex) < baseKeys.at(baseIndex))
@@ -118,11 +133,9 @@ namespace Flense::Core
             {
                 // Set all children to be removed
                 return Visit(base, [](const FilesystemChangeInfo& info) {
-                    return FilesystemChangeInfo{
-                        .kind = info.kind,
-                        .size = info.size,
-                        .changeKind = FilesystemChangeKind::Removed,
-                    };
+                    FilesystemChangeInfo infoCopy = info;
+                    infoCopy.changeKind = FilesystemChangeKind::Removed;
+                    return infoCopy;
                 });
             }
 

@@ -6,7 +6,6 @@
 #include "ImageLayer.h"
 #include "ImageParser.h"
 #include "NestedArchiveByteStream.h"
-#include "Tree.h"
 
 #include <algorithm>
 #include <array>
@@ -293,43 +292,18 @@ namespace Flense::Core
                 const std::string& layerPath = m_layerPaths.at(layerNum);
                 const FilesystemChangeTreeNodeRef& diff = m_filesystemsByLayerDigest.at(layerPath);
 
-                FilesystemChangeTreeNodeRef thisLayerFsSnapshot;
-
                 if (currentFsSnapshot)
                 {
-                    thisLayerFsSnapshot = ApplyFilesystemChanges(currentFsSnapshot, diff);
+                    currentFsSnapshot = ApplyFilesystemChanges(currentFsSnapshot, diff);
                 }
                 else
                 {
-                    thisLayerFsSnapshot = diff;
+                    currentFsSnapshot = diff;
                 }
 
-                layers.emplace_back(CollapseWhitespace(command), thisLayerFsSnapshot);
+                layers.emplace_back(CollapseWhitespace(command), currentFsSnapshot);
 
                 layerNum += 1;
-
-                // After showing values as removed, actually remove them from subsequent layers
-
-                const auto removed = Prune(thisLayerFsSnapshot, [](const FilesystemChangeInfo& info) {
-                    return info.changeKind == FilesystemChangeKind::Removed;
-                });
-
-                // For the remaining diffs, 'accept' the changes to now show them as None in the next layer
-
-                currentFsSnapshot = Visit(removed, [](const FilesystemChangeInfo& info) {
-                    if (info.changeKind != FilesystemChangeKind::None)
-                    {
-                        return FilesystemChangeInfo{
-                            .kind = info.kind,
-                            .size = info.size,
-                            .changeKind = FilesystemChangeKind::None,
-                        };
-                    }
-                    else
-                    {
-                        return info;
-                    }
-                });
             }
         }
 
