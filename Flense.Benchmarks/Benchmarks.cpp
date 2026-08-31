@@ -1,14 +1,12 @@
 #include "pch.h"
 
-#include "ArchiveReader.h"
 #include "Benchmarks.h"
 #include "FileByteStream.h"
-#include "FilesystemTree.h"
-#include "ImageLayer.h"
-#include "ImageParser.h"
 #include "Progress.h"
 
 #include <psapi.h>
+
+import Flense.Core;
 
 #include <algorithm>
 #include <chrono>

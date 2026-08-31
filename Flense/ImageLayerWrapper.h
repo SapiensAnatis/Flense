@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include "ImageLayer.h"
 #include "ImageLayerWrapper.g.h"
+
+import Flense.Core;
 
 namespace winrt::Flense::implementation
 {

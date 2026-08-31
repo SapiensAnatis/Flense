@@ -5,8 +5,9 @@
 #include "FileKindGlyphConverter.g.cpp"
 #endif
 
-#include "FileKind.h"
 #include "winrt/Flense.h"
+
+import Flense.Core;
 
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::UI::Xaml::Interop;

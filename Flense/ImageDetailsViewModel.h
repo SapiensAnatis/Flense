@@ -1,9 +1,10 @@
 #pragma once
 
 #include "ImageDetailsViewModel.g.h"
-#include "ImageParser.h"
 
 #include <vector>
+
+import Flense.Core;
 
 namespace winrt::Flense::implementation
 {

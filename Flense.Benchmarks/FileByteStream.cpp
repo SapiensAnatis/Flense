@@ -2,12 +2,12 @@
 
 #include "FileByteStream.h"
 
-#include "ArchiveReader.h"
-
 #include <algorithm>
 #include <format>
 #include <limits>
 #include <stdexcept>
+
+import Flense.Core;
 
 namespace Flense::Benchmarks
 {

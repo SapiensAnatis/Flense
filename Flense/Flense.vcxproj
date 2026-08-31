@@ -84,7 +84,11 @@
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level4</WarningLevel>
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(GeneratedFilesDir)\Views;..\Flense.Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GeneratedFilesDir)\Views;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <!-- Needed so files consuming Flense.Core's "import std;" surface (e.g. std::ranges::to, which
+           collides with a textual <ranges> include in the same TU) can say "import std;" themselves
+           instead of textually re-including the STL. -->
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">

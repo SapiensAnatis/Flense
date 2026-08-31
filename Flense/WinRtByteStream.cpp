@@ -1,9 +1,10 @@
 #include "pch.h"
 
-#include "ArchiveReader.h"
 #include "WinRtByteStream.h"
 
 #include <algorithm>
+
+import Flense.Core;
 
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Storage::Streams;
