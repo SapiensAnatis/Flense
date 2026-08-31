@@ -9,4 +9,13 @@
 
 #define NOMINMAX
 
+#include <algorithm>
+#include <memory>
+#include <optional>
+#include <span>
+#include <stop_token>
+#include <string>
+#include <string_view>
+#include <vector>
+
 #endif // PCH_H
