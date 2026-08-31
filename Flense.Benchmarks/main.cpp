@@ -151,8 +151,8 @@ namespace
         {
             std::cout << std::format("Benchmarking {}...\n", imagePath.filename().string()) << std::flush;
 
-            const std::string json = RunSelfCapturingStdout(
-                {std::wstring{ChildModeFlag}, imagePath.wstring(), std::to_wstring(Runs)});
+            const std::string json =
+                RunSelfCapturingStdout({std::wstring{ChildModeFlag}, imagePath.wstring(), std::to_wstring(Runs)});
 
             PrintReport(DeserializeResult(json));
             std::cout << std::flush;
@@ -166,6 +166,10 @@ int wmain(const int argc, wchar_t* argv[])
 {
     try
     {
+#if defined(_DEBUG)
+        throw std::runtime_error("Refusing to run benchmarks on a Debug build - please compile in Release");
+#endif
+
         if (argc == 4 && argv[1] == ChildModeFlag)
         {
             RunChild(argv[2], std::stoi(std::wstring{argv[3]}));

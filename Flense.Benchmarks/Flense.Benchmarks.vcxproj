@@ -89,7 +89,10 @@
   <ItemGroup>
     <ClCompile Include="Benchmarks.cpp" />
     <ClCompile Include="FileByteStream.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cpp">
+      <!-- Prevent unreachable code warnings from our Release-only sanity check -->
+      <DisableSpecificWarnings Condition="'$(Configuration)'=='Debug'">4702;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
