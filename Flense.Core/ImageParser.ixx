@@ -1,18 +1,12 @@
-#pragma once
+export module Flense.Core:ImageParser;
 
-#include "FilesystemTree.h"
+import :ArchiveReader;
+import :FilesystemTree;
+import :ImageLayer;
+import std;
 
-#include <optional>
-#include <stop_token>
-#include <string>
-#include <unordered_map>
-#include <vector>
-
-namespace Flense::Core
+export namespace Flense::Core
 {
-    class ArchiveEntry;
-    class ImageLayer;
-
     struct ImageDetails
     {
         std::optional<std::string> repoTag;

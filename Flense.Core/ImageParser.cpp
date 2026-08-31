@@ -1,27 +1,12 @@
-#include "pch.h"
+module Flense.Core:ImageParser;
 
-#include "ArchiveReader.h"
-#include "FilesystemParsing.h"
-#include "FilesystemTree.h"
-#include "ImageLayer.h"
-#include "ImageParser.h"
-#include "NestedArchiveByteStream.h"
-
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <cstddef>
-#include <nlohmann/json.hpp>
-#include <optional>
-#include <span>
-#include <stop_token>
-#include <string>
-#include <string_view>
-#include <type_traits>
-#include <unordered_map>
-#include <utility>
-#include <variant>
-#include <vector>
+import :ArchiveReader;
+import :FilesystemParsing;
+import :FilesystemTree;
+import :ImageLayer;
+import :NestedArchiveByteStream;
+import nlohmann_json;
+import std;
 
 namespace Flense::Core
 {
@@ -95,7 +80,7 @@ namespace Flense::Core
             contents.resize(entry.Size());
 
             const std::span<char> contentsSpan = std::span{contents};
-            const size_t bytesRead = entry.ReadInto(std::as_writable_bytes(contentsSpan));
+            const std::size_t bytesRead = entry.ReadInto(std::as_writable_bytes(contentsSpan));
             contents.resize(bytesRead);
 
             const nlohmann::json manifests = nlohmann::json::parse(contents);
@@ -142,10 +127,10 @@ namespace Flense::Core
             // Sniff a small, bounded prefix first - large layer blobs must never be buffered in
             // full just to find out they're not JSON.
             std::array<char, 64> sniffBuffer{};
-            const size_t sniffLength = std::min(sniffBuffer.size(), static_cast<size_t>(entry.Size()));
+            const std::size_t sniffLength = std::min(sniffBuffer.size(), static_cast<std::size_t>(entry.Size()));
             const std::span<char> sniffSpan = std::span{sniffBuffer}.first(sniffLength);
 
-            const size_t sniffed = entry.ReadInto(std::as_writable_bytes(sniffSpan));
+            const std::size_t sniffed = entry.ReadInto(std::as_writable_bytes(sniffSpan));
 
             if (LooksLikeJsonObject(std::string_view{sniffBuffer.data(), sniffed}))
             {
@@ -154,7 +139,7 @@ namespace Flense::Core
                 contents.resize(entry.Size());
 
                 const std::span<char> remainingSpan = std::span{contents}.subspan(sniffed);
-                const size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
+                const std::size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
                 contents.resize(sniffed + read);
 
                 return JsonBlobDetails{
@@ -275,7 +260,7 @@ namespace Flense::Core
             const nlohmann::json config = nlohmann::json::parse(configIt->second);
             const nlohmann::json& historyArray = config.at("history");
 
-            size_t layerNum = 0;
+            std::size_t layerNum = 0;
             FilesystemChangeTreeNodeRef currentFsSnapshot{nullptr};
 
             for (const auto& historyObj : historyArray)

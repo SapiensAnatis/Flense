@@ -6,7 +6,7 @@ CheckOptions:
   readability-identifier-naming.StructCase: "CamelCase"
   readability-identifier-naming.EnumCase: "CamelCase"
   readability-identifier-naming.MacroDefinitionCase: "UPPER_CASE"
-  misc-include-cleaner.IgnoreHeaders: "pch.h;.*nlohmann.*"
+  misc-include-cleaner.IgnoreHeaders: ".*nlohmann.*"
   misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
 Checks: '-*,
 bugprone-*

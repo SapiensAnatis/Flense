@@ -1,11 +1,10 @@
-#pragma once
+export module Flense.Core:FilesystemTree;
 
-#include "FileKind.h"
-#include "Tree.h"
+import :FileKind;
+import :Tree;
+import std;
 
-#include <cstdint>
-
-namespace Flense::Core
+export namespace Flense::Core
 {
 
     /// <summary>
@@ -26,7 +25,7 @@ namespace Flense::Core
     struct FilesystemChangeInfo
     {
         FileKind kind;
-        uint64_t size;
+        std::uint64_t size;
         FilesystemChangeKind changeKind;
 
         bool operator==(const FilesystemChangeInfo& other) const = default;

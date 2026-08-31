@@ -1,14 +1,11 @@
-#pragma once
+export module Flense.Core:FilesystemParsing;
 
-#include "FilesystemTree.h"
+import :ArchiveReader;
+import :FilesystemTree;
+import std;
 
-#include <span>
-#include <stop_token>
-
-namespace Flense::Core
+export namespace Flense::Core
 {
-    class ArchiveReader;
-
     /// <summary>
     /// Populate a filesystem tree from a nested .tar archive inside an image layer.
     /// </summary>

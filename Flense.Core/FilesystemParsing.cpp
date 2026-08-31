@@ -1,19 +1,9 @@
-#include "pch.h"
+module Flense.Core:FilesystemParsing;
 
-#include "ArchiveReader.h"
-#include "FileKind.h"
-#include "FilesystemParsing.h"
-#include "FilesystemTree.h"
-#include "Tree.h"
-
-#include <cstddef>
-#include <flat_map>
-#include <ranges>
-#include <stop_token>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
+import :ArchiveReader;
+import :FilesystemTree;
+import :Tree;
+import std;
 
 namespace Flense::Core
 {
@@ -67,8 +57,8 @@ namespace Flense::Core
             outKeys.reserve(baseKeys.size() + diffKeys.size());
             outValues.reserve(baseKeys.size() + diffKeys.size());
 
-            size_t baseIndex = 0;
-            size_t diffIndex = 0;
+            std::size_t baseIndex = 0;
+            std::size_t diffIndex = 0;
 
             while (baseIndex < baseKeys.size() || diffIndex < diffKeys.size())
             {

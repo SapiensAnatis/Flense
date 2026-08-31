@@ -1,12 +1,7 @@
-#include "pch.h"
+module Flense.Core:NestedArchiveByteStream;
 
-#include "ArchiveReader.h"
-#include "NestedArchiveByteStream.h"
-
-#include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <span>
+import :ArchiveReader;
+import std;
 
 namespace Flense::Core
 {
@@ -15,14 +10,14 @@ namespace Flense::Core
     {
     }
 
-    size_t NestedArchiveByteStream::ReadSync(const std::span<std::byte> buffer)
+    std::size_t NestedArchiveByteStream::ReadSync(const std::span<std::byte> buffer)
     {
-        size_t bufferIdx = 0;
+        std::size_t bufferIdx = 0;
 
         if (m_position < m_initialBuffer.size())
         {
-            const size_t available = m_initialBuffer.size() - m_position;
-            const size_t toCopy = std::min(available, buffer.size());
+            const std::size_t available = m_initialBuffer.size() - m_position;
+            const std::size_t toCopy = std::min(available, buffer.size());
 
             std::copy_n(m_initialBuffer.subspan(m_position).begin(), toCopy, buffer.begin());
 
@@ -35,26 +30,26 @@ namespace Flense::Core
             return bufferIdx;
         }
 
-        const size_t read = m_entry->ReadInto(buffer.subspan(bufferIdx));
+        const std::size_t read = m_entry->ReadInto(buffer.subspan(bufferIdx));
         m_position += read;
 
         return bufferIdx + read;
     }
 
-    int64_t NestedArchiveByteStream::Skip(const int64_t request)
+    std::int64_t NestedArchiveByteStream::Skip(const std::int64_t request)
     {
-        const int64_t actualSkip = m_entry->ParentReader()->Skip(request);
-        m_position += static_cast<uint64_t>(actualSkip);
+        const std::int64_t actualSkip = m_entry->ParentReader()->Skip(request);
+        m_position += static_cast<std::uint64_t>(actualSkip);
 
         return actualSkip;
     }
 
-    uint64_t NestedArchiveByteStream::Size()
+    std::uint64_t NestedArchiveByteStream::Size()
     {
         return m_entry->Size();
     }
 
-    uint64_t NestedArchiveByteStream::Position()
+    std::uint64_t NestedArchiveByteStream::Position()
     {
         return m_position;
     }

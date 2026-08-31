@@ -1,6 +1,6 @@
-#pragma once
+export module Flense.Core:FileKind;
 
-namespace Flense::Core
+export namespace Flense::Core
 {
     enum class FileKind
     {

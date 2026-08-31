@@ -15,45 +15,43 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ArchiveReader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ImageParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ImageLayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NestedArchiveByteStream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FilesystemParsing.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FilesystemTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileKind.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="pch.cpp">
+    <ClCompile Include="FileKind.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImageParser.cpp">
+    <ClCompile Include="Tree.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FilesystemTree.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageLayer.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ArchiveReader.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NestedArchiveByteStream.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NestedArchiveByteStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FilesystemParsing.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="FilesystemParsing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NlohmannJson.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageParser.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Flense.Core.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

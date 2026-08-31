@@ -1,15 +1,8 @@
-#pragma once
+export module Flense.Core:Tree;
 
-#include <algorithm>
-#include <concepts>
-#include <flat_map>
-#include <memory>
-#include <string>
-#include <type_traits>
-#include <utility>
-#include <vector>
+import std;
 
-namespace Flense::Core
+export namespace Flense::Core
 {
     template <typename T> class TreeNode;
 

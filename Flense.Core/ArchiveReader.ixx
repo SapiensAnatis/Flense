@@ -1,23 +1,12 @@
-#pragma once
-
-#include "FileKind.h"
-
+module;
 #include <archive.h>
 #include <archive_entry.h>
+export module Flense.Core:ArchiveReader;
 
-#include <array>
-#include <concepts>
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <optional>
-#include <span>
-#include <stop_token>
-#include <string_view>
-#include <utility>
+import :FileKind;
+import std;
 
-namespace Flense::Core
+export namespace Flense::Core
 {
     /// <summary>
     /// A source libarchive can pull compressed bytes from.
@@ -28,11 +17,11 @@ namespace Flense::Core
     /// async - callers are expected to ArchiveReader::ProcessArchive on a background thread.
     /// </remarks>
     template <typename T>
-    concept ByteStream = requires(T& source, std::span<std::byte> buffer, int64_t requestedSkip) {
-        { source.ReadSync(buffer) } -> std::convertible_to<size_t>;
-        { source.Skip(requestedSkip) } -> std::convertible_to<int64_t>;
-        { source.Size() } -> std::convertible_to<uint64_t>;
-        { source.Position() } -> std::convertible_to<uint64_t>;
+    concept ByteStream = requires(T& source, std::span<std::byte> buffer, std::int64_t requestedSkip) {
+        { source.ReadSync(buffer) } -> std::convertible_to<std::size_t>;
+        { source.Skip(requestedSkip) } -> std::convertible_to<std::int64_t>;
+        { source.Size() } -> std::convertible_to<std::uint64_t>;
+        { source.Position() } -> std::convertible_to<std::uint64_t>;
     };
 
     class ArchiveReader;
@@ -65,10 +54,10 @@ namespace Flense::Core
         /// <summary>
         /// The total size of this entry's body, as recorded in the archive header.
         /// </summary>
-        [[nodiscard]] uint64_t Size() const
+        [[nodiscard]] std::uint64_t Size() const
         {
-            const int64_t size = archive_entry_size(m_entry);
-            return size > 0 ? static_cast<uint64_t>(size) : 0;
+            const std::int64_t size = archive_entry_size(m_entry);
+            return size > 0 ? static_cast<std::uint64_t>(size) : 0;
         }
 
         /// <summary>
@@ -80,9 +69,9 @@ namespace Flense::Core
         /// </summary>
         /// <returns>The number of bytes actually read, which is less than buffer.size() once this
         /// entry's body is exhausted.</returns>
-        [[nodiscard]] size_t ReadInto(std::span<std::byte> buffer) const
+        [[nodiscard]] std::size_t ReadInto(std::span<std::byte> buffer) const
         {
-            size_t totalRead = 0;
+            std::size_t totalRead = 0;
             while (totalRead < buffer.size())
             {
                 const std::span<std::byte> remaining = buffer.subspan(totalRead);
@@ -92,7 +81,7 @@ namespace Flense::Core
                     break;
                 }
 
-                totalRead += static_cast<size_t>(bytesRead);
+                totalRead += static_cast<std::size_t>(bytesRead);
             }
 
             return totalRead;
@@ -166,7 +155,7 @@ namespace Flense::Core
 
             auto context = std::make_unique<Context>();
             context->readSync = [&source](std::span<std::byte> buffer) { return source.ReadSync(buffer); };
-            context->skip = [&source](int64_t request) { return source.Skip(request); };
+            context->skip = [&source](std::int64_t request) { return source.Skip(request); };
 
             archive_read_set_callback_data(archive.get(), context.get());
             archive_read_set_read_callback(archive.get(), &ArchiveReadCallback);
@@ -213,7 +202,7 @@ namespace Flense::Core
         /// <remarks>
         /// Used for NestedArchiveByteStream where libarchive may want to skip while reading a sub-tar.
         /// </remarks>
-        int64_t Skip(int64_t request)
+        std::int64_t Skip(std::int64_t request)
         {
             return m_context->skip(request);
         }
@@ -229,12 +218,12 @@ namespace Flense::Core
 
         using ArchivePtr = std::unique_ptr<archive, ArchiveDeleter>;
 
-        static constexpr size_t ChunkSize = 64 * 1024;
+        static constexpr std::size_t ChunkSize = 64 * 1024;
 
         struct Context
         {
-            std::function<size_t(std::span<std::byte>)> readSync;
-            std::function<int64_t(int64_t)> skip;
+            std::function<std::size_t(std::span<std::byte>)> readSync;
+            std::function<std::int64_t(std::int64_t)> skip;
 
             // Only set for the duration of a single operation, by StopTokenScope.
             std::stop_token stopToken;
@@ -275,7 +264,7 @@ namespace Flense::Core
                 return ARCHIVE_FATAL;
             }
 
-            const size_t bytesRead = context.readSync(std::span(context.buffer));
+            const std::size_t bytesRead = context.readSync(std::span(context.buffer));
             *buffer = context.buffer.data();
             return static_cast<la_ssize_t>(bytesRead);
         }
