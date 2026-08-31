@@ -63,9 +63,7 @@ namespace Flense::Core
 
     template <typename T, typename F>
         requires std::equality_comparable<T> && std::same_as<std::invoke_result_t<F&, const T&>, T>
-    TreeNodeRef<T> Visit(
-        const TreeNodeRef<T>& node,
-        F&& fn) // NOLINT(cppcoreguidelines-missing-std-forward) - can't std::forward a reusable delegate
+    TreeNodeRef<T> Visit(const TreeNodeRef<T>& node, const F& fn)
     {
         const auto& children = node->Children();
 
@@ -76,7 +74,7 @@ namespace Flense::Core
 
         for (const auto& child : children.values())
         {
-            auto next = Visit(child, fn);
+            auto next = Visit<T, F>(child, fn);
             changed = changed || (next.get() != child.get()); // pointer comparison
             values.push_back(std::move(next));
         }
