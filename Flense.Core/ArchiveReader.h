@@ -14,9 +14,8 @@
 #include <optional>
 #include <span>
 #include <stop_token>
-#include <string>
 #include <string_view>
-#include <vector>
+#include <utility>
 
 namespace Flense::Core
 {
@@ -49,13 +48,13 @@ namespace Flense::Core
     class ArchiveEntry
     {
       public:
-        std::string_view Pathname() const
+        [[nodiscard]] std::string_view Pathname() const
         {
             const char* pathname = archive_entry_pathname(m_entry);
 
             if (pathname)
             {
-                return std::string_view(pathname);
+                return {pathname};
             }
             else
             {
@@ -66,7 +65,7 @@ namespace Flense::Core
         /// <summary>
         /// The total size of this entry's body, as recorded in the archive header.
         /// </summary>
-        uint64_t Size() const
+        [[nodiscard]] uint64_t Size() const
         {
             const int64_t size = archive_entry_size(m_entry);
             return size > 0 ? static_cast<uint64_t>(size) : 0;
@@ -81,13 +80,13 @@ namespace Flense::Core
         /// </summary>
         /// <returns>The number of bytes actually read, which is less than buffer.size() once this
         /// entry's body is exhausted.</returns>
-        size_t ReadInto(std::span<std::byte> buffer) const
+        [[nodiscard]] size_t ReadInto(std::span<std::byte> buffer) const
         {
             size_t totalRead = 0;
             while (totalRead < buffer.size())
             {
-                const la_ssize_t bytesRead =
-                    archive_read_data(m_archive, buffer.data() + totalRead, buffer.size() - totalRead);
+                const std::span<std::byte> remaining = buffer.subspan(totalRead);
+                const la_ssize_t bytesRead = archive_read_data(m_archive, remaining.data(), remaining.size());
                 if (bytesRead <= 0)
                 {
                     break;
@@ -103,7 +102,7 @@ namespace Flense::Core
         /// Gets the type of the entry (i.e. dir/file/symlink/other).
         /// </summary>
         /// <returns>The type of the entry.</returns>
-        FileKind FileKind() const
+        [[nodiscard]] FileKind FileKind() const
         {
             switch (archive_entry_filetype(m_entry))
             {
@@ -124,7 +123,7 @@ namespace Flense::Core
         /// <remarks>
         /// Used for NestedArchiveByteStream where we want to call ArchiveReader::Skip while reading a sub-tar.
         /// </remarks>
-        ArchiveReader* ParentReader() const
+        [[nodiscard]] ArchiveReader* ParentReader() const
         {
             return m_parentReader;
         }
@@ -165,10 +164,9 @@ namespace Flense::Core
             archive_read_support_format_tar(archive.get());
             archive_read_support_filter_gzip(archive.get());
 
-            auto context = std::make_unique<Context>(Context{
-                .readSync = [&source](std::span<std::byte> buffer) { return source.ReadSync(buffer); },
-                .skip = [&source](int64_t request) { return source.Skip(request); },
-            });
+            auto context = std::make_unique<Context>();
+            context->readSync = [&source](std::span<std::byte> buffer) { return source.ReadSync(buffer); };
+            context->skip = [&source](int64_t request) { return source.Skip(request); };
 
             archive_read_set_callback_data(archive.get(), context.get());
             archive_read_set_read_callback(archive.get(), &ArchiveReadCallback);
@@ -195,7 +193,7 @@ namespace Flense::Core
         {
             const StopTokenScope scope{*m_context, std::move(stopToken)};
 
-            archive_entry* entry;
+            archive_entry* entry = nullptr;
             if (m_context->stopToken.stop_requested() ||
                 archive_read_next_header(m_archive.get(), &entry) != ARCHIVE_OK)
             {
@@ -241,7 +239,7 @@ namespace Flense::Core
             // Only set for the duration of a single operation, by StopTokenScope.
             std::stop_token stopToken;
 
-            std::array<std::byte, ChunkSize> buffer;
+            std::array<std::byte, ChunkSize> buffer{};
         };
 
         /// <summary>
@@ -262,6 +260,8 @@ namespace Flense::Core
 
             StopTokenScope(const StopTokenScope&) = delete;
             StopTokenScope& operator=(const StopTokenScope&) = delete;
+            StopTokenScope(StopTokenScope&&) = delete;
+            StopTokenScope& operator=(StopTokenScope&&) = delete;
 
           private:
             Context& m_context;

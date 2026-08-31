@@ -25,7 +25,7 @@ namespace winrt::Flense::implementation
             ratio = 1.0f - ratio;
         }
 
-        return winrt::box_value(GridLength{ratio, GridUnitType::Star});
+        return winrt::box_value(GridLength{.Value = ratio, .GridUnitType = GridUnitType::Star});
     }
 
     IInspectable RatioToGridLengthConverter::ConvertBack(const IInspectable& /* value */,

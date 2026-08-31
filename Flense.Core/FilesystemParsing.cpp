@@ -1,11 +1,19 @@
 #include "pch.h"
 
 #include "ArchiveReader.h"
+#include "FileKind.h"
 #include "FilesystemParsing.h"
 #include "FilesystemTree.h"
+#include "Tree.h"
 
+#include <cstddef>
 #include <flat_map>
 #include <ranges>
+#include <stop_token>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace Flense::Core
 {
@@ -19,7 +27,8 @@ namespace Flense::Core
 
         TreeNodeRef<FilesystemChangeInfo> Freeze(MutableTreeNode&& node)
         {
-            auto containers = std::move(node.children).extract();
+            auto [info, children] = std::move(node);
+            auto containers = std::move(children).extract();
 
             std::vector<FilesystemChangeTreeNodeRef> frozen;
             frozen.reserve(containers.values.size());
@@ -27,12 +36,12 @@ namespace Flense::Core
             for (auto& child : containers.values)
             {
                 const FilesystemChangeTreeNodeRef& added = frozen.emplace_back(Freeze(std::move(child)));
-                node.info.size += added->Data().size;
+                info.size += added->Data().size;
             }
 
             return FilesystemChangeTreeNode::Create(
-                node.info, std::flat_map<std::string, FilesystemChangeTreeNodeRef>(
-                               std::sorted_unique, std::move(containers.keys), std::move(frozen)));
+                std::move(info), std::flat_map<std::string, FilesystemChangeTreeNodeRef>(
+                                     std::sorted_unique, std::move(containers.keys), std::move(frozen)));
         }
 
         // TODO: This patch logic is entirely AI-generated. Check it over when tidying up the code
@@ -66,28 +75,28 @@ namespace Flense::Core
                 const bool baseExhausted = baseIndex >= baseKeys.size();
                 const bool diffExhausted = diffIndex >= diffKeys.size();
 
-                if (diffExhausted || (!baseExhausted && baseKeys[baseIndex] < diffKeys[diffIndex]))
+                if (diffExhausted || (!baseExhausted && baseKeys.at(baseIndex) < diffKeys.at(diffIndex)))
                 {
                     // Only in base: not touched by this diff, carry over unchanged.
-                    outKeys.push_back(baseKeys[baseIndex]);
-                    outValues.push_back(baseValues[baseIndex]);
+                    outKeys.push_back(baseKeys.at(baseIndex));
+                    outValues.push_back(baseValues.at(baseIndex));
                     ++baseIndex;
                 }
-                else if (baseExhausted || diffKeys[diffIndex] < baseKeys[baseIndex])
+                else if (baseExhausted || diffKeys.at(diffIndex) < baseKeys.at(baseIndex))
                 {
                     // Only in diff: a brand new entry. Nothing to remove it from, so skip whiteouts here.
-                    if (diffValues[diffIndex]->Data().changeKind != FilesystemChangeKind::Removed)
+                    if (diffValues.at(diffIndex)->Data().changeKind != FilesystemChangeKind::Removed)
                     {
-                        outKeys.push_back(diffKeys[diffIndex]);
-                        outValues.push_back(diffValues[diffIndex]);
+                        outKeys.push_back(diffKeys.at(diffIndex));
+                        outValues.push_back(diffValues.at(diffIndex));
                     }
                     ++diffIndex;
                 }
                 else
                 {
                     // Present in both: recursively patch;
-                    auto patched = PatchNode(baseValues[baseIndex], diffValues[diffIndex]);
-                    outKeys.push_back(baseKeys[baseIndex]);
+                    auto patched = PatchNode(baseValues.at(baseIndex), diffValues.at(diffIndex));
+                    outKeys.push_back(baseKeys.at(baseIndex));
                     outValues.push_back(std::move(patched));
 
                     ++baseIndex;
@@ -95,8 +104,7 @@ namespace Flense::Core
                 }
             }
 
-            return FilesystemChangeTreeNode::ChildrenContainer(std::sorted_unique, std::move(outKeys),
-                                                               std::move(outValues));
+            return {std::sorted_unique, std::move(outKeys), std::move(outValues)};
         }
 
         /// <summary>
@@ -122,7 +130,8 @@ namespace Flense::Core
             FilesystemChangeInfo newInfo(diff->Data());
             newInfo.changeKind = FilesystemChangeKind::Modified;
 
-            FilesystemChangeTreeNode::ChildrenContainer children = PatchChildren(base->Children(), diff->Children());
+            const FilesystemChangeTreeNode::ChildrenContainer children =
+                PatchChildren(base->Children(), diff->Children());
 
             if (newInfo.kind == FileKind::Directory)
             {
@@ -154,7 +163,7 @@ namespace Flense::Core
 
         while (auto entry = nestedTarReader->Next(stopToken))
         {
-            std::string_view path = entry->Pathname();
+            const std::string_view path = entry->Pathname();
 
             // TODO: handle opaque whiteouts, which hide every entry a lower layer put in this directory.
             if (path.ends_with("/.wh..wh..opq"))

@@ -18,4 +18,8 @@
     <OutDir>$(FlenseOutputDirectory)\$(MSBuildProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <GeneratedFilesDir>$(FlenseOutputDirectory)\$(MSBuildProjectName)\Generated Files\</GeneratedFilesDir>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
 </Project>

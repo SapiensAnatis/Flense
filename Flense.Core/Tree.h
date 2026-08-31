@@ -3,11 +3,11 @@
 #include <algorithm>
 #include <concepts>
 #include <flat_map>
-#include <functional>
 #include <memory>
-#include <span>
 #include <string>
-#include <string_view>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace Flense::Core
 {
@@ -31,8 +31,12 @@ namespace Flense::Core
         {
         }
 
+        ~TreeNode() = default;
+
         TreeNode(const TreeNode&) = delete;
         TreeNode& operator=(const TreeNode&) = delete;
+        TreeNode(TreeNode&&) = delete;
+        TreeNode& operator=(TreeNode&&) = delete;
 
         static Ref Create(T data, ChildrenContainer children)
         {
@@ -59,7 +63,9 @@ namespace Flense::Core
 
     template <typename T, typename F>
         requires std::equality_comparable<T> && std::same_as<std::invoke_result_t<F&, const T&>, T>
-    TreeNodeRef<T> Visit(const TreeNodeRef<T>& node, F&& fn)
+    TreeNodeRef<T> Visit(
+        const TreeNodeRef<T>& node,
+        F&& fn) // NOLINT(cppcoreguidelines-missing-std-forward) - can't std::forward a reusable delegate
     {
         const auto& children = node->Children();
 
@@ -83,8 +89,8 @@ namespace Flense::Core
             return node; // entire subtree aliased, zero allocations
         }
 
-        return TreeNode<T>::Create(
-            std::move(data), TreeNode<T>::ChildrenContainer(std::sorted_unique, children.keys(), std::move(values)));
+        return TreeNode<T>::Create(std::move(data), typename TreeNode<T>::ChildrenContainer(
+                                                        std::sorted_unique, children.keys(), std::move(values)));
     }
 
     /// <summary>
@@ -100,7 +106,9 @@ namespace Flense::Core
     /// the result will be a tree with a childless root node.</remarks>
     template <typename T, typename F>
         requires std::same_as<std::invoke_result_t<F&, const T&>, bool>
-    TreeNodeRef<T> Prune(const TreeNodeRef<T>& node, F&& predicate)
+    TreeNodeRef<T> Prune(
+        const TreeNodeRef<T>& node,
+        F&& predicate) // NOLINT(cppcoreguidelines-missing-std-forward) - can't std::forward a reusable delegate
     {
         // Do not call predicate() on the root node...
         const auto& children = node->Children();
@@ -133,8 +141,8 @@ namespace Flense::Core
             return node; // entire subtree aliased, zero allocations
         }
 
-        return TreeNode<T>::Create(
-            node->Data(), TreeNode<T>::ChildrenContainer(std::sorted_unique, std::move(keys), std::move(values)));
+        return TreeNode<T>::Create(node->Data(), typename TreeNode<T>::ChildrenContainer(
+                                                     std::sorted_unique, std::move(keys), std::move(values)));
     }
 
 } // namespace Flense::Core

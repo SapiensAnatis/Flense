@@ -24,7 +24,7 @@ namespace Flense::Core
             const size_t available = m_initialBuffer.size() - m_position;
             const size_t toCopy = std::min(available, buffer.size());
 
-            std::copy_n(m_initialBuffer.begin() + m_position, toCopy, buffer.begin());
+            std::copy_n(m_initialBuffer.subspan(m_position).begin(), toCopy, buffer.begin());
 
             bufferIdx += toCopy;
             m_position += toCopy;

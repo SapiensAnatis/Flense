@@ -3,7 +3,7 @@
 #include "FileKind.h"
 #include "Tree.h"
 
-#include <string>
+#include <cstdint>
 
 namespace Flense::Core
 {
@@ -35,11 +35,11 @@ namespace Flense::Core
     /// <summary>
     /// A node in a tree that describes diffs applied to a filesystem.
     /// </summary>
-    using FilesystemChangeTreeNode = TreeNode<FilesystemChangeInfo>;
+    using FilesystemChangeTreeNode = typename TreeNode<FilesystemChangeInfo>;
 
     /// <summary>
     /// A ref to a node in a tree that describes diffs applied to a filesystem.
     /// </summary>
-    using FilesystemChangeTreeNodeRef = TreeNodeRef<FilesystemChangeInfo>;
+    using FilesystemChangeTreeNodeRef = typename TreeNodeRef<FilesystemChangeInfo>;
 
 } // namespace Flense::Core

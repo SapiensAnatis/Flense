@@ -6,11 +6,12 @@
 #include "ImageLayer.h"
 #include "ImageParser.h"
 #include "NestedArchiveByteStream.h"
+#include "Tree.h"
 
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cctype>
+#include <cstddef>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <span>
@@ -19,6 +20,7 @@
 #include <string_view>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -142,7 +144,7 @@ namespace Flense::Core
             // full just to find out they're not JSON.
             std::array<char, 64> sniffBuffer{};
             const size_t sniffLength = std::min(sniffBuffer.size(), static_cast<size_t>(entry.Size()));
-            std::span<char> sniffSpan = std::span{sniffBuffer}.first(sniffLength);
+            const std::span<char> sniffSpan = std::span{sniffBuffer}.first(sniffLength);
 
             const size_t sniffed = entry.ReadInto(std::as_writable_bytes(sniffSpan));
 
@@ -284,7 +286,7 @@ namespace Flense::Core
                     continue;
                 }
 
-                std::string_view command = historyObj.at("created_by").get_ref<const std::string&>();
+                const std::string_view command = historyObj.at("created_by").get_ref<const std::string&>();
 
                 // TODO: Make this more destructive so the filesystem tree can be moved?
                 // Though, does it really matter if it's just a shared pointer?

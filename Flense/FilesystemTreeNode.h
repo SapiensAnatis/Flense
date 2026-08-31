@@ -11,7 +11,7 @@ namespace winrt::Flense::implementation
     struct FilesystemTreeNode : FilesystemTreeNodeT<FilesystemTreeNode>
     {
         FilesystemTreeNode(winrt::hstring name, ::Flense::Core::FilesystemChangeTreeNodeRef node,
-                           winrt::weak_ref<winrt::Flense::implementation::FilesystemTreeNode> parent);
+                           winrt::weak_ref<winrt::Flense::FilesystemTreeNode> parent);
         ~FilesystemTreeNode();
 
         winrt::hstring Name() const;
@@ -46,6 +46,7 @@ namespace winrt::Flense::implementation
         uint32_t m_depth{0};
 
         winrt::event<winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
-        winrt::weak_ref<winrt::Flense::implementation::FilesystemTreeNode> m_parent;
+
+        winrt::weak_ref<winrt::Flense::FilesystemTreeNode> m_parent;
     };
 } // namespace winrt::Flense::implementation

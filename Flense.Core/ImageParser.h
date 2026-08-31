@@ -2,11 +2,9 @@
 
 #include "FilesystemTree.h"
 
-#include <cstdint>
 #include <optional>
 #include <stop_token>
 #include <string>
-#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -46,7 +44,7 @@ namespace Flense::Core
         /// Assembles ImageDetails once all archive entries have been handed to ProcessEntry().
         /// </summary>
         /// <returns>An ImageDetails struct.</returns>
-        ImageDetails Build() const;
+        [[nodiscard]] ImageDetails Build() const;
 
       private:
         std::optional<std::string> m_configPath;
