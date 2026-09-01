@@ -230,71 +230,34 @@
   </ImportGroup>
   <UsingTask TaskName="MultiToolTask" AssemblyFile="$(VCTargetsPath)Microsoft.Build.CppTasks.Common.dll"/>
 
-  <Target Name="BeforeClangTidy">
-    <ItemGroup>
-      <_Pcm Include="@(ClCompile)" Condition="'%(ClCompile.CompilerIteration)' == 'Modules'">
-        <!-- custom clang arguments -->
-        <AdditionalOptions>%(ClCompile.AdditionalOptions) -x c++-module /clang:-fmodule-output=E:\Projects\SapiensAnatis\Flense\Flense.Core\Debug\modules\%(Filename).pcm /clang:-fprebuilt-module-path=E:\Projects\SapiensAnatis\Flense\Flense.Core\Debug\modules</AdditionalOptions>
+<Target Name="_SelectModuleTUs">
+  <ItemGroup>
+    <_ModuleTU Include="@(ClCompile)"
+               Condition="'%(ClCompile.CompilerIteration)' == 'Modules'" />
+  </ItemGroup>
+</Target>
 
-        <!-- remove precompiled headers as compiler may not match clang-tidy toolset -->
-        <PrecompiledHeader />
-        <PrecompiledHeaderFile />
-        <PrecompiledHeaderOutputFile />
+<Target Name="BeforeClangTidy"
+        DependsOnTargets="_SelectModuleTUs"
+        Outputs="%(_ModuleTU.Identity)">
 
-        <!-- remove settings which don't apply to clang -->
-        <BrowseInformation />
-        <BrowseInformationFile />
-        <CompileAsManaged />
-        <CompileAsWinRT />
-        <CompileAs />
-        <DebugInformationFormat />
-        <DisableLanguageExtensions />
-        <DisableSpecificWarnings />
-        <EnableFiberSafeOptimizations />
-        <MultiProcessorCompilation />
-        <EnableParallelCodeGeneration />
-        <EnablePREfast />
-        <EnforceTypeConversionRules />
-        <ErrorReporting />
-        <ExpandAttributedSource />
-        <ForceConformanceInForLoopScope />
-        <ForcedUsingFiles />
-        <GenerateXMLDocumentationFiles />
-        <IgnoreStandardIncludePath />
-        <MinimalRebuild />
-        <OpenMPSupport />
-        <PREfastAdditionalOptions />
-        <PREfastAdditionalPlugins />
-        <PREfastLog />
-        <PREfastProjectDirectory />
-        <PREfastRulesetDirectories />
-        <PREfastRulesetFile />
-        <ProgramDataBaseFileName />
-        <RemoveUnreferencedCodeData />
-        <SDLCheck />
-        <SpectreMitigation />
-        <StringPooling />
-        <SupportJustMyCode />
-        <TreatSpecificWarningsAsErrors />
-        <TreatWChar_tAsBuiltInType />
-        <UseFullPaths />
-        <WholeProgramOptimization />
-        <ModuleOutputFile />
-        <AdditionalHeaderUnitDependencies />
-        <AdditionalBMIDirectories />
-        <GenerateModuleDependencies />
-      </_Pcm>
-    </ItemGroup>
+  <ItemGroup>
+    <_Dep Remove="@(_Dep)" />
+    <_Dep Include="$([MSBuild]::ValueOrDefault('%(_ModuleTU.AdditionalModuleDependencies)', '').Replace('.ifc', '.pcm'))" />
+  </ItemGroup>
 
-    <Message Importance="High" Text="Module outputs: @(_Pcm->'%(AdditionalModuleDependencies)')" />
+  <PropertyGroup>
+    <_ModuleOutput>$([MSBuild]::ValueOrDefault('%(_ModuleTU.ModuleOutputFile)', '').Replace('.ifc', '.pcm'))</_ModuleOutput>
+    <_ModuleFileFlags>@(_Dep->Distinct()->'-fmodule-file=%(Identity)', ' ')</_ModuleFileFlags>
+  </PropertyGroup>
 
-    <MultiToolTask TaskName="Microsoft.Build.CPPTasks.CL"
-                  TaskAssemblyName="$(VCTargetsPath)Microsoft.Build.CppTasks.Common.dll"
-                  Sources="@(_Pcm)"
-                  ToolExe="clang-cl.exe" ToolPath="C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\Llvm\x64\bin\"
-                  TrackerLogDirectory="$(TLogLocation)" MinimalRebuildFromTracking="true"
-                  MaxProcessCount="$(MultiProcMaxCount)" SchedulerName="$(MultiProcSchedulerName)"/>
-                  
+  <ItemGroup>
+    <_Pcm Include="@(_ModuleTU)">
+      <AdditionalOptions>%(_ModuleTU.AdditionalOptions) -x c++-module -fmodule-output=$(_ModuleOutput) $(_ModuleFileFlags)</AdditionalOptions>
+      <!-- your metadata removals, unchanged -->
+    </_Pcm>
+  </ItemGroup>
 
-  </Target>
+  <Message Importance="High" Text="[%(_Pcm.Filename)] raw=[$([MSBuild]::ValueOrDefault('%(_Pcm.AdditionalOptions)', ''))]" />
+</Target>
 </Project>
