@@ -34,8 +34,8 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <!-- clang-tidy in this toolchain mis-parses C++20 module interface units (.ixx) as pre-C++20 source,
-         so it fails on "export module" itself rather than analysing anything real; disable until that's fixed. -->
+    <!-- Analysing a module-based project needs the clang .pcm scaffolding that
+         BuildClangTidyModuleBmis in Directory.Build.targets puts in place. -->
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -228,36 +228,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-  <UsingTask TaskName="MultiToolTask" AssemblyFile="$(VCTargetsPath)Microsoft.Build.CppTasks.Common.dll"/>
-
-<Target Name="_SelectModuleTUs">
-  <ItemGroup>
-    <_ModuleTU Include="@(ClCompile)"
-               Condition="'%(ClCompile.CompilerIteration)' == 'Modules'" />
-  </ItemGroup>
-</Target>
-
-<Target Name="BeforeClangTidy"
-        DependsOnTargets="_SelectModuleTUs"
-        Outputs="%(_ModuleTU.Identity)">
-
-  <ItemGroup>
-    <_Dep Remove="@(_Dep)" />
-    <_Dep Include="$([MSBuild]::ValueOrDefault('%(_ModuleTU.AdditionalModuleDependencies)', '').Replace('.ifc', '.pcm'))" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <_ModuleOutput>$([MSBuild]::ValueOrDefault('%(_ModuleTU.ModuleOutputFile)', '').Replace('.ifc', '.pcm'))</_ModuleOutput>
-    <_ModuleFileFlags>@(_Dep->Distinct()->'-fmodule-file=%(Identity)', ' ')</_ModuleFileFlags>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <_Pcm Include="@(_ModuleTU)">
-      <AdditionalOptions>%(_ModuleTU.AdditionalOptions) -x c++-module -fmodule-output=$(_ModuleOutput) $(_ModuleFileFlags)</AdditionalOptions>
-      <!-- your metadata removals, unchanged -->
-    </_Pcm>
-  </ItemGroup>
-
-  <Message Importance="High" Text="[%(_Pcm.Filename)] raw=[$([MSBuild]::ValueOrDefault('%(_Pcm.AdditionalOptions)', ''))]" />
-</Target>
 </Project>

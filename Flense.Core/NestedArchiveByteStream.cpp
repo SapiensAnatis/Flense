@@ -1,4 +1,4 @@
-module Flense.Core:NestedArchiveByteStream;
+module Flense.Core;
 
 import :ArchiveReader;
 import std;

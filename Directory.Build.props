@@ -22,8 +22,4 @@
   <PropertyGroup>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
-
-<Target Name="BeforeClangTidy">
-	<Message Importance="High" Text="I am running before clang tidy"/>
-</Target>
 </Project>
