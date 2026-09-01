@@ -1,0 +1,188 @@
+<Project>
+
+  <!--
+    clang-tidy cannot read MSVC's .ifc module BMIs, so on its own it fails on the first
+    `import` it meets. Before it runs, recompile every module interface unit in the project
+    to a clang .pcm with clang-cl and point clang-tidy at those with -fmodule-file=.
+
+    MSBuild's own module scan (SetModuleDependencies) has already worked out each TU's module
+    name, BMI path and build order, so the metadata it leaves on ClCompile is reused rather
+    than rediscovered: %(AdditionalModuleDependencies) is a transitive `name=path.ifc;` list,
+    and %(MultiToolTaskDependency) is what lets MultiToolTask schedule the .pcm builds in
+    dependency order.
+
+    This file is imported before Microsoft.Cpp.ClangTidy.targets, so redefining that file's
+    BeforeClangTidy hook here would be silently overridden by its own empty definition;
+    extending ClangTidyDependsOn is the hook that survives.
+  -->
+  <PropertyGroup>
+    <ClangTidyDependsOn>$(ClangTidyDependsOn);BuildClangTidyModuleBmis</ClangTidyDependsOn>
+  </PropertyGroup>
+
+  <Target Name="BuildClangTidyModuleBmis"
+          Condition="'$(RunClangCppAnalysis)' == 'true' and '$(EnableCppModules)' == 'true'">
+
+    <PropertyGroup>
+      <ClangTidyBmiIntDir>$(IntDir)ClangTidyModules\</ClangTidyBmiIntDir>
+      <ClangTidyBmiTLogDir>$(TLogLocation)ClangTidyModules\</ClangTidyBmiTLogDir>
+      <!-- The .pcm build is scaffolding, not a review: clang-tidy re-reports anything real
+           when it analyses the same sources, and the MSVC-only switches MSBuild passes would
+           otherwise surface here as unknown-argument warnings. -->
+      <ClangTidyBmiQuietOptions>/w -Wno-unknown-argument -Wno-unused-command-line-argument</ClangTidyBmiQuietOptions>
+    </PropertyGroup>
+
+    <!-- .ifc -> .pcm keeps each BMI beside the MSVC one it mirrors, so the dependency paths
+         rewritten here always resolve to the file the .pcm build actually wrote. -->
+    <ItemGroup>
+      <ClCompile Condition="'%(ClCompile.AdditionalModuleDependencies)' != ''">
+        <ClangTidyModuleFiles>-fmodule-file=$([MSBuild]::ValueOrDefault('%(ClCompile.AdditionalModuleDependencies)', '').TrimEnd(';').Replace('.ifc', '.pcm').Replace(';', ' -fmodule-file='))</ClangTidyModuleFiles>
+      </ClCompile>
+      <ClCompile Condition="'%(ClCompile.CompilerIteration)' == 'Modules'">
+        <ClangTidyBmiFile>$([MSBuild]::ValueOrDefault('%(ClCompile.ModuleOutputFile)', '').Replace('.ifc', '.pcm'))</ClangTidyBmiFile>
+      </ClCompile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ClangTidyBmi Include="@(ClCompile)"
+                     Condition="'%(ClCompile.CompilerIteration)' == 'Modules' and '%(ClCompile.ExcludedFromBuild)' != 'true'">
+        <AdditionalOptions>%(ClCompile.AdditionalOptions) $(ClangTidyAdditionalOptions) $(ClangTidyBmiQuietOptions) -x c++-module /c -fmodule-output=%(ClCompile.ClangTidyBmiFile) %(ClCompile.ClangTidyModuleFiles)</AdditionalOptions>
+        <ObjectFileName>$(ClangTidyBmiIntDir)%(ClCompile.Filename)%(ClCompile.Extension).obj</ObjectFileName>
+        <TrackerLogDirectory>$(ClangTidyBmiTLogDir)</TrackerLogDirectory>
+
+        <!-- Module wiring is expressed in AdditionalOptions above; leaving MSBuild's own
+             metadata in place would re-emit it as /ifcOutput, /reference and /interface. -->
+        <ModuleOutputFile />
+        <AdditionalModuleDependencies />
+        <AdditionalHeaderUnitDependencies />
+        <AdditionalBMIDirectories />
+        <GenerateModuleDependencies />
+        <ModuleDependenciesFile />
+        <BuildStlModules />
+        <CompileAs />
+
+        <!-- Settings clang-cl does not understand, or that would collide with the real build's
+             outputs. The calling convention is deliberately left alone: it is part of a BMI's
+             compatibility check, so it has to match what clang-tidy is given below. -->
+        <EnableClServerMode />
+        <PrecompiledHeader />
+        <PrecompiledHeaderFile />
+        <PrecompiledHeaderOutputFile />
+        <BrowseInformation />
+        <BrowseInformationFile />
+        <DebugInformationFormat />
+        <ProgramDataBaseFileName />
+        <DisableSpecificWarnings />
+        <TreatSpecificWarningsAsErrors />
+        <TreatWarningAsError />
+        <WarningLevel />
+        <EnablePREfast />
+        <PREfastAdditionalOptions />
+        <PREfastAdditionalPlugins />
+        <PREfastLog />
+        <PREfastProjectDirectory />
+        <PREfastRulesetDirectories />
+        <PREfastRulesetFile />
+        <AnalyzeExternalRuleset />
+        <DisableAnalyzeExternal />
+        <CompileAsManaged />
+        <CompileAsWinRT />
+        <DisableLanguageExtensions />
+        <EnableFiberSafeOptimizations />
+        <EnableParallelCodeGeneration />
+        <EnforceTypeConversionRules />
+        <ErrorReporting />
+        <ExpandAttributedSource />
+        <ForceConformanceInForLoopScope />
+        <ForcedUsingFiles />
+        <GenerateXMLDocumentationFiles />
+        <IgnoreStandardIncludePath />
+        <MinimalRebuild />
+        <MultiProcessorCompilation />
+        <_MultiProcessorCompilation />
+        <OpenMPSupport />
+        <RemoveUnreferencedCodeData />
+        <SDLCheck />
+        <SpectreMitigation />
+        <StringPooling />
+        <SupportJustMyCode />
+        <TreatWChar_tAsBuiltInType />
+        <UseFullPaths />
+        <WholeProgramOptimization />
+      </_ClangTidyBmi>
+    </ItemGroup>
+
+    <MakeDir Directories="$(ClangTidyBmiIntDir);$(ClangTidyBmiTLogDir)" />
+
+    <MultiToolTask
+      Condition                  ="'@(_ClangTidyBmi)' != ''"
+      TaskName                   ="Microsoft.Build.CPPTasks.CL"
+      Sources                    ="@(_ClangTidyBmi)"
+
+      TrackerLogDirectory        ="$(ClangTidyBmiTLogDir)"
+      MinimalRebuildFromTracking ="true"
+      ToolArchitecture           ="$(CLToolArchitecture)"
+      TrackerFrameworkPath       ="$(CLTrackerFrameworkPath)"
+      TrackerSdkPath             ="$(CLTrackerSdkPath)"
+      ToolExe                    ="clang-cl.exe"
+      ToolPath                   ="$(ClangTidyToolPath)"
+      TrackFileAccess            ="$(TrackFileAccess)"
+      MaxProcessCount            ="$(MultiProcMaxCount)"
+      SchedulerName              ="$(MultiProcSchedulerName)" />
+
+    <!--
+      The ClangTidy task runs over every ClCompile item, whether or not GetCompileCommands
+      produced a command for it. Take out the module units the scan dragged in from outside
+      the project - the STL's std.ixx and std.compat.ixx - since they are not ours to lint and
+      with no compile command clang-tidy falls back to a mode that cannot even parse them.
+      They go back afterwards, because ComputeCLOutputs still has to see them to put their
+      objects in the library.
+    -->
+    <ItemGroup>
+      <_ClangTidyForeignModule Include="@(ClCompile)"
+                               Condition="'%(ClCompile.CompilerIteration)' == 'Modules' and !$([MSBuild]::ValueOrDefault('%(ClCompile.FullPath)', '').StartsWith('$(MSBuildProjectDirectory)'))" />
+      <ClCompile Remove="@(_ClangTidyForeignModule)" />
+    </ItemGroup>
+
+    <!-- GetCompileCommands only picks up ClCompile items with an empty CompilerIteration,
+         which hides every module interface unit from clang-tidy. Clear it so the .ixx files
+         are analysed too, swap CompileAsCppModule (whose /interface clang-cl rejects outright)
+         for -x c++-module, and hand every TU the .pcm files built above. -->
+    <ItemGroup>
+      <ClCompile Condition="'%(ClCompile.CompilerIteration)' == 'Modules'">
+        <CompilerIteration />
+        <ClangTidyCompileAs>%(ClCompile.CompileAs)</ClangTidyCompileAs>
+        <CompileAs />
+        <AdditionalOptions>%(ClCompile.AdditionalOptions) -x c++-module</AdditionalOptions>
+      </ClCompile>
+      <ClCompile Condition="'%(ClCompile.ClangTidyModuleFiles)' != ''">
+        <AdditionalOptions>%(ClCompile.AdditionalOptions) %(ClCompile.ClangTidyModuleFiles)</AdditionalOptions>
+      </ClCompile>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <ClangTidyModulesPrepared>true</ClangTidyModulesPrepared>
+    </PropertyGroup>
+
+  </Target>
+
+  <!--
+    Put back the ClCompile metadata the analysis pass borrowed. GetProjectInfoForReference runs
+    after Build and reads CompileAs to work out which BMIs this project publishes, and
+    ComputeCLOutputs still has to see the STL module units to put their objects in the library,
+    so neither can be left in the shape clang-tidy needed.
+  -->
+  <Target Name="RestoreClangTidyModuleMetadata" AfterTargets="ClangTidy"
+          Condition="'$(ClangTidyModulesPrepared)' == 'true'">
+    <ItemGroup>
+      <ClCompile Include="@(_ClangTidyForeignModule)" />
+      <_ClangTidyForeignModule Remove="@(_ClangTidyForeignModule)" />
+    </ItemGroup>
+    <ItemGroup>
+      <ClCompile Condition="'%(ClCompile.ClangTidyCompileAs)' != ''">
+        <CompileAs>%(ClCompile.ClangTidyCompileAs)</CompileAs>
+        <CompilerIteration>Modules</CompilerIteration>
+      </ClCompile>
+    </ItemGroup>
+  </Target>
+
+</Project>
