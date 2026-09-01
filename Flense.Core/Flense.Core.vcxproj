@@ -36,7 +36,7 @@
   <PropertyGroup>
     <!-- clang-tidy in this toolchain mis-parses C++20 module interface units (.ixx) as pre-C++20 source,
          so it fails on "export module" itself rather than analysing anything real; disable until that's fixed. -->
-    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -225,10 +225,76 @@
     <ClCompile Include="ImageParser.cpp" />
     <ClCompile Include="Flense.Core.ixx" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include=".clang-tidy" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <UsingTask TaskName="MultiToolTask" AssemblyFile="$(VCTargetsPath)Microsoft.Build.CppTasks.Common.dll"/>
+
+  <Target Name="BeforeClangTidy">
+    <ItemGroup>
+      <_Pcm Include="@(ClCompile)" Condition="'%(ClCompile.CompilerIteration)' == 'Modules'">
+        <!-- custom clang arguments -->
+        <AdditionalOptions>%(ClCompile.AdditionalOptions) -x c++-module /clang:-fmodule-output=E:\Projects\SapiensAnatis\Flense\Flense.Core\Debug\modules\%(Filename).pcm /clang:-fprebuilt-module-path=E:\Projects\SapiensAnatis\Flense\Flense.Core\Debug\modules</AdditionalOptions>
+
+        <!-- remove precompiled headers as compiler may not match clang-tidy toolset -->
+        <PrecompiledHeader />
+        <PrecompiledHeaderFile />
+        <PrecompiledHeaderOutputFile />
+
+        <!-- remove settings which don't apply to clang -->
+        <BrowseInformation />
+        <BrowseInformationFile />
+        <CompileAsManaged />
+        <CompileAsWinRT />
+        <CompileAs />
+        <DebugInformationFormat />
+        <DisableLanguageExtensions />
+        <DisableSpecificWarnings />
+        <EnableFiberSafeOptimizations />
+        <MultiProcessorCompilation />
+        <EnableParallelCodeGeneration />
+        <EnablePREfast />
+        <EnforceTypeConversionRules />
+        <ErrorReporting />
+        <ExpandAttributedSource />
+        <ForceConformanceInForLoopScope />
+        <ForcedUsingFiles />
+        <GenerateXMLDocumentationFiles />
+        <IgnoreStandardIncludePath />
+        <MinimalRebuild />
+        <OpenMPSupport />
+        <PREfastAdditionalOptions />
+        <PREfastAdditionalPlugins />
+        <PREfastLog />
+        <PREfastProjectDirectory />
+        <PREfastRulesetDirectories />
+        <PREfastRulesetFile />
+        <ProgramDataBaseFileName />
+        <RemoveUnreferencedCodeData />
+        <SDLCheck />
+        <SpectreMitigation />
+        <StringPooling />
+        <SupportJustMyCode />
+        <TreatSpecificWarningsAsErrors />
+        <TreatWChar_tAsBuiltInType />
+        <UseFullPaths />
+        <WholeProgramOptimization />
+        <ModuleOutputFile />
+        <AdditionalHeaderUnitDependencies />
+        <AdditionalBMIDirectories />
+        <GenerateModuleDependencies />
+      </_Pcm>
+    </ItemGroup>
+
+    <Message Importance="High" Text="Module outputs: @(_Pcm->'%(AdditionalModuleDependencies)')" />
+
+    <MultiToolTask TaskName="Microsoft.Build.CPPTasks.CL"
+                  TaskAssemblyName="$(VCTargetsPath)Microsoft.Build.CppTasks.Common.dll"
+                  Sources="@(_Pcm)"
+                  ToolExe="clang-cl.exe" ToolPath="C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\Llvm\x64\bin\"
+                  TrackerLogDirectory="$(TLogLocation)" MinimalRebuildFromTracking="true"
+                  MaxProcessCount="$(MultiProcMaxCount)" SchedulerName="$(MultiProcSchedulerName)"/>
+                  
+
+  </Target>
 </Project>

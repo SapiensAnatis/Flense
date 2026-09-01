@@ -1,0 +1,14 @@
+HeaderFilterRegex: '^.*Flense(\.Core)?/.*$'
+ExcludeHeaderFilterRegex: '^.*Generated Files.*$'
+ExtraArgsBefore: ['/std:c++23preview']
+ImplementationFileExtensions: ['cpp', 'ixx']
+CheckOptions:
+  readability-identifier-naming.LocalVariableCase: "camelBack"
+  readability-identifier-naming.FunctionCase: "CamelCase"
+  readability-identifier-naming.ConstexprVariableCase: "CamelCase"
+  readability-identifier-naming.StructCase: "CamelCase"
+  readability-identifier-naming.EnumCase: "CamelCase"
+  readability-identifier-naming.MacroDefinitionCase: "UPPER_CASE"
+  misc-include-cleaner.IgnoreHeaders: ".*nlohmann.*;pch.h"
+  misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
+Checks: 'bugprone-*'

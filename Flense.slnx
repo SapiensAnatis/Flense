@@ -6,9 +6,12 @@
   </Configurations>
   <Folder Name="/Solution Items/">
     <File Path=".clang-format" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
     <File Path="LICENSE.md" />
     <File Path="README.md" />
     <File Path="THIRD-PARTY-NOTICES.md" />
+    <File Path=".clang-tidy" />
     <File Path="build-app.ps1" />
     <File Path="vcpkg.json" />
   </Folder>
@@ -28,7 +31,6 @@
     <Deploy />
   </Project>
   <Project Path="Flense.Benchmarks/Flense.Benchmarks.vcxproj" Id="3f1c8a72-6b4e-4d29-9a51-7c0e2f8b41d6">
-    <Platform Solution="*|ARM64" Project="x64" />
-    <Platform Solution="*|x86" Project="x64" />
+    <Platform Project="x64" />
   </Project>
 </Solution>
