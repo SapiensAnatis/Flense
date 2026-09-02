@@ -1,10 +1,6 @@
-# Paths reaching clang-tidy here are Windows-shaped, so the separator has to be a class - a
-# bare '/' matches nothing and silently suppresses every header. Matching Flense.<project>
-# rather than a bare Flense keeps the checkout directory, whatever it got cloned as, from
-# dragging vcpkg_installed and packages in with it.
-HeaderFilterRegex: '[\\/]Flense\.[^\\/]+[\\/]'
-ExcludeHeaderFilterRegex: '^.*Generated Files.*$'
 ExtraArgsBefore: ['/std:c++23preview']
+# For some reason, .ixx are treated as headers and analysed multiple times - better to analyse them as implementation files
+ExcludeHeaderFilterRegex: '\.ixx$|Generated Files'
 ImplementationFileExtensions: ['cpp', 'ixx']
 CheckOptions:
   readability-identifier-naming.LocalVariableCase: "camelBack"
@@ -15,4 +11,13 @@ CheckOptions:
   readability-identifier-naming.MacroDefinitionCase: "UPPER_CASE"
   misc-include-cleaner.IgnoreHeaders: ".*nlohmann.*;pch.h"
   misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
-Checks: 'bugprone-*'
+WarningsAsErrors: '*'
+Checks: >
+  bugprone-*,
+  cppcoreguidelines-*,
+  concurrency-*,
+  misc-*,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  performance-*,
+  readability-*,
