@@ -3,13 +3,13 @@ export module Flense.Core:NestedArchiveByteStream;
 import :ArchiveReader;
 import std;
 
-export namespace Flense::Core
+namespace Flense::Core
 {
     /// <summary>
     /// Byte source for ArchiveReader that reads from the libarchive handle of an existing open archive.
     /// Used for reading nested .tar image layers in Docker images.
     /// </summary>
-    class NestedArchiveByteStream
+    export class NestedArchiveByteStream
     {
       public:
         /// <summary>

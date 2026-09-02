@@ -13,7 +13,7 @@ CheckOptions:
   misc-include-cleaner.IgnoreHeaders: ".*nlohmann.*;pch.h"
   misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
   performance-unnecessary-value-param.AllowedTypes: 'std::stop_token'
-#WarningsAsErrors: '*'
+WarningsAsErrors: '*'
 # readability-redundant-declaration fires on operator new/delete redeclared via two BMIs (std and
 # nlohmann_json) in any TU that imports both. The location is inside a BMI, so it has no file path
 # for the header filters or NOLINT to match on.
@@ -25,6 +25,7 @@ Checks: >
   misc-*,
   -misc-include-cleaner,
   -misc-no-recursion,
+  -misc-use-internal-linkage,
   modernize-*,
   -modernize-use-trailing-return-type,
   performance-*,

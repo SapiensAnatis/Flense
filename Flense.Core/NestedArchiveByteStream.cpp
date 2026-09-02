@@ -1,6 +1,7 @@
 module Flense.Core;
 
 import :ArchiveReader;
+import :NestedArchiveByteStream;
 import std;
 
 namespace Flense::Core

@@ -1,6 +1,7 @@
 module Flense.Core;
 
 import :ArchiveReader;
+import :FilesystemParsing;
 import :FilesystemTree;
 import :Tree;
 import std;
@@ -11,8 +12,8 @@ namespace Flense::Core
     {
         struct MutableTreeNode
         {
-            FilesystemChangeInfo info;
-            std::flat_map<std::string, MutableTreeNode> children;
+            FilesystemChangeInfo info{};
+            std::flat_map<std::string, MutableTreeNode> children{};
         };
 
         TreeNodeRef<FilesystemChangeInfo> Freeze(MutableTreeNode&& node)
