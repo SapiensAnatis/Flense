@@ -41,14 +41,12 @@ export namespace Flense::Core
         {
             const char* pathname = archive_entry_pathname(m_entry);
 
-            if (pathname)
+            if (pathname != nullptr)
             {
                 return {pathname};
             }
-            else
-            {
-                return "";
-            }
+
+            return "";
         }
 
         /// <summary>
@@ -125,9 +123,9 @@ export namespace Flense::Core
         {
         }
 
-        ArchiveReader* m_parentReader;
         archive_entry* m_entry;
         archive* m_archive;
+        ArchiveReader* m_parentReader;
     };
 
     /// <summary>
@@ -218,7 +216,7 @@ export namespace Flense::Core
 
         using ArchivePtr = std::unique_ptr<archive, ArchiveDeleter>;
 
-        static constexpr std::size_t ChunkSize = 64 * 1024;
+        static constexpr std::size_t ChunkSize = std::size_t{64} * 1024;
 
         struct Context
         {
@@ -256,7 +254,7 @@ export namespace Flense::Core
             Context& m_context;
         };
 
-        static la_ssize_t ArchiveReadCallback(archive*, void* clientData, const void** buffer)
+        static la_ssize_t ArchiveReadCallback(archive* /* unused */, void* clientData, const void** buffer)
         {
             auto& context = *static_cast<Context*>(clientData);
             if (context.stopToken.stop_requested())
@@ -269,7 +267,7 @@ export namespace Flense::Core
             return static_cast<la_ssize_t>(bytesRead);
         }
 
-        static la_int64_t ArchiveSkipCallback(archive*, void* clientData, la_int64_t request)
+        static la_int64_t ArchiveSkipCallback(archive* /* unused */, void* clientData, la_int64_t request)
         {
             auto& context = *static_cast<Context*>(clientData);
             if (context.stopToken.stop_requested() || request <= 0)

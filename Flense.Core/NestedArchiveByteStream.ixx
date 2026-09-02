@@ -21,13 +21,13 @@ export namespace Flense::Core
 
         std::size_t ReadSync(std::span<std::byte> buffer);
         std::int64_t Skip(std::int64_t request);
-        std::uint64_t Size();
-        std::uint64_t Position();
+        [[nodiscard]] std::uint64_t Size() const;
+        [[nodiscard]] std::uint64_t Position() const;
 
       private:
         std::uint64_t m_position{0};
-        std::span<const std::byte> m_initialBuffer;
         ArchiveEntry* m_entry{nullptr};
+        std::span<const std::byte> m_initialBuffer;
     };
 
 } // namespace Flense::Core

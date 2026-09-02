@@ -8,6 +8,6 @@ export module nlohmann_json;
 // them, this wrapper needs rethinking rather than just extending the using-list below.
 export namespace nlohmann
 {
-    using nlohmann::basic_json;
-    using nlohmann::json;
-}
+    using nlohmann::basic_json; // NOLINT(misc-unused-using-decls)
+    using nlohmann::json;       // NOLINT(misc-unused-using-decls)
+} // namespace nlohmann

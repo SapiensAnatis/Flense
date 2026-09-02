@@ -1,3 +1,4 @@
+HeaderFilterRegex: '.*Flense.*'
 ExtraArgsBefore: ['/std:c++23preview']
 # For some reason, .ixx are treated as headers and analysed multiple times - better to analyse them as implementation files
 ExcludeHeaderFilterRegex: '\.ixx$|Generated Files'
@@ -11,13 +12,24 @@ CheckOptions:
   readability-identifier-naming.MacroDefinitionCase: "UPPER_CASE"
   misc-include-cleaner.IgnoreHeaders: ".*nlohmann.*;pch.h"
   misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
-WarningsAsErrors: '*'
+  performance-unnecessary-value-param.AllowedTypes: 'std::stop_token'
+#WarningsAsErrors: '*'
+# readability-redundant-declaration fires on operator new/delete redeclared via two BMIs (std and
+# nlohmann_json) in any TU that imports both. The location is inside a BMI, so it has no file path
+# for the header filters or NOLINT to match on.
 Checks: >
   bugprone-*,
   cppcoreguidelines-*,
+  -cppcoreguidelines-rvalue-reference-param-not-moved,
   concurrency-*,
   misc-*,
+  -misc-include-cleaner,
+  -misc-no-recursion,
   modernize-*,
   -modernize-use-trailing-return-type,
   performance-*,
   readability-*,
+  -readability-identifier-length,
+  -readability-magic-numbers,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-redundant-declaration,

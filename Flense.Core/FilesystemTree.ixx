@@ -10,7 +10,7 @@ export namespace Flense::Core
     /// <summary>
     /// Represents a type of diff operation on a file in a filesystem tree.
     /// </summary>
-    enum class FilesystemChangeKind
+    enum class FilesystemChangeKind : std::uint8_t
     {
         Unspecified = 0,
         None,
@@ -24,9 +24,9 @@ export namespace Flense::Core
     /// </summary>
     struct FilesystemChangeInfo
     {
-        FileKind kind;
-        std::uint64_t size;
-        FilesystemChangeKind changeKind;
+        FileKind kind{};
+        std::uint64_t size{};
+        FilesystemChangeKind changeKind{};
 
         bool operator==(const FilesystemChangeInfo& other) const = default;
     };

@@ -20,7 +20,8 @@ export namespace Flense::Core
         using Ref = std::shared_ptr<const TreeNode>;
         using ChildrenContainer = std::flat_map<std::string, Ref>;
 
-        TreeNode(T data, ChildrenContainer children, Private) : m_data(std::move(data)), m_children(std::move(children))
+        TreeNode(T data, ChildrenContainer children, Private /*unused*/)
+            : m_data(std::move(data)), m_children(std::move(children))
         {
         }
 

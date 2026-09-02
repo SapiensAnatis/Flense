@@ -147,17 +147,15 @@ namespace Flense::Core
                     .contents = std::move(contents),
                 };
             }
-            else
-            {
-                // This is a tar file containing layer diffs.
-                NestedArchiveByteStream nestedStream(&entry, std::as_bytes(std::span(sniffBuffer)));
-                auto reader = ArchiveReader::CreateFromStream(nestedStream);
 
-                return BlobFsDetails{
-                    .archivePath = std::string(entry.Pathname()),
-                    .filesystemChanges = ParseLayerFilesystem(&reader, stopToken),
-                };
-            }
+            // This is a tar file containing layer diffs.
+            NestedArchiveByteStream nestedStream(&entry, std::as_bytes(std::span(sniffBuffer)));
+            auto reader = ArchiveReader::CreateFromStream(nestedStream);
+
+            return BlobFsDetails{
+                .archivePath = std::string(entry.Pathname()),
+                .filesystemChanges = ParseLayerFilesystem(&reader, stopToken),
+            };
         }
 
         /// <summary>

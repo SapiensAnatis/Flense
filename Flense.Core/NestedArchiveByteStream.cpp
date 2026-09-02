@@ -44,12 +44,12 @@ namespace Flense::Core
         return actualSkip;
     }
 
-    std::uint64_t NestedArchiveByteStream::Size()
+    std::uint64_t NestedArchiveByteStream::Size() const
     {
         return m_entry->Size();
     }
 
-    std::uint64_t NestedArchiveByteStream::Position()
+    std::uint64_t NestedArchiveByteStream::Position() const
     {
         return m_position;
     }
