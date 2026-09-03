@@ -2,10 +2,8 @@ export module Flense.Core:Tree;
 
 import std;
 
-export namespace Flense::Core
+namespace Flense::Core
 {
-    template <typename T> class TreeNode;
-
     /// <summary>
     /// Represents an immutable tree or tree node.
     /// </summary>

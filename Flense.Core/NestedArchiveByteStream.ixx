@@ -9,7 +9,7 @@ namespace Flense::Core
     /// Byte source for ArchiveReader that reads from the libarchive handle of an existing open archive.
     /// Used for reading nested .tar image layers in Docker images.
     /// </summary>
-    export class NestedArchiveByteStream
+    class NestedArchiveByteStream
     {
       public:
         /// <summary>

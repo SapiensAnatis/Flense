@@ -3,7 +3,7 @@ module;
 #include <archive_entry.h>
 export module Flense.Core:ArchiveReader;
 
-import :FileKind;
+import :Filesystem;
 import std;
 
 export namespace Flense::Core

@@ -7,7 +7,7 @@ export module Flense.Core:RingBuffer;
 import std;
 import :Mutex;
 
-export namespace Flense::Core
+namespace Flense::Core
 {
     class RingBuffer
     {

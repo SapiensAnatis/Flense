@@ -6,7 +6,7 @@ export module Flense.Core:Mutex;
 
 import std;
 
-export namespace Flense::Core
+namespace Flense::Core
 {
     // Defines an annotated interface for mutexes.
     // Implemented using std::mutex.

@@ -1,7 +1,7 @@
 export module Flense.Core:ImageParser;
 
 import :ArchiveReader;
-import :FilesystemTree;
+import :Filesystem;
 import :ImageLayer;
 import std;
 

@@ -15,13 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FileKind.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Tree.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FilesystemTree.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ImageLayer.ixx">
@@ -64,6 +58,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mutex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Filesystem.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

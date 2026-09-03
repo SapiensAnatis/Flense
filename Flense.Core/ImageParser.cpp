@@ -2,7 +2,7 @@ module Flense.Core;
 
 import :ArchiveReader;
 import :FilesystemParsing;
-import :FilesystemTree;
+import :Filesystem;
 import :ImageLayer;
 import :NestedArchiveByteStream;
 import nlohmann_json;

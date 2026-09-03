@@ -1,11 +1,18 @@
-export module Flense.Core:FilesystemTree;
+export module Flense.Core:Filesystem;
 
-import :FileKind;
 import :Tree;
 import std;
 
 export namespace Flense::Core
 {
+    enum class FileKind : std::uint8_t
+    {
+        Unspecified = 0,
+        File,
+        Directory,
+        Symlink,
+        Other, // Socket / device / etc
+    };
 
     /// <summary>
     /// Represents a type of diff operation on a file in a filesystem tree.
