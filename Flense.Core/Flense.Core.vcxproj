@@ -212,6 +212,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FileKind.ixx" />
+    <ClCompile Include="Mutex.ixx" />
     <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="RingBuffer.ixx" />
     <ClCompile Include="Tree.ixx" />
@@ -228,7 +229,7 @@
     <ClCompile Include="Flense.Core.ixx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Mutex.h" />
+    <ClInclude Include="ThreadSafetyAttributes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

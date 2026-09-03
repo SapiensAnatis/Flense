@@ -1,10 +1,11 @@
 module;
 
-#include "Mutex.h"
+#include "ThreadSafetyAttributes.h"
 
 export module Flense.Core:RingBuffer;
 
 import std;
+import :Mutex;
 
 export namespace Flense::Core
 {
