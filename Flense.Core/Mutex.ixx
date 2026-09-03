@@ -16,11 +16,7 @@ export namespace Flense::Core
         // Acquire/lock this mutex exclusively.  Only one thread can have exclusive
         // access at any one time.  Write operations to guarded data require an
         // exclusive lock.
-        void Lock() ACQUIRE()
-        {
-            m_mutex.lock();
-            m_owner.store(std::this_thread::get_id());
-        }
+        void Lock() ACQUIRE();
 
         // Acquire/lock this mutex for read operations, which require only a shared
         // lock.  This assumes a multiple-reader, single writer semantics.  Multiple
@@ -30,21 +26,11 @@ export namespace Flense::Core
         void ReaderLock() ACQUIRE_SHARED() = delete;
 
         // Release/unlock an exclusive mutex.
-        void Unlock() RELEASE()
-        {
-            m_mutex.unlock();
-            m_owner.store(std::thread::id{});
-        }
+        void Unlock() RELEASE();
 
-        void lock() ACQUIRE() // NOLINT(readability-identifier-naming) - std::condition_variable_any shim
-        {
-            Lock();
-        }
+        void lock() ACQUIRE(); // NOLINT(readability-identifier-naming) - std::condition_variable_any shim
 
-        void unlock() RELEASE() // NOLINT(readability-identifier-naming) - std::condition_variable_any shim
-        {
-            Unlock();
-        }
+        void unlock() RELEASE(); // NOLINT(readability-identifier-naming) - std::condition_variable_any shim
 
         // Release/unlock a shared mutex.
         void ReaderUnlock() RELEASE_SHARED() = delete;
@@ -53,37 +39,19 @@ export namespace Flense::Core
         void GenericUnlock() RELEASE_GENERIC() = delete;
 
         // Try to acquire the mutex.  Returns true on success, and false on failure.
-        bool TryLock() TRY_ACQUIRE(true)
-        {
-            if (m_mutex.try_lock())
-            {
-                m_owner.store(std::this_thread::get_id());
-                return true;
-            }
-
-            return false;
-        }
+        bool TryLock() TRY_ACQUIRE(true);
 
         // Try to acquire the mutex for read operations.
         bool ReaderTryLock() TRY_ACQUIRE_SHARED(true) = delete;
 
         // Assert that this mutex is currently held by the calling thread.
-        void AssertHeld() ASSERT_CAPABILITY(this)
-        {
-            if (m_owner != std::this_thread::get_id())
-            {
-                std::abort();
-            }
-        }
+        void AssertHeld() ASSERT_CAPABILITY(this);
 
         // Assert that is mutex is currently held for read operations.
         void AssertReaderHeld() ASSERT_SHARED_CAPABILITY(this) = delete;
 
         // For negative capabilities.
-        const Mutex& operator!() const
-        {
-            return *this;
-        }
+        const Mutex& operator!() const;
 
       private:
         std::mutex m_mutex;
@@ -108,65 +76,32 @@ export namespace Flense::Core
         MutexLocker& operator=(MutexLocker&& other) = delete;
 
         // Acquire mu, implicitly acquire *this and associate it with mu.
-        MutexLocker(Mutex* mu) ACQUIRE(mu) : mut(mu), locked(true)
-        {
-            mu->Lock();
-        }
+        MutexLocker(Mutex* mu) ACQUIRE(mu);
 
         // Assume mu is held, implicitly acquire *this and associate it with mu.
-        MutexLocker(Mutex* mu, std::adopt_lock_t /* unused */) REQUIRES(mu) : mut(mu), locked(true)
-        {
-        }
+        MutexLocker(Mutex* mu, std::adopt_lock_t /* unused */) REQUIRES(mu);
 
         // Assume mu is not held, implicitly acquire *this and associate it with mu.
-        MutexLocker(Mutex* mu, std::defer_lock_t /* unused */) EXCLUDES(mu) : mut(mu), locked(false)
-        {
-        }
+        MutexLocker(Mutex* mu, std::defer_lock_t /* unused */) EXCLUDES(mu);
 
         // Same as constructors, but without tag types. (Requires C++17 copy elision.)
-        static MutexLocker Lock(Mutex* mu) ACQUIRE(mu)
-        {
-            return {mu};
-        }
+        static MutexLocker Lock(Mutex* mu) ACQUIRE(mu);
 
-        static MutexLocker Adopt(Mutex* mu) REQUIRES(mu)
-        {
-            return {mu, std::adopt_lock};
-        }
+        static MutexLocker Adopt(Mutex* mu) REQUIRES(mu);
 
-        static MutexLocker DeferLock(Mutex* mu) EXCLUDES(mu)
-        {
-            return {mu, std::defer_lock};
-        }
+        static MutexLocker DeferLock(Mutex* mu) EXCLUDES(mu);
 
         // Release *this and all associated mutexes, if they are still held.
         // There is no warning if the scope was already unlocked before.
-        ~MutexLocker() RELEASE()
-        {
-            if (locked)
-            {
-                mut->Unlock();
-            }
-        }
+        ~MutexLocker() RELEASE();
 
         // Acquire all associated mutexes exclusively.
-        void Lock() ACQUIRE()
-        {
-            mut->Lock();
-            locked = true;
-        }
+        void Lock() ACQUIRE();
 
         // Try to acquire all associated mutexes exclusively.
-        bool TryLock() TRY_ACQUIRE(true)
-        {
-            return locked = mut->TryLock();
-        }
+        bool TryLock() TRY_ACQUIRE(true);
 
         // Release all associated mutexes. Warn on double unlock.
-        void Unlock() RELEASE()
-        {
-            mut->Unlock();
-            locked = false;
-        }
+        void Unlock() RELEASE();
     };
 } // namespace Flense::Core

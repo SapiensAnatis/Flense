@@ -213,6 +213,7 @@
   <ItemGroup>
     <ClCompile Include="FileKind.ixx" />
     <ClCompile Include="Mutex.ixx" />
+    <ClCompile Include="Mutex.cpp" />
     <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="RingBuffer.ixx" />
     <ClCompile Include="Tree.ixx" />
