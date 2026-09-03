@@ -217,7 +217,7 @@
     <ClCompile Include="RingBuffer.ixx" />
     <ClCompile Include="Tree.ixx" />
     <ClCompile Include="Filesystem.ixx" />
-    <ClCompile Include="ImageLayer.ixx" />
+    <ClCompile Include="Image.ixx" />
     <ClCompile Include="ArchiveReader.ixx" />
     <ClCompile Include="NestedArchiveByteStream.ixx" />
     <ClCompile Include="NestedArchiveByteStream.cpp" />

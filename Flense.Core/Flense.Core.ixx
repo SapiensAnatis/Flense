@@ -1,6 +1,6 @@
 export module Flense.Core;
 
 export import :Filesystem;
-export import :ImageLayer;
+export import :Image;
 export import :ArchiveReader;
 export import :ImageParser;

@@ -18,7 +18,7 @@
     <ClCompile Include="Tree.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImageLayer.ixx">
+    <ClCompile Include="Image.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ArchiveReader.ixx">

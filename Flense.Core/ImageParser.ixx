@@ -2,16 +2,11 @@ export module Flense.Core:ImageParser;
 
 import :ArchiveReader;
 import :Filesystem;
-import :ImageLayer;
+import :Image;
 import std;
 
 export namespace Flense::Core
 {
-    struct ImageDetails
-    {
-        std::optional<std::string> repoTag;
-        std::vector<ImageLayer> layers;
-    };
 
     /// <summary>
     /// Accumulates OCI image manifest/config details from an archive's entries, fed one at a time.
@@ -38,7 +33,7 @@ export namespace Flense::Core
         /// Assembles ImageDetails once all archive entries have been handed to ProcessEntry().
         /// </summary>
         /// <returns>An ImageDetails struct.</returns>
-        [[nodiscard]] ImageDetails Build() const;
+        [[nodiscard]] Image Build() const;
 
       private:
         std::optional<std::string> m_configPath;

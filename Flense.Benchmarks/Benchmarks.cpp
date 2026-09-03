@@ -65,7 +65,7 @@ namespace Flense::Benchmarks
             double buildMs{0.0};
             size_t entryCount{0};
             std::vector<EntryTiming> entryTimings;
-            Core::ImageDetails details;
+            Core::Image image;
         };
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Flense::Benchmarks
             result.parseMs = ElapsedMs(parseStart);
 
             const auto buildStart = Clock::now();
-            result.details = parser.Build();
+            result.image = parser.Build();
             result.buildMs = ElapsedMs(buildStart);
 
             return result;
@@ -275,7 +275,7 @@ namespace Flense::Benchmarks
         RunIoPass(imagePath, reporter, 0);
         RunParsePass(imagePath, false, reporter, 0);
 
-        Core::ImageDetails lastDetails;
+        Core::Image lastImage;
 
         for (int run = 0; run < runs; run += 1)
         {
@@ -294,7 +294,7 @@ namespace Flense::Benchmarks
 
             if (isFinalRun)
             {
-                lastDetails = std::move(pass.details);
+                lastImage = std::move(pass.image);
 
                 result.slowestEntries = std::move(pass.entryTimings);
                 std::ranges::sort(result.slowestEntries, std::ranges::greater{}, &EntryTiming::milliseconds);
@@ -306,10 +306,10 @@ namespace Flense::Benchmarks
             }
         }
 
-        result.counters.layerCount = lastDetails.layers.size();
+        result.counters.layerCount = lastImage.layers.size();
 
         std::unordered_set<const void*> uniqueNodes;
-        for (const Core::ImageLayer& layer : lastDetails.layers)
+        for (const Core::ImageLayer& layer : lastImage.layers)
         {
             CountTreeNodes(layer.FilesystemChanges(), result.counters.treeNodeCount, uniqueNodes);
         }

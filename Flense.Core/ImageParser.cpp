@@ -3,7 +3,7 @@ module Flense.Core;
 import :ArchiveReader;
 import :FilesystemParsing;
 import :Filesystem;
-import :ImageLayer;
+import :Image;
 import :NestedArchiveByteStream;
 import nlohmann_json;
 import std;
@@ -243,11 +243,11 @@ namespace Flense::Core
             parsed);
     }
 
-    ImageDetails ImageParser::Build() const
+    Image ImageParser::Build() const
     {
         if (!m_configPath)
         {
-            return ImageDetails{};
+            return Image{};
         }
 
         std::vector<ImageLayer> layers;
@@ -290,7 +290,7 @@ namespace Flense::Core
             }
         }
 
-        return ImageDetails{
+        return Image{
             .repoTag = m_repoTag,
             .layers = std::move(layers),
         };

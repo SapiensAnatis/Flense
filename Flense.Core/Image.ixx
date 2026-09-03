@@ -1,4 +1,4 @@
-export module Flense.Core:ImageLayer;
+export module Flense.Core:Image;
 
 import :Filesystem;
 import std;
@@ -27,4 +27,11 @@ export namespace Flense::Core
         std::string m_command;
         FilesystemChangeTreeNodeRef m_filesystemChanges;
     };
+
+    struct Image
+    {
+        std::optional<std::string> repoTag;
+        std::vector<ImageLayer> layers;
+    };
+
 } // namespace Flense::Core
