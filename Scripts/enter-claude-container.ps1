@@ -26,13 +26,13 @@ $volumeMounts = @("C:\Users\ContainerUser\.claude", "C:\Users\ContainerUser\.nug
 
 # The mounted volumes have the wrong permissions by default
 foreach ($volumeMount in $volumeMounts) {
-    Invoke-InContainer -User ContainerAdministrator icacls $volumeMount /grant 'ContainerUser:(OI)(CI)M' /T /Q
+    Invoke-InContainer -User ContainerAdministrator icacls $volumeMount /grant 'ContainerUser:(OI)(CI)F' /T /Q
 
     if ($LASTEXITCODE -ne 0) {
         Write-Host "icacls grant failed on $volumeMount ($LASTEXITCODE); reassigning owner"
 
         Invoke-InContainer -User ContainerAdministrator takeown /F $volumeMount /R /D Y
-        Invoke-InContainer -User ContainerAdministrator icacls $volumeMount /grant 'ContainerUser:(OI)(CI)M' /T /C /Q
+        Invoke-InContainer -User ContainerAdministrator icacls $volumeMount /grant 'ContainerUser:(OI)(CI)F' /T /C /Q
     }
 }
 

@@ -1,7 +1,7 @@
 HeaderFilterRegex: '.*Flense.*'
-ExtraArgsBefore: ['/std:c++23preview']
+ExtraArgsBefore: ['/std:c++23preview', '-Wthread-safety']
 # For some reason, .ixx are treated as headers and analysed multiple times - better to analyse them as implementation files
-ExcludeHeaderFilterRegex: '\.ixx$|Generated Files'
+ExcludeHeaderFilterRegex: '\.ixx$|Generated Files|Mutex.h'
 ImplementationFileExtensions: ['cpp', 'ixx']
 CheckOptions:
   readability-identifier-naming.LocalVariableCase: "camelBack"
@@ -32,5 +32,7 @@ Checks: >
   readability-*,
   -readability-identifier-length,
   -readability-magic-numbers,
+  -readability-use-concise-preprocessor-directives,
   -cppcoreguidelines-avoid-magic-numbers,
   -readability-redundant-declaration,
+  clang-diagnostic-*,

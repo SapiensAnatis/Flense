@@ -54,5 +54,16 @@
     <ClCompile Include="Flense.Core.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RingBuffer.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RingBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Mutex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
