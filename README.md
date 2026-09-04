@@ -97,6 +97,5 @@ To use it, run the script:
 .\Scripts\enter-claude.container.ps1
 ```
 
-If you encounter permission issues with the mounted volumes (e.g. can't restore packages, can't write Claude transcripts), you
-may need to grant full access on C:\ProgramData\Docker\volumes to 'Everyone', as described in [this GitHub issue](https://github.com/docker/for-win/issues/13539)
+The script tries to fix container permissions as it enters, because named volumes on Windows seem to be a nightmare to deal with in this regard. If Claude reports that it can't write transcripts or keeps making you log in again, there is probably a permissions issue that the script has been unable to fix.
 
