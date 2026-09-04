@@ -88,8 +88,9 @@ export namespace Flense::Core
         /// </summary>
         void JoinWorkers();
 
+        static constexpr std::size_t WorkerMaxMemoryUsage = std::size_t{128} * 1024 * 1024;
         static constexpr std::size_t WorkerBufferSize = std::size_t{256} * 1024;
-        static constexpr std::size_t WorkerBufferCount = 32;
+        static constexpr std::size_t WorkerBufferCount = WorkerMaxMemoryUsage / WorkerBufferSize;
 
         BufferPool m_bufferPool{WorkerBufferSize, WorkerBufferCount};
         std::vector<Worker> m_workers;

@@ -214,6 +214,8 @@
     <ClCompile Include="BufferPool.ixx" />
     <ClCompile Include="Mutex.ixx" />
     <ClCompile Include="Mutex.cpp" />
+    <ClCompile Include="Platform.ixx" />
+    <ClCompile Include="Platform.Windows.cpp" />
     <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="RingBuffer.ixx" />
     <ClCompile Include="Channel.ixx" />
