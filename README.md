@@ -25,7 +25,7 @@ Even if it means I lose my sanity in the process, and start writing my shopping 
 
 ## Benchmarks
 
-Benchmarks of the core image parsing against .tar files are included below. Tests were done with three sample images:
+Benchmarks of the core image parsing against .tar files are included below. Tests were done using the headless benchmarking harness with three sample images:
 
 - `postgres:latest`, a relatively light application container
 - `mcr.microsoft.com/devcontainers/cpp:latest`, a moderate size dev container with compilers
@@ -53,7 +53,7 @@ Below are the comparison results for `dive` parsing the same archives with `--ci
 
 - `Flense/` — the WinUI 3 desktop app (C++/WinRT)
 - `Flense.Core/` — a portable core library (plain C++, no WinRT/Windows headers)
-- `Flense.Benchmarks/` — a harness used to benchmark the portable core in a headless context
+- `Flense.Benchmarks/` — a harness used to benchmark the portable core in a headless/non-GUI context
 
 ### `Flense` — WinUI 3 app
 
