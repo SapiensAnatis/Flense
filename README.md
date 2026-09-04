@@ -23,12 +23,37 @@ This project, if I ever actually finish it, will be a love letter to deeply-inte
 in not using Avalonia, or Qt, or even just CsWinRT, but I want it all. Every efficiency saving, every opportunity to look as native as possible.
 Even if it means I lose my sanity in the process, and start writing my shopping lists in MIDL.
 
-## Project layout
+## Benchmarks
+
+Benchmarks of the core image parsing against .tar files are included below. Tests were done with three sample images:
+
+- `postgres:latest`, a relatively light application container
+- `mcr.microsoft.com/devcontainers/cpp:latest`, a moderate size dev container with compilers 
+- `nvidia/cuda`, a much larger development image 
+
+These results were measured on a desktop machine with an AMD Ryzen 7 5800X and 32 GB of RAM.
+
+| Image | `.tar` size | Median parse time | Peak memory usage |
+|---|---|---|---|
+| `postgres:latest` | 164 MB | 0.70 s | 144.9 MiB |
+| `mcr.microsoft.com/devcontainers/cpp:latest` | 805 MB | 2.88 s | 162.8 MiB |
+| `nvidia/cuda:latest` | 2.22 GB | 4.59 s | 138.7 MiB |
+
+Below are the comparison results for `dive` parsing the same archives with `--ci`. These are relatively low-effort PowerShell benchmarks, and so don't include memory usage.
+
+| Image | `.tar` size | Median parse time | Peak memory usage |
+|---|---|---|---|
+| `postgres:latest` | 164 MB | 1.94 s | N/A |
+| `mcr.microsoft.com/devcontainers/cpp:latest` | 805 MB | 10.1 s | N/A |
+| `nvidia/cuda:latest` | 2.22 GB | 13.23 s | N/A |
+
+## Architecture 
+
+### Project layout
 
 - `Flense/` — the WinUI 3 desktop app (C++/WinRT)
 - `Flense.Core/` — a portable core library (plain C++, no WinRT/Windows headers)
-
-## Architecture
+- `Flense.Benchmarks/` — a harness used to benchmark the portable core in a headless context
 
 ### `Flense` — WinUI 3 app
 
