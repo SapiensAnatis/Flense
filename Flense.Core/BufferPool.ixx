@@ -31,8 +31,8 @@ namespace Flense::Core
 
             m_bufferAvailable.wait(m_mutex, [this]() REQUIRES(m_mutex) { return !m_buffers.empty(); });
 
-            std::vector<std::byte> buffer = std::move(m_buffers.front());
-            m_buffers.pop_front();
+            std::vector<std::byte> buffer = std::move(m_buffers.back());
+            m_buffers.pop_back();
             return buffer;
         }
 
@@ -45,7 +45,7 @@ namespace Flense::Core
 
       private:
         Mutex m_mutex;
-        std::list<std::vector<std::byte>> m_buffers GUARDED_BY(m_mutex);
+        std::vector<std::vector<std::byte>> m_buffers GUARDED_BY(m_mutex);
         std::condition_variable_any m_bufferAvailable;
     };
 
@@ -74,17 +74,12 @@ namespace Flense::Core
 
         static RentedBuffer From(BufferPool* pool)
         {
-            if (pool == nullptr)
-            {
-                throw std::invalid_argument("pool cannot be null");
-            }
-
-            return RentedBuffer(pool, pool->GetBuffer());
+            return {pool, pool->GetBuffer()};
         }
 
         [[nodiscard]] std::span<std::byte> Buffer() noexcept
         {
-            return std::span(m_buffer);
+            return {m_buffer};
         }
 
         ~RentedBuffer()
@@ -97,7 +92,16 @@ namespace Flense::Core
         {
             if (m_pool != nullptr)
             {
-                m_pool->ReturnBuffer(std::move(m_buffer));
+                try
+                {
+                    m_pool->ReturnBuffer(std::move(m_buffer));
+                }
+                catch (...) // NOLINT(bugprone-empty-catch)
+                {
+                    // Don't throw from a destructor.
+                    // std::vector<std::byte> has a noexcept move constructor, so this will not corrupt the vector.
+                }
+
                 m_pool = nullptr;
             }
         }

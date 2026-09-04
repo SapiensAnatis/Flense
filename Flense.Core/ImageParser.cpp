@@ -1,12 +1,14 @@
 module Flense.Core;
 
 import :ArchiveReader;
+import :BufferPool;
+import :Channel;
+import :ChannelByteStream;
 import :FilesystemParsing;
 import :Filesystem;
 import :Image;
-import :NestedArchiveByteStream;
-import :Channel;
-import :BufferPool;
+import :ImageParser;
+import :Mutex;
 
 import nlohmann_json;
 import std;
@@ -25,31 +27,8 @@ namespace Flense::Core
             std::vector<std::string> layerPaths;
         };
 
-        /// <summary>
-        /// Represents the file contents of a JSON blob from blobs/sha256/.
-        /// </summary>
-        /// <remarks>
-        /// This could be the image config or something else entirely. Its role isn't known until
-        /// it's cross-referenced against ManifestDetails.
-        /// </remarks>
-        struct JsonBlobDetails
-        {
-            std::string archivePath;
-            std::string contents;
-        };
-
-        /// <summary>
-        /// A binary filesystem blob.
-        /// </summary>
-        struct BlobFsDetails
-        {
-            std::string archivePath;
-            FilesystemChangeTreeNodeRef filesystemChanges;
-        };
-
-        using ParsedEntry = std::variant<std::monostate, ManifestDetails, JsonBlobDetails, BlobFsDetails>;
-
         constexpr std::string_view BlobPrefix = "blobs/sha256/";
+        constexpr std::chrono::seconds ProgressInterval{2};
 
         /// <summary>
         /// Checks if a character is a space or a tab. Matches fewer characters than isspace and is locale-independent.
@@ -119,72 +98,6 @@ namespace Flense::Core
         }
 
         /// <summary>
-        /// Parses a blob found under sha256/blobs/.
-        /// </summary>
-        /// <param name="entry">The archive entry.</param>
-        /// <param name="stopToken">The token to check for cancellation, handed to ParseLayerFilesystem so a large
-        /// layer blob can be abandoned part-way through rather than only between top-level entries.</param>
-        /// <returns>A BlobFsDetails or JsonBlobDetails.</returns>
-        ParsedEntry ParseBlob(ArchiveEntry& entry, std::stop_token stopToken)
-        {
-            // Sniff a small, bounded prefix first - large layer blobs must never be buffered in
-            // full just to find out they're not JSON.
-            std::array<char, 64> sniffBuffer{};
-            const std::size_t sniffLength = std::min(sniffBuffer.size(), static_cast<std::size_t>(entry.Size()));
-            const std::span<char> sniffSpan = std::span{sniffBuffer}.first(sniffLength);
-
-            const std::size_t sniffed = entry.ReadInto(std::as_writable_bytes(sniffSpan));
-
-            if (LooksLikeJsonObject(std::string_view{sniffBuffer.data(), sniffed}))
-            {
-                // Confirmed JSON (manifest/config/etc. - always small) - now safe to buffer in full.
-                std::string contents(sniffBuffer.data(), sniffed);
-                contents.resize(entry.Size());
-
-                const std::span<char> remainingSpan = std::span{contents}.subspan(sniffed);
-                const std::size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
-                contents.resize(sniffed + read);
-
-                return JsonBlobDetails{
-                    .archivePath = std::string{entry.Pathname()},
-                    .contents = std::move(contents),
-                };
-            }
-
-            // This is a tar file containing layer diffs.
-            NestedArchiveByteStream nestedStream(&entry, std::as_bytes(std::span(sniffBuffer)));
-            auto reader = ArchiveReader::CreateFromStream(nestedStream);
-
-            return BlobFsDetails{
-                .archivePath = std::string(entry.Pathname()),
-                .filesystemChanges = ParseLayerFilesystem(&reader, stopToken),
-            };
-        }
-
-        /// <summary>
-        /// Parses an archive entry into one of a number of possible entry types.
-        /// </summary>
-        /// <param name="entry">The archive entry.</param>
-        /// <param name="stopToken">The token to check for cancellation.</param>
-        /// <returns>A variant over the possible types.</returns>
-        ParsedEntry ParseEntry(ArchiveEntry& entry, std::stop_token stopToken)
-        {
-            const std::string_view pathname = entry.Pathname();
-
-            if (pathname == "manifest.json")
-            {
-                return ParseManifestJson(entry);
-            }
-
-            if (pathname.starts_with(BlobPrefix))
-            {
-                return ParseBlob(entry, stopToken);
-            }
-
-            return std::monostate{};
-        }
-
-        /// <summary>
         /// Collapses runs of whitespace and/or tab characters into a single whitespace character.
         /// </summary>
         /// <param name="string">The input string.</param>
@@ -215,40 +128,180 @@ namespace Flense::Core
 
     void ImageParser::ProcessEntry(ArchiveEntry& entry, std::stop_token stopToken)
     {
+        (void)stopToken;
 
-        ParsedEntry parsed = ParseEntry(entry, stopToken);
+        const std::string_view pathname = entry.Pathname();
 
-        std::visit(
-            [this]<typename T>(T& value) {
-                if constexpr (std::is_same_v<T, ManifestDetails>)
-                {
-                    m_configPath = std::move(value.configPath);
-                    m_repoTag = std::move(value.repoTag);
-                    m_layerPaths = std::move(value.layerPaths);
-                }
-                else if constexpr (std::is_same_v<T, JsonBlobDetails>)
-                {
-                    m_jsonBlobsByDigest.emplace(std::move(value.archivePath), std::move(value.contents));
-                }
-                else if constexpr (std::is_same_v<T, BlobFsDetails>)
-                {
-                    m_filesystemsByLayerDigest.emplace(std::move(value.archivePath),
-                                                       std::move(value.filesystemChanges));
-                }
-                else if constexpr (std::is_same_v<T, std::monostate>)
-                {
-                    // Do nothing
-                }
-                else
-                {
-                    static_assert(false, "unhandled ParsedEntry alternative");
-                }
-            },
-            parsed);
+        if (pathname == "manifest.json")
+        {
+            const std::uint64_t entrySize = entry.Size();
+            ManifestDetails manifest = ParseManifestJson(entry);
+
+            m_bytesProcessed.fetch_add(entrySize, std::memory_order_relaxed);
+
+            m_configPath = std::move(manifest.configPath);
+            m_repoTag = std::move(manifest.repoTag);
+            m_layerPaths = std::move(manifest.layerPaths);
+            return;
+        }
+
+        if (!pathname.starts_with(BlobPrefix))
+        {
+            return;
+        }
+
+        const std::uint64_t entrySize = entry.Size();
+
+        // Sniff a small, bounded prefix first - large layer blobs must never be buffered in
+        // full just to find out they're not JSON.
+        std::array<char, 64> sniffBuffer{};
+        const std::size_t sniffLength = std::min(sniffBuffer.size(), static_cast<std::size_t>(entrySize));
+        const std::span<char> sniffSpan = std::span{sniffBuffer}.first(sniffLength);
+
+        const std::size_t sniffed = entry.ReadInto(std::as_writable_bytes(sniffSpan));
+
+        if (LooksLikeJsonObject(std::string_view{sniffBuffer.data(), sniffed}))
+        {
+            // Confirmed JSON (manifest/config/etc. - always small) - now safe to buffer in full and parse inline.
+            std::string contents(sniffBuffer.data(), sniffed);
+            contents.resize(entrySize);
+
+            const std::span<char> remainingSpan = std::span{contents}.subspan(sniffed);
+            const std::size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
+            contents.resize(sniffed + read);
+
+            m_bytesProcessed.fetch_add(sniffed + read, std::memory_order_relaxed);
+
+            m_jsonBlobsByDigest.emplace(std::string{pathname}, std::move(contents));
+            return;
+        }
+
+        // This is a tar file containing layer diffs - hand it off to a worker thread so the (CPU-heavy)
+        // parsing can proceed while the reader moves on to the next top-level entry.
+        DispatchLayerWorker(std::string{pathname}, entry, entrySize,
+                            std::as_bytes(std::span{sniffBuffer}.first(sniffed)));
     }
 
-    Image ImageParser::Build() const
+    void ImageParser::DispatchLayerWorker(std::string archivePath, ArchiveEntry& entry, const std::uint64_t entrySize,
+                                          const std::span<const std::byte> sniffedPrefix)
     {
+        auto channel = std::make_shared<Channel<BufferChunk>>();
+
+        std::promise<void> promise;
+        std::future<void> future = promise.get_future();
+
+        std::jthread thread([this, channel, archivePath = std::move(archivePath), entrySize,
+                             promise = std::move(promise)](std::stop_token workerStopToken) mutable {
+            try
+            {
+                ChannelByteStream stream(channel.get(), entrySize);
+                auto reader = ArchiveReader::CreateFromStream(stream);
+                FilesystemChangeTreeNodeRef filesystem = ParseLayerFilesystem(&reader, workerStopToken);
+
+                {
+                    const MutexLocker locker(&m_filesystemMutex);
+                    m_filesystemsByLayerDigest.emplace(std::move(archivePath), std::move(filesystem));
+                }
+
+                m_bytesProcessed.fetch_add(entrySize, std::memory_order_relaxed);
+
+                promise.set_value();
+            }
+            catch (...)
+            {
+                promise.set_exception(std::current_exception());
+            }
+        });
+
+        m_workers.push_back(Worker{.thread = std::move(thread), .result = std::move(future)});
+
+        bool exhausted = false;
+
+        {
+            RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
+            const std::span<std::byte> bufferSpan = buffer.Buffer();
+
+            std::ranges::copy(sniffedPrefix, bufferSpan.begin());
+
+            const std::size_t additionalRead = entry.ReadInto(bufferSpan.subspan(sniffedPrefix.size()));
+            const std::size_t length = sniffedPrefix.size() + additionalRead;
+
+            exhausted = length < bufferSpan.size();
+
+            channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length});
+        }
+
+        while (!exhausted)
+        {
+            RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
+            const std::span<std::byte> bufferSpan = buffer.Buffer();
+            const std::size_t length = entry.ReadInto(bufferSpan);
+
+            exhausted = length < bufferSpan.size();
+
+            channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length});
+        }
+
+        channel->Close();
+    }
+
+    void ImageParser::ReportProgressPeriodically(const ProgressCallback& onProgress,
+                                                 const std::stop_token stopToken) const
+    {
+        std::mutex mutex;
+        std::condition_variable_any cv;
+        std::unique_lock lock(mutex);
+
+        while (true)
+        {
+            // Interruptible sleep
+            cv.wait_for(lock, stopToken, ProgressInterval, [] { return false; });
+
+            if (stopToken.stop_requested())
+            {
+                break;
+            }
+
+            onProgress(m_bytesProcessed.load(std::memory_order_relaxed));
+        }
+    }
+
+    void ImageParser::JoinWorkers()
+    {
+        for (std::size_t i = 0; i < m_workers.size(); ++i)
+        {
+            try
+            {
+                m_workers.at(i).result.get();
+            }
+            catch (...)
+            {
+                // Every worker captured `this` in its lambda, so none can be left running once we let this
+                // exception escape. Clearing the vector destroys each remaining jthread, which requests
+                // cancellation and joins it on the way out - no need to do that by hand here.
+                m_workers.clear();
+                throw;
+            }
+        }
+
+        m_workers.clear();
+    }
+
+    Image ImageParser::Build(const ProgressCallback& onProgress)
+    {
+        {
+            std::jthread progressReporter;
+
+            if (onProgress)
+            {
+                progressReporter = std::jthread([this, &onProgress](const std::stop_token stopToken) {
+                    ReportProgressPeriodically(onProgress, stopToken);
+                });
+            }
+
+            JoinWorkers();
+        } // progressReporter is stopped and joined here, before we go on to assemble the Image below.
+
         if (!m_configPath)
         {
             return Image{};
@@ -261,6 +314,8 @@ namespace Flense::Core
         {
             const nlohmann::json config = nlohmann::json::parse(configIt->second);
             const nlohmann::json& historyArray = config.at("history");
+
+            const MutexLocker locker(&m_filesystemMutex);
 
             std::size_t layerNum = 0;
             FilesystemChangeTreeNodeRef currentFsSnapshot{nullptr};

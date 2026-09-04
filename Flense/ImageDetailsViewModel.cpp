@@ -9,6 +9,10 @@
 #include "TitleBarService.h"
 #include "WinRtByteStream.h"
 
+#if defined(__INTELLISENSE__)
+#include <ranges>
+#endif
+
 import Flense.Core;
 import std;
 
@@ -128,6 +132,8 @@ namespace winrt::Flense::implementation
 
         WinRtByteStream stream{rawStream};
 
+        const std::uint64_t totalBytes = stream.Size();
+
         LoadingProgress(0);
         IsLoading(true);
 
@@ -145,28 +151,31 @@ namespace winrt::Flense::implementation
 
         ::Flense::Core::ImageParser imageParser;
 
-        double lastReportedPercent = 0;
+        auto updateProgress = [dispatcher, weak = get_weak(), totalBytes](const std::uint64_t bytesProcessed) {
+            if (totalBytes == 0)
+            {
+                return;
+            }
+
+            const double percent = (static_cast<double>(bytesProcessed) / static_cast<double>(totalBytes)) * 100.0;
+
+            dispatcher.TryEnqueue([weak, percent] {
+                if (auto self = weak.get())
+                {
+                    self->LoadingProgress(percent);
+                }
+            });
+        };
+
         while (auto entry = reader.Next(stopToken))
         {
             imageParser.ProcessEntry(*entry, stopToken);
 
+            updateProgress(imageParser.BytesProcessed());
+
             if (stopToken.stop_requested())
             {
                 co_return;
-            }
-
-            const double percent = (static_cast<double>(stream.Position()) / static_cast<double>(stream.Size())) * 90.0;
-
-            // Don't flood the UI with updates
-            if (percent - lastReportedPercent >= 1.0)
-            {
-                lastReportedPercent = percent;
-                dispatcher.TryEnqueue([weak = get_weak(), percent] {
-                    if (auto self = weak.get())
-                    {
-                        self->LoadingProgress(percent);
-                    }
-                });
             }
         }
 
@@ -175,7 +184,7 @@ namespace winrt::Flense::implementation
             co_return;
         }
 
-        auto details = imageParser.Build();
+        auto details = imageParser.Build(updateProgress);
 
         auto parsedLayers = details.layers | std::views::transform([](const auto& layer) {
                                 return winrt::make<implementation::ImageLayerWrapper>(layer);
