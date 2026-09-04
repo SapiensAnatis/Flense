@@ -19,9 +19,13 @@ export namespace Flense::Core
     template <typename T>
     concept ByteStream = requires(T& source, std::span<std::byte> buffer, std::int64_t requestedSkip) {
         { source.ReadSync(buffer) } -> std::convertible_to<std::size_t>;
-        { source.Skip(requestedSkip) } -> std::convertible_to<std::int64_t>;
         { source.Size() } -> std::convertible_to<std::uint64_t>;
         { source.Position() } -> std::convertible_to<std::uint64_t>;
+    };
+
+    template <typename T>
+    concept SkippableByteStream = ByteStream<T> && requires(T& source, std::int64_t requestedSkip) {
+        { source.Skip(requestedSkip) } -> std::convertible_to<std::int64_t>;
     };
 
     class ArchiveReader;
@@ -153,11 +157,16 @@ export namespace Flense::Core
 
             auto context = std::make_unique<Context>();
             context->readSync = [&source](std::span<std::byte> buffer) { return source.ReadSync(buffer); };
-            context->skip = [&source](std::int64_t request) { return source.Skip(request); };
 
             archive_read_set_callback_data(archive.get(), context.get());
             archive_read_set_read_callback(archive.get(), &ArchiveReadCallback);
-            archive_read_set_skip_callback(archive.get(), &ArchiveSkipCallback);
+
+            if constexpr (SkippableByteStream<TStream>)
+            {
+                context->skip = [&source](std::int64_t request) { return source.Skip(request); };
+                archive_read_set_skip_callback(archive.get(), &ArchiveSkipCallback);
+            }
+
             archive_read_open1(archive.get());
 
             return ArchiveReader{std::move(archive), std::move(context)};

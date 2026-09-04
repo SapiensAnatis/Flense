@@ -55,5 +55,5 @@ namespace Flense::Core
         return m_position;
     }
 
-    static_assert(::Flense::Core::ByteStream<NestedArchiveByteStream>);
+    static_assert(::Flense::Core::SkippableByteStream<NestedArchiveByteStream>);
 } // namespace Flense::Core

@@ -54,6 +54,15 @@
     <ClCompile Include="RingBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Channel.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ChannelByteStream.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ChannelByteStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Mutex.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -61,6 +70,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Filesystem.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferPool.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

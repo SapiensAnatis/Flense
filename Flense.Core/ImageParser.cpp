@@ -5,6 +5,9 @@ import :FilesystemParsing;
 import :Filesystem;
 import :Image;
 import :NestedArchiveByteStream;
+import :Channel;
+import :BufferPool;
+
 import nlohmann_json;
 import std;
 
@@ -212,6 +215,7 @@ namespace Flense::Core
 
     void ImageParser::ProcessEntry(ArchiveEntry& entry, std::stop_token stopToken)
     {
+
         ParsedEntry parsed = ParseEntry(entry, stopToken);
 
         std::visit(

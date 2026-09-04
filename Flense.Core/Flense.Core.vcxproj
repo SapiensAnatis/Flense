@@ -211,10 +211,14 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BufferPool.ixx" />
     <ClCompile Include="Mutex.ixx" />
     <ClCompile Include="Mutex.cpp" />
     <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="RingBuffer.ixx" />
+    <ClCompile Include="Channel.ixx" />
+    <ClCompile Include="ChannelByteStream.ixx" />
+    <ClCompile Include="ChannelByteStream.cpp" />
     <ClCompile Include="Tree.ixx" />
     <ClCompile Include="Filesystem.ixx" />
     <ClCompile Include="Image.ixx" />

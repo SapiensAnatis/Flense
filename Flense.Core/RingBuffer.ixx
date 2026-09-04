@@ -6,6 +6,7 @@ export module Flense.Core:RingBuffer;
 
 import std;
 import :Mutex;
+import :ArchiveReader;
 
 namespace Flense::Core
 {
@@ -33,4 +34,22 @@ namespace Flense::Core
 
         std::vector<std::byte> m_buffer GUARDED_BY(m_mutex);
     };
+
+    class RingBufferStream
+    {
+      public:
+        explicit RingBufferStream(RingBuffer* buffer, std::int64_t totalDataSize);
+
+        std::size_t ReadSync(std::span<std::byte> target);
+        [[nodiscard]] std::int64_t Size() const;
+        [[nodiscard]] std::int64_t Position() const;
+
+      private:
+        RingBuffer* m_buffer{nullptr};
+        std::int64_t m_totalDataSize{0};
+        std::int64_t m_position{0};
+    };
+
+    static_assert(ByteStream<RingBufferStream>);
+
 } // namespace Flense::Core

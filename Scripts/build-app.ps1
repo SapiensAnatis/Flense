@@ -41,6 +41,10 @@ if (-not $env:VSCMD_VER) {
     $vsPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
     if (-not $vsPath) { throw 'No Visual Studio installation with MSBuild was found.' }
 
+    # VsDevCmd.bat (invoked internally by Enter-VsDevShell below) shells out to a bare
+    # "vswhere.exe" call of its own, relying on it being resolvable via PATH -- make sure it is.
+    $env:Path = "$(Split-Path $vswhere);$env:Path"
+
     & (Join-Path $vsPath 'Common7\Tools\Launch-VsDevShell.ps1') `
         -Arch amd64 -HostArch amd64 -SkipAutomaticLocation -NoLogo
 }

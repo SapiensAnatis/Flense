@@ -43,6 +43,9 @@ export namespace Flense::Core
         // Raw, not-yet-parsed JSON text keyed by digest hashes
         std::unordered_map<std::string, std::string> m_jsonBlobsByDigest;
         std::unordered_map<std::string, FilesystemChangeTreeNodeRef> m_filesystemsByLayerDigest;
+
+        std::uint64_t m_readBytes{0};
+        std::uint64_t m_processsedBytes{0};
     };
 
 } // namespace Flense::Core

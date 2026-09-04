@@ -96,4 +96,30 @@ namespace Flense::Core
         return m_buffer.size() - m_size;
     }
 
+    RingBufferStream::RingBufferStream(RingBuffer* buffer, const std::int64_t totalDataSize)
+        : m_buffer(buffer), m_totalDataSize(totalDataSize)
+    {
+        if (buffer == nullptr)
+        {
+            throw std::invalid_argument("RingBufferStream: buffer cannot be null");
+        }
+    }
+
+    std::size_t RingBufferStream::ReadSync(std::span<std::byte> target)
+    {
+        std::size_t bytes = m_buffer->Read(target);
+        m_position += static_cast<std::int64_t>(bytes);
+        return bytes;
+    }
+
+    std::int64_t RingBufferStream::Size() const
+    {
+        return m_totalDataSize;
+    }
+
+    std::int64_t RingBufferStream::Position() const
+    {
+        return m_position;
+    }
+
 } // namespace Flense::Core
