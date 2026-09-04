@@ -177,7 +177,7 @@
     <ClInclude Include="MainWindow.xaml.h">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClInclude>
-    <ClInclude Include="DeveloperMenuBarItem.xaml.h" Condition="'$(Configuration)'=='Debug'">
+    <ClInclude Include="DeveloperMenuBarItem.xaml.h">
       <DependentUpon>DeveloperMenuBarItem.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
@@ -194,7 +194,7 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml" />
-    <Page Include="DeveloperMenuBarItem.xaml" Condition="'$(Configuration)'=='Debug'">
+    <Page Include="DeveloperMenuBarItem.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
@@ -261,7 +261,7 @@
     <ClCompile Include="MainWindow.xaml.cpp">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClCompile>
-    <ClCompile Include="DeveloperMenuBarItem.xaml.cpp" Condition="'$(Configuration)'=='Debug'">
+    <ClCompile Include="DeveloperMenuBarItem.xaml.cpp">
       <DependentUpon>DeveloperMenuBarItem.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
@@ -319,7 +319,7 @@
     <Midl Include="TitleBarService.idl">
       <SubType>Designer</SubType>
     </Midl>
-    <Midl Include="DeveloperMenuBarItem.idl" Condition="'$(Configuration)'=='Debug'">
+    <Midl Include="DeveloperMenuBarItem.idl">
       <DependentUpon>DeveloperMenuBarItem.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>
