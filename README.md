@@ -70,7 +70,7 @@ want to use CMake or Bazel to build this library and their own native GUIs.
 ## Dev environment
 
 - **OS:** Windows 11 (Windows App SDK / WinUI 3 desktop app)
-- **IDE/toolchain:** Visual Studio 2026 with the C++ desktop and Windows App SDK workloads
+- **IDE/toolchain:** Visual Studio 2026 with the C++ desktop, Windows App SDK, and clang-cl workloads. See the container's [vsconfig](Container/vs.vsconfig) for a precise list.
 - **Language:** C++20 built with MSVC
 - **Formatting:** `.clang-format` at the repo root
 - **Third-party C++ dependencies:** [vcpkg](https://github.com/microsoft/vcpkg), in manifest mode. Install it anywhere (e.g. `X:\vcpkg`), bootstrap
