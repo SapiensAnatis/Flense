@@ -13,73 +13,70 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Archive">
+      <UniqueIdentifier>{2E83E3FE-9A67-42E6-9D63-BB75E4B232C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Image">
+      <UniqueIdentifier>{A262826A-28ED-4A9A-B2E1-6F66EE07EA49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Concurrency">
+      <UniqueIdentifier>{F46B8A21-9BF0-45B6-9E2D-7B8AEDABB463}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Platform">
+      <UniqueIdentifier>{ACF363C1-902B-4D4D-B5F5-ADE2C9A08C12}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tree.ixx">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Image</Filter>
     </ClCompile>
     <ClCompile Include="Image.ixx">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Image</Filter>
     </ClCompile>
     <ClCompile Include="ArchiveReader.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NestedArchiveByteStream.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NestedArchiveByteStream.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Archive</Filter>
     </ClCompile>
     <ClCompile Include="FilesystemParsing.ixx">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Image</Filter>
     </ClCompile>
     <ClCompile Include="FilesystemParsing.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NlohmannJson.ixx">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Image</Filter>
     </ClCompile>
     <ClCompile Include="ImageParser.ixx">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Image</Filter>
     </ClCompile>
     <ClCompile Include="ImageParser.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Image</Filter>
     </ClCompile>
     <ClCompile Include="Flense.Core.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RingBuffer.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RingBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Channel.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ChannelByteStream.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ChannelByteStream.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Concurrency</Filter>
     </ClCompile>
     <ClCompile Include="Mutex.ixx">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Concurrency</Filter>
     </ClCompile>
     <ClCompile Include="Mutex.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Concurrency</Filter>
     </ClCompile>
     <ClCompile Include="Filesystem.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BufferPool.ixx">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Image</Filter>
     </ClCompile>
     <ClCompile Include="Platform.ixx">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Platform</Filter>
     </ClCompile>
     <ClCompile Include="Platform.Windows.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="ChannelByteStream.cpp">
+      <Filter>Source Files\Archive</Filter>
+    </ClCompile>
+    <ClCompile Include="ChannelByteStream.ixx">
+      <Filter>Source Files\Archive</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferPool.ixx">
+      <Filter>Source Files\Concurrency</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

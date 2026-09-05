@@ -5,22 +5,37 @@ ExcludeHeaderFilterRegex: '\.ixx$|Generated Files'
 ImplementationFileExtensions: ['cpp', 'ixx']
 CheckOptions:
   readability-identifier-naming.LocalVariableCase: "camelBack"
+  readability-identifier-naming.ParameterCase: "camelBack"
   readability-identifier-naming.FunctionCase: "CamelCase"
   readability-identifier-naming.ConstexprVariableCase: "CamelCase"
   readability-identifier-naming.StructCase: "CamelCase"
   readability-identifier-naming.EnumCase: "CamelCase"
+  readability-identifier-naming.ClassCase: "CamelCase"
+  readability-identifier-naming.ClassMemberCase: "camelBack"
+  readability-identifier-naming.ClassMemberPrefix: "m_"
+  readability-identifier-naming.NamespaceCase: "CamelCase"
   readability-identifier-naming.MacroDefinitionCase: "UPPER_CASE"
   misc-include-cleaner.IgnoreHeaders: ".*nlohmann.*;pch.h"
   misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
   performance-unnecessary-value-param.AllowedTypes: 'std::stop_token'
 WarningsAsErrors: '*'
-# readability-redundant-declaration fires on operator new/delete redeclared via two BMIs (std and
-# nlohmann_json) in any TU that imports both. The location is inside a BMI, so it has no file path
-# for the header filters or NOLINT to match on.
+
+# Disabled checks:
+# - cppcoreguidelines-rvalue-reference-param-not-moved: false positives in Freeze() even with AllowPartialMove: true
+# - misc-include-cleaner: doesn't understand that we get symbols from module imports, demands we import the headers as well
+# - misc-no-recursion: lots of tree-based code recurses into node subgraphs, which could perhaps be improved but is not a priority right now
+# - misc-use-internal-linkage: false positives, possibly doesn't see symbols being used externally to a TU due to module imports
+# - modernize-use-trailing-return-type: disagree with this style preference
+# - readability-identifier-length: disagree with this style preference
+# - readability-magic-numbers: disagree with this style preference as it's too absolute; nobody wants constexpr int BitsInByte = 8
+# - readability-use-concise-preprocessor-directives: MSVC recommends using #if defined(...) instead of #ifdef
+# - readability-redundant-declaration: false positives in vcruntime_new.h which don't appear to be filtered out by HeaderFilterRegex
+
 Checks: >
   bugprone-*,
   cppcoreguidelines-*,
   -cppcoreguidelines-rvalue-reference-param-not-moved,
+  -cppcoreguidelines-avoid-magic-numbers,
   concurrency-*,
   misc-*,
   -misc-include-cleaner,
@@ -33,6 +48,5 @@ Checks: >
   -readability-identifier-length,
   -readability-magic-numbers,
   -readability-use-concise-preprocessor-directives,
-  -cppcoreguidelines-avoid-magic-numbers,
   -readability-redundant-declaration,
   clang-diagnostic-*,

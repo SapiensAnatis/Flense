@@ -216,8 +216,6 @@
     <ClCompile Include="Mutex.cpp" />
     <ClCompile Include="Platform.ixx" />
     <ClCompile Include="Platform.Windows.cpp" />
-    <ClCompile Include="RingBuffer.cpp" />
-    <ClCompile Include="RingBuffer.ixx" />
     <ClCompile Include="Channel.ixx" />
     <ClCompile Include="ChannelByteStream.ixx" />
     <ClCompile Include="ChannelByteStream.cpp" />
@@ -225,11 +223,8 @@
     <ClCompile Include="Filesystem.ixx" />
     <ClCompile Include="Image.ixx" />
     <ClCompile Include="ArchiveReader.ixx" />
-    <ClCompile Include="NestedArchiveByteStream.ixx" />
-    <ClCompile Include="NestedArchiveByteStream.cpp" />
     <ClCompile Include="FilesystemParsing.ixx" />
     <ClCompile Include="FilesystemParsing.cpp" />
-    <ClCompile Include="NlohmannJson.ixx" />
     <ClCompile Include="ImageParser.ixx" />
     <ClCompile Include="ImageParser.cpp" />
     <ClCompile Include="Flense.Core.ixx" />

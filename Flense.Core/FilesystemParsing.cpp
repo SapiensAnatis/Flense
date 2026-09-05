@@ -18,8 +18,7 @@ namespace Flense::Core
 
         TreeNodeRef<FilesystemChangeInfo> Freeze(MutableTreeNode&& node)
         {
-            auto [info, children] = std::move(node);
-            auto containers = std::move(children).extract();
+            auto containers = std::move(node.children).extract();
 
             std::vector<FilesystemChangeTreeNodeRef> frozen;
             frozen.reserve(containers.values.size());
@@ -27,12 +26,12 @@ namespace Flense::Core
             for (auto& child : containers.values)
             {
                 const FilesystemChangeTreeNodeRef& added = frozen.emplace_back(Freeze(std::move(child)));
-                info.size += added->Data().size;
+                node.info.size += added->Data().size;
             }
 
             return FilesystemChangeTreeNode::Create(
-                std::move(info), std::flat_map<std::string, FilesystemChangeTreeNodeRef>(
-                                     std::sorted_unique, std::move(containers.keys), std::move(frozen)));
+                node.info, std::flat_map<std::string, FilesystemChangeTreeNodeRef>(
+                               std::sorted_unique, std::move(containers.keys), std::move(frozen)));
         }
 
         // TODO: This patch logic is entirely AI-generated. Check it over when tidying up the code

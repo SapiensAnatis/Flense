@@ -1,3 +1,7 @@
+module;
+
+#include <nlohmann/json.hpp>
+
 module Flense.Core;
 
 import :ArchiveReader;
@@ -10,7 +14,6 @@ import :Image;
 import :ImageParser;
 import :Mutex;
 
-import nlohmann_json;
 import std;
 
 namespace Flense::Core
