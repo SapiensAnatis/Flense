@@ -20,17 +20,18 @@ namespace Flense::Core
         /// Pushes an item into the channel. Never blocks.
         /// </summary>
         /// <param name="value">The value to push.</param>
-        void Push(T&& value)
+        [[nodiscard]] bool Push(T&& value)
         {
             const MutexLocker locker(&m_mutex);
 
             if (m_closed)
             {
-                return;
+                return false;
             }
 
             m_queue.push(std::move(value));
             m_itemPushed.notify_one();
+            return true;
         }
 
         /// <summary>
@@ -65,6 +66,16 @@ namespace Flense::Core
             {
                 m_closed = true;
                 m_itemPushed.notify_all();
+            }
+        }
+
+        void Drain()
+        {
+            std::queue<T> discarded;
+
+            {
+                const MutexLocker locker(&m_mutex);
+                std::swap(m_queue, discarded);
             }
         }
 

@@ -184,7 +184,12 @@ namespace winrt::Flense::implementation
             co_return;
         }
 
-        auto details = imageParser.Build(updateProgress);
+        auto details = imageParser.Build(updateProgress, stopToken);
+
+        if (stopToken.stop_requested())
+        {
+            co_return;
+        }
 
         auto parsedLayers = details.layers | std::views::transform([](const auto& layer) {
                                 return winrt::make<implementation::ImageLayerWrapper>(layer);

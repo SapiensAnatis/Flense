@@ -128,7 +128,10 @@ namespace Flense::Core
 
     void ImageParser::ProcessEntry(ArchiveEntry& entry, std::stop_token stopToken)
     {
-        (void)stopToken;
+        if (stopToken.stop_requested())
+        {
+            return;
+        }
 
         const std::string_view pathname = entry.Pathname();
 
@@ -179,11 +182,12 @@ namespace Flense::Core
         // This is a tar file containing layer diffs - hand it off to a worker thread so the (CPU-heavy)
         // parsing can proceed while the reader moves on to the next top-level entry.
         DispatchLayerWorker(std::string{pathname}, entry, entrySize,
-                            std::as_bytes(std::span{sniffBuffer}.first(sniffed)));
+                            std::as_bytes(std::span{sniffBuffer}.first(sniffed)), stopToken);
     }
 
     void ImageParser::DispatchLayerWorker(std::string archivePath, ArchiveEntry& entry, const std::uint64_t entrySize,
-                                          const std::span<const std::byte> sniffedPrefix)
+                                          const std::span<const std::byte> sniffedPrefix,
+                                          const std::stop_token stopToken)
     {
         auto channel = std::make_shared<Channel<BufferChunk>>();
 
@@ -209,11 +213,23 @@ namespace Flense::Core
             }
             catch (...)
             {
+                channel->Drain();
+                channel->Close();
                 promise.set_exception(std::current_exception());
             }
         });
 
-        m_workers.push_back(Worker{.thread = std::move(thread), .result = std::move(future)});
+        Worker& worker = m_workers.emplace_back(std::move(thread), std::move(future), channel);
+        worker.upstreamStop.emplace(stopToken, std::function<void()>{[channel = worker.channel, &worker] {
+                                        channel->Drain();
+                                        channel->Close();
+                                        worker.thread.request_stop();
+                                    }});
+
+        if (stopToken.stop_requested())
+        {
+            return;
+        }
 
         bool exhausted = false;
 
@@ -228,10 +244,13 @@ namespace Flense::Core
 
             exhausted = length < bufferSpan.size();
 
-            channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length});
+            if (!channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length}))
+            {
+                return;
+            }
         }
 
-        while (!exhausted)
+        while (!exhausted && !stopToken.stop_requested())
         {
             RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
             const std::span<std::byte> bufferSpan = buffer.Buffer();
@@ -239,10 +258,18 @@ namespace Flense::Core
 
             exhausted = length < bufferSpan.size();
 
-            channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length});
+            if (!channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length}))
+            {
+                return;
+            }
         }
 
         channel->Close();
+    }
+
+    ImageParser::~ImageParser()
+    {
+        m_workers.clear();
     }
 
     void ImageParser::ReportProgressPeriodically(const ProgressCallback& onProgress,
@@ -266,28 +293,32 @@ namespace Flense::Core
         }
     }
 
-    void ImageParser::JoinWorkers()
+    bool ImageParser::JoinWorkers(const std::stop_token stopToken)
     {
-        for (std::size_t i = 0; i < m_workers.size(); ++i)
+        for (auto it = m_workers.begin(); it != m_workers.end(); ++it)
         {
             try
             {
-                m_workers.at(i).result.get();
+                it->result.get();
             }
             catch (...)
             {
-                // Every worker captured `this` in its lambda, so none can be left running once we let this
-                // exception escape. Clearing the vector destroys each remaining jthread, which requests
-                // cancellation and joins it on the way out - no need to do that by hand here.
                 m_workers.clear();
                 throw;
+            }
+
+            if (stopToken.stop_requested())
+            {
+                m_workers.clear();
+                return false;
             }
         }
 
         m_workers.clear();
+        return true;
     }
 
-    Image ImageParser::Build(const ProgressCallback& onProgress)
+    Image ImageParser::Build(const ProgressCallback& onProgress, const std::stop_token stopToken)
     {
         {
             std::jthread progressReporter;
@@ -299,7 +330,10 @@ namespace Flense::Core
                 });
             }
 
-            JoinWorkers();
+            if (!JoinWorkers(stopToken))
+            {
+                return Image{};
+            }
         } // progressReporter is stopped and joined here, before we go on to assemble the Image below.
 
         if (!m_configPath)

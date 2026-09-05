@@ -6,6 +6,8 @@ export module Flense.Core:ImageParser;
 
 import :ArchiveReader;
 import :BufferPool;
+import :Channel;
+import :ChannelByteStream;
 import :Filesystem;
 import :Image;
 import :Mutex;
@@ -26,6 +28,14 @@ export namespace Flense::Core
     {
       public:
         using ProgressCallback = std::function<void(std::uint64_t bytesProcessed)>;
+
+        ImageParser() = default;
+        ~ImageParser();
+
+        ImageParser(const ImageParser&) = delete;
+        ImageParser& operator=(const ImageParser&) = delete;
+        ImageParser(ImageParser&&) = delete;
+        ImageParser& operator=(ImageParser&&) = delete;
 
         /// <summary>
         /// Processes an individual archive entry, and store it in the parser's internal state for a later Build() call.
@@ -50,7 +60,7 @@ export namespace Flense::Core
         /// <param name="onProgress">Optional callback invoked periodically, from a background thread, with
         /// cumulative byte totals while waiting for outstanding work to finish.</param>
         /// <returns>An ImageDetails struct.</returns>
-        [[nodiscard]] Image Build(const ProgressCallback& onProgress = {});
+        [[nodiscard]] Image Build(const ProgressCallback& onProgress = {}, std::stop_token stopToken = {});
 
         [[nodiscard]] std::uint64_t BytesProcessed() const
         {
@@ -58,10 +68,21 @@ export namespace Flense::Core
         }
 
       private:
+        struct Worker;
+
+        using UpstreamStopRegistration = std::stop_callback<std::function<void()>>;
+
         struct Worker
         {
+            Worker(std::jthread&& thread, std::future<void>&& result, std::shared_ptr<Channel<BufferChunk>> channel)
+                : thread(std::move(thread)), result(std::move(result)), channel(std::move(channel))
+            {
+            }
+
             std::jthread thread;
             std::future<void> result;
+            std::shared_ptr<Channel<BufferChunk>> channel;
+            std::optional<UpstreamStopRegistration> upstreamStop;
         };
 
         /// <summary>
@@ -74,7 +95,7 @@ export namespace Flense::Core
         /// <param name="entrySize">The entry's total size, as reported by the archive header.</param>
         /// <param name="sniffedPrefix">The bytes already read from entry while sniffing for JSON.</param>
         void DispatchLayerWorker(std::string archivePath, ArchiveEntry& entry, std::uint64_t entrySize,
-                                 std::span<const std::byte> sniffedPrefix);
+                                 std::span<const std::byte> sniffedPrefix, std::stop_token stopToken);
 
         /// <summary>
         /// Calls onProgress with the current byte totals every ProgressInterval, until stopToken is stopped.
@@ -86,14 +107,14 @@ export namespace Flense::Core
         /// capture `this`, so none can be left running) before that exception is rethrown to the caller;
         /// exceptions from any other workers are discarded.
         /// </summary>
-        void JoinWorkers();
+        [[nodiscard]] bool JoinWorkers(std::stop_token stopToken);
 
         static constexpr std::size_t WorkerMaxMemoryUsage = std::size_t{128} * 1024 * 1024;
         static constexpr std::size_t WorkerBufferSize = std::size_t{256} * 1024;
         static constexpr std::size_t WorkerBufferCount = WorkerMaxMemoryUsage / WorkerBufferSize;
 
         BufferPool m_bufferPool{WorkerBufferSize, WorkerBufferCount};
-        std::vector<Worker> m_workers;
+        std::list<Worker> m_workers;
 
         std::optional<std::string> m_configPath;
         std::optional<std::string> m_repoTag;
