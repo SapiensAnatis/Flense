@@ -25,13 +25,20 @@ Even if it means I lose my sanity in the process, and start writing my shopping 
 
 ## Benchmarks
 
-Benchmarks of the core image parsing against .tar files are included below. Tests were done using the headless benchmarking harness with three sample images:
+Benchmarks of the core image parsing against .tar files are included below. Tests are done using the headless benchmarking harness with three sample images:
 
 - `postgres:latest`, a relatively light application container
 - `mcr.microsoft.com/devcontainers/cpp:latest`, a moderate size dev container with compilers
 - `nvidia/cuda`, a much larger development image
 
-These results were measured on a desktop machine with an AMD Ryzen 7 5800X and 32 GB of RAM. The benchmark harness uses `FILE_FLAG_NO_BUFFERING` to simulate a cold read, to represent a realistic use case in which the target image is analyzed for the first time and is not in the disk cache.
+These results are measured on a desktop machine with the following specifications:
+
+- AMD Ryzen 7 5800X CPU
+- 32 GB of DDR4 RAM
+- Samsung 870 QV0 1TB SSD
+
+The benchmark harness uses `FILE_FLAG_NO_BUFFERING` to simulate a cold read, to represent a realistic use case in which the target image
+is analyzed for the first time and is not in the disk cache.
 
 | Image                                        | `.tar` size | Median cold parse time | Peak memory usage |
 | -------------------------------------------- | ----------- | ---------------------- | ----------------- |
@@ -39,13 +46,14 @@ These results were measured on a desktop machine with an AMD Ryzen 7 5800X and 3
 | `mcr.microsoft.com/devcontainers/cpp:latest` | 805 MB      | 2.03 s                 | 163.0 MiB         |
 | `nvidia/cuda:latest`                         | 2.22 GB     | 4.97 s                 | 139.2 MiB         |
 
-Below are the comparison results for `dive` parsing the same archives with `--ci`. These are relatively low-effort PowerShell benchmarks, and so don't include memory usage.
+Below are the comparison results for `dive` parsing the same archives with `--ci`. To simulate cold reads without modifying the source code, 
+the benchmark invokes `SetSystemFileCacheSize` with `-1` before each `dive` call, which is documented as a way to flush the filesystem cache.
 
-| Image                                        | `.tar` size | Median parse time | Peak memory usage |
-| -------------------------------------------- | ----------- | ----------------- | ----------------- |
-| `postgres:latest`                            | 164 MB      | 1.94 s            | N/A               |
-| `mcr.microsoft.com/devcontainers/cpp:latest` | 805 MB      | 10.1 s            | N/A               |
-| `nvidia/cuda:latest`                         | 2.22 GB     | 13.23 s           | N/A               |
+| Image                                        | `.tar` size | Median cold parse time | Peak memory usage |
+| -------------------------------------------- | ----------- | ---------------------- | ----------------- |
+| `postgres:latest`                            | 164 MB      | 2.01 s                 | 37.8 MiB          |
+| `mcr.microsoft.com/devcontainers/cpp:latest` | 805 MB      | 9.95 s                 | 109.3 MiB         |
+| `nvidia/cuda:latest`                         | 2.22 GB     | 12.66 s                | 20.6 MiB          |
 
 ## Architecture
 
