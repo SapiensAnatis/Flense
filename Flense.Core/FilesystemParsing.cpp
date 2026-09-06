@@ -178,6 +178,14 @@ namespace Flense::Core
                          std::views::transform([](auto t) { return std::string_view(t); }) |
                          std::views::filter([](std::string_view c) { return !c.empty() && c != "."; });
 
+            // The root is a synthetic directory used to aggregate this layer.  Archive metadata can
+            // contain entries such as "" or "."; neither identifies a filesystem node and must not
+            // overwrite the root's directory kind or aggregate size.
+            if (split.begin() == split.end())
+            {
+                continue;
+            }
+
             MutableTreeNode* node = &rootNode;
 
             for (const std::string_view pathComponent : split)

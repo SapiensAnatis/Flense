@@ -70,15 +70,27 @@ namespace winrt::Flense::implementation
     float FilesystemTreeNode::SizeAsProportionOfParent() const
     {
         // This isn't implemented in the Flense::Core tree because it is bad for node reusability
+        auto parent = m_parent.get();
 
-        if (auto parent = m_parent.get(); parent && parent.Size() != 0)
-        {
-            return static_cast<float>(m_node->Data().size) / static_cast<float>(parent.Size());
-        }
-        else
+        if (parent == nullptr)
         {
             return 0;
         }
+
+        if (parent.Size() == 0)
+        {
+            return 0;
+        }
+
+        if (parent.Size() < m_node->Data().size)
+        {
+            // This shouldn't really happen... but we must guard it to avoid returning negative ratios from
+            // RatioToGridLengthConverter in inverted mode, which would crash the app.
+            assert(false && "encountered child with larger size than parent");
+            return 1;
+        }
+
+        return static_cast<float>(m_node->Data().size) / static_cast<float>(parent.Size());
     }
 
     Thickness FilesystemTreeNode::IndentMargin() const
