@@ -33,10 +33,9 @@
     <RootNamespace>FlenseCore</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-  <PropertyGroup>
-    <!-- Analysing a module-based project needs the clang .pcm scaffolding that
-         BuildClangTidyModuleBmis in Directory.Build.targets puts in place. -->
+  <PropertyGroup Label="clang-tidy">
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <MaxNumberOfProcesses>0</MaxNumberOfProcesses> <!-- Unlimited parallelism -->
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
