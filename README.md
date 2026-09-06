@@ -57,7 +57,10 @@ Below are the comparison results for `dive` parsing the same archives with `--ci
 
 ### `Flense` — WinUI 3 app
 
-A WinUI 3 app, implemented using C++/WinRT.
+A WinUI 3 app, implemented using C++/WinRT. Proides a main menu to open images, a loading screen, and then an 'analysis view', with diffs across
+layers and a file tree view. The app is packaged as an MSIX, and so can be sideloaded on any Windows 10/11 machine with Developer Mode enabled.
+
+Calls Flense.Core to perform image analysis, and then displays the result in the UI. It should not know anything about Docker or OCI images.
 
 ### `Flense.Core` — portable analysis layer
 
@@ -66,6 +69,11 @@ later without a rewrite.
 
 To be confirmed: how on Earth the build system for that will work; we're 100% locked into MSBuild for WinUI 3, but other platforms will probably
 want to use CMake or Bazel to build this library and their own native GUIs.
+
+### `Flense.Benchmarks` — headless benchmark harness
+
+A Win32 console app that runs the core library against all `.tar` images found in the `TestData/` folder. Not yet cross-platform due to using
+platform-specific subprocess and file APIs, but could be made so with a platform abstraction layer.
 
 ## Dev environment
 
