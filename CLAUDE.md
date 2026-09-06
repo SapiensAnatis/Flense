@@ -12,7 +12,7 @@ app is launched from the build directory you are using (see below).
 
 If you are in a container, you cannot run the app as there is no GUI stack, so your feedback loop is restricted to building the app.
 
-Regardless of whether you are in a container or not, you should always pass -OutputDirectory C:\build to avoid conflicting with Visual Studio builds on the host.
+You can build the app using the script at `.\Scripts\build-app.ps1`. Regardless of whether you are in a container or not, you should always pass -OutputDirectory C:\build to avoid conflicting with Visual Studio builds on the host.
 
 For example:
 
