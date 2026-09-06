@@ -35,9 +35,9 @@ These results were measured on a desktop machine with an AMD Ryzen 7 5800X and 3
 
 | Image                                        | `.tar` size | Median parse time | Peak memory usage |
 | -------------------------------------------- | ----------- | ----------------- | ----------------- |
-| `postgres:latest`                            | 164 MB      | 0.70 s            | 144.9 MiB         |
-| `mcr.microsoft.com/devcontainers/cpp:latest` | 805 MB      | 2.88 s            | 162.8 MiB         |
-| `nvidia/cuda:latest`                         | 2.22 GB     | 4.59 s            | 138.7 MiB         |
+| `postgres:latest`                            | 164 MB      | 0.39 s            | 144.6 MiB         |
+| `mcr.microsoft.com/devcontainers/cpp:latest` | 805 MB      | 1.49 s            | 162.8 MiB         |
+| `nvidia/cuda:latest`                         | 2.22 GB     | 2.87 s            | 138.5 MiB         |
 
 Below are the comparison results for `dive` parsing the same archives with `--ci`. These are relatively low-effort PowerShell benchmarks, and so don't include memory usage.
 
