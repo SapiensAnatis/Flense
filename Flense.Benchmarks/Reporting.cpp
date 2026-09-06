@@ -187,7 +187,7 @@ namespace Flense::Benchmarks
     {
         std::cout << std::format("\nImage: {} ({})\n", result.imagePath.filename().string(),
                                  FormatBytes(result.imageSizeBytes));
-        std::cout << std::format("Runs : {} (1 warmup, warm page cache)\n\n", result.runs);
+        std::cout << std::format("Runs : {} (1 warmup, all reads uncached)\n\n", result.runs);
 
         PrintPhaseTable(result);
         PrintSlowestEntries(result);

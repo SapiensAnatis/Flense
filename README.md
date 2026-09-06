@@ -31,13 +31,13 @@ Benchmarks of the core image parsing against .tar files are included below. Test
 - `mcr.microsoft.com/devcontainers/cpp:latest`, a moderate size dev container with compilers
 - `nvidia/cuda`, a much larger development image
 
-These results were measured on a desktop machine with an AMD Ryzen 7 5800X and 32 GB of RAM.
+These results were measured on a desktop machine with an AMD Ryzen 7 5800X and 32 GB of RAM. The benchmark harness uses `FILE_FLAG_NO_BUFFERING` to simulate a cold read, to represent a realistic use case in which the target image is analyzed for the first time and is not in the disk cache.
 
-| Image                                        | `.tar` size | Median parse time | Peak memory usage |
-| -------------------------------------------- | ----------- | ----------------- | ----------------- |
-| `postgres:latest`                            | 164 MB      | 0.39 s            | 144.6 MiB         |
-| `mcr.microsoft.com/devcontainers/cpp:latest` | 805 MB      | 1.49 s            | 162.8 MiB         |
-| `nvidia/cuda:latest`                         | 2.22 GB     | 2.87 s            | 138.5 MiB         |
+| Image                                        | `.tar` size | Median cold parse time | Peak memory usage |
+| -------------------------------------------- | ----------- | ---------------------- | ----------------- |
+| `postgres:latest`                            | 164 MB      | 0.47 s                 | 145.9 MiB         |
+| `mcr.microsoft.com/devcontainers/cpp:latest` | 805 MB      | 2.03 s                 | 163.0 MiB         |
+| `nvidia/cuda:latest`                         | 2.22 GB     | 4.97 s                 | 139.2 MiB         |
 
 Below are the comparison results for `dive` parsing the same archives with `--ci`. These are relatively low-effort PowerShell benchmarks, and so don't include memory usage.
 

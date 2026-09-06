@@ -269,9 +269,9 @@ namespace Flense::Benchmarks
 
         ProgressReporter reporter{imagePath.filename().string(), runs + 1};
 
-        // Warm up the page cache and the allocator. An I/O pass alone would cache the file, but the
-        // first parse also pays one-off costs (heap growth, page faults on first touch) that would
-        // otherwise land entirely on run 1 and skew the max.
+        // Warm up the allocator. Every pass reads straight from disk regardless (FileByteStream
+        // bypasses the OS page cache), but the first parse still pays one-off costs - heap growth,
+        // page faults on first touch - that would otherwise land entirely on run 1 and skew the max.
         RunIoPass(imagePath, reporter, 0);
         RunParsePass(imagePath, false, reporter, 0);
 
