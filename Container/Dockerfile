@@ -65,3 +65,5 @@ RUN Invoke-WebRequest https://claude.ai/install.ps1 -OutFile C:\TEMP\claude-inst
     Remove-Item C:\TEMP\claude-install.ps1
 
 WORKDIR C:/src
+
+ENV DEVCONTAINER=true

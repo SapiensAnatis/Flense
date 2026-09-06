@@ -4,10 +4,15 @@ Flense is a WinUI 3 app for analysing Docker images, written in C++/WinRT (not C
 
 ## Instructions
 
-You are running in a container, so running the app is not possible as there is no GUI stack. However, you can validate your changes using 
-build-app.ps1 in the repository root.
+Before invoking build commands or skills, establish whether you are in a container. If you are in a container, the `DEVCONTAINER` 
+environment variable will be set.
 
-You should always pass -OutputDirectory C:\build to avoid conflicting with Visual Studio builds on the host.
+If you are not in a container, you can use the skills from `winui@win-dev-skills` to run the app for testing as required. You must make sure the 
+app is launched from the build directory you are using (see below).
+
+If you are in a container, you cannot run the app as there is no GUI stack, so your feedback loop is restricted to building the app.
+
+Regardless of whether you are in a container or not, you should always pass -OutputDirectory C:\build to avoid conflicting with Visual Studio builds on the host.
 
 For example:
 
