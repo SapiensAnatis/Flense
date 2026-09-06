@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 
 #include "FilesystemItemColourConverter.h"
 #if __has_include("FilesystemItemColourConverter.g.cpp")
@@ -6,41 +6,16 @@
 #endif
 
 using namespace winrt::Windows::Foundation;
-using namespace winrt::Microsoft::UI::Xaml;
 using namespace winrt::Windows::UI::Xaml::Interop;
-using namespace winrt::Microsoft::UI::Xaml::Media;
 
 #include "winrt/Flense.h"
 
 namespace winrt::Flense::implementation
 {
-    namespace
-    {
-        static SolidColorBrush AddedBrush{nullptr};
-        static SolidColorBrush RemovedBrush{nullptr};
-        static SolidColorBrush ModifiedBrush{nullptr};
-        static SolidColorBrush DefaultBrush{nullptr};
-    } // namespace
-
-    void FilesystemItemColourConverter::InitializeComponent()
-    {
-        auto resources = Application::Current().Resources();
-
-        auto successBrush = resources.Lookup(winrt::box_value(L"SystemFillColorSuccessBrush")).as<SolidColorBrush>();
-        AddedBrush = SolidColorBrush(successBrush.Color());
-        AddedBrush.Opacity(0.2);
-
-        auto critcalBrush = resources.Lookup(winrt::box_value(L"SystemFillColorCriticalBrush")).as<SolidColorBrush>();
-        RemovedBrush = SolidColorBrush(critcalBrush.Color());
-        RemovedBrush.Opacity(0.2);
-
-        auto cautionBrush = resources.Lookup(winrt::box_value(L"SystemFillColorCautionBrush")).as<SolidColorBrush>();
-        ModifiedBrush = SolidColorBrush(cautionBrush.Color());
-        ModifiedBrush.Opacity(0.2);
-
-        DefaultBrush = SolidColorBrush(winrt::Windows::UI::Color());
-    }
-
+    /// <remarks>
+    /// The styles are supplied from XAML and set their background with {ThemeResource}, so the framework re-resolves
+    /// the colours when the theme changes.
+    /// </remarks>
     IInspectable FilesystemItemColourConverter::Convert(const IInspectable& value, const TypeName& /* targetType */,
                                                         const IInspectable& /* parameter */,
                                                         const hstring& /* language */)
@@ -52,13 +27,13 @@ namespace winrt::Flense::implementation
         switch (kind)
         {
         case Added:
-            return AddedBrush;
+            return m_addedStyle;
         case Removed:
-            return RemovedBrush;
+            return m_removedStyle;
         case Modified:
-            return ModifiedBrush;
+            return m_modifiedStyle;
         default:
-            return DefaultBrush;
+            return nullptr;
         }
     }
 
@@ -67,6 +42,7 @@ namespace winrt::Flense::implementation
                                                             const IInspectable& /* parameter */,
                                                             const hstring& /* language */)
     {
+        // One-way binding only
         throw hresult_not_implemented();
     }
 } // namespace winrt::Flense::implementation

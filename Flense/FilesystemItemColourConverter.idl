@@ -5,5 +5,9 @@ namespace Flense
     runtimeclass FilesystemItemColourConverter : [default] Microsoft.UI.Xaml.Data.IValueConverter
     {
         FilesystemItemColourConverter();
+
+        Microsoft.UI.Xaml.Style AddedStyle;
+        Microsoft.UI.Xaml.Style RemovedStyle;
+        Microsoft.UI.Xaml.Style ModifiedStyle;
     }
 }

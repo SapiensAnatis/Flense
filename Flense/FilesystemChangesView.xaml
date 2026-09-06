@@ -15,6 +15,32 @@
                 <Setter Property="VerticalAlignment" Value="Center" />
             </Style>
 
+            <Style x:Key="FilesystemItemChangeStyle" TargetType="Border">
+                <Setter Property="Opacity" Value="0.2" />
+                <Setter Property="CornerRadius" Value="{ThemeResource ControlCornerRadius}" />
+            </Style>
+
+            <Style
+                x:Key="FilesystemItemAddedStyle"
+                BasedOn="{StaticResource FilesystemItemChangeStyle}"
+                TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource SystemFillColorSuccessBrush}" />
+            </Style>
+
+            <Style
+                x:Key="FilesystemItemRemovedStyle"
+                BasedOn="{StaticResource FilesystemItemChangeStyle}"
+                TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource SystemFillColorCriticalBrush}" />
+            </Style>
+
+            <Style
+                x:Key="FilesystemItemModifiedStyle"
+                BasedOn="{StaticResource FilesystemItemChangeStyle}"
+                TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource SystemFillColorCautionBrush}" />
+            </Style>
+
             <DataTemplate x:Key="FilesystemItemTemplate" x:DataType="local:FilesystemTreeNode">
                 <TreeViewItem
                     VerticalContentAlignment="Stretch"
@@ -31,10 +57,7 @@
                         </Grid.ColumnDefinitions>
 
                         <!--  Background for first two columns  -->
-                        <Border
-                            Grid.ColumnSpan="2"
-                            Background="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemColourConverter}}"
-                            CornerRadius="{ThemeResource ControlCornerRadius}" />
+                        <Border Grid.ColumnSpan="2" Style="{x:Bind ChangeKind, Converter={StaticResource FilesystemItemColourConverter}}" />
 
                         <Border
                             Grid.Column="0"
@@ -90,7 +113,11 @@
                 </TreeViewItem>
             </DataTemplate>
 
-            <local:FilesystemItemColourConverter x:Key="FilesystemItemColourConverter" />
+            <local:FilesystemItemColourConverter
+                x:Key="FilesystemItemColourConverter"
+                AddedStyle="{StaticResource FilesystemItemAddedStyle}"
+                ModifiedStyle="{StaticResource FilesystemItemModifiedStyle}"
+                RemovedStyle="{StaticResource FilesystemItemRemovedStyle}" />
 
             <local:FileKindGlyphConverter x:Key="FileKindGlyphConverter" />
 
