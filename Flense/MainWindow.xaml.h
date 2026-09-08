@@ -24,6 +24,9 @@ namespace winrt::Flense::implementation
 
         void Exit_Click(const winrt::Windows::Foundation::IInspectable& sender,
                         const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
+
+      private:
+        bool m_backDialogShowing{};
     };
 } // namespace winrt::Flense::implementation
 

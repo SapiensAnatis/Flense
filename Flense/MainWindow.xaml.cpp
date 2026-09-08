@@ -45,6 +45,14 @@ namespace winrt::Flense::implementation
     winrt::fire_and_forget MainWindow::AppTitleBar_BackRequested(const Controls::TitleBar& /* sender */,
                                                                  const IInspectable& /* args */)
     {
+        // UI Automation invokes the back button through ProgrammaticClick, which ignores the open
+        // dialog's input blocker and so can raise this a second time. Showing a second
+        // ContentDialog throws, and an exception escaping a fire_and_forget terminates the process.
+        if (m_backDialogShowing)
+        {
+            co_return;
+        }
+
         auto lifetime = get_strong();
 
         Controls::ContentDialog dialog;
@@ -55,7 +63,11 @@ namespace winrt::Flense::implementation
         dialog.CloseButtonText(L"Cancel");
         dialog.DefaultButton(Controls::ContentDialogButton::Primary);
 
-        auto result = co_await dialog.ShowAsync();
+        m_backDialogShowing = true;
+
+        const auto result = co_await dialog.ShowAsync();
+
+        m_backDialogShowing = false;
 
         if (result == Controls::ContentDialogResult::Primary && rootFrame().CanGoBack())
         {
