@@ -7,7 +7,6 @@
 
 #include <format>
 
-using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::UI::Xaml::Interop;
 
 namespace winrt::Flense::implementation
@@ -17,8 +16,9 @@ namespace winrt::Flense::implementation
     static constexpr uint64_t OneMegabyte = static_cast<uint64_t>(1e6);
     static constexpr uint64_t OneKilobyte = static_cast<uint64_t>(1e3);
 
-    IInspectable FileSizeStringConverter::Convert(const IInspectable& value, const TypeName& /* targetType */,
-                                                  const IInspectable& /* parameter */, const hstring& /* language */)
+    winrt::Windows::Foundation::IInspectable FileSizeStringConverter::Convert(
+        const winrt::Windows::Foundation::IInspectable& value, const TypeName& /* targetType */,
+        const winrt::Windows::Foundation::IInspectable& /* parameter */, const hstring& /* language */)
     {
         const uint64_t castedValue = value.as<uint64_t>();
 
@@ -61,9 +61,9 @@ namespace winrt::Flense::implementation
         return winrt::box_value(str);
     }
 
-    IInspectable FileSizeStringConverter::ConvertBack(const IInspectable& /* value */, const TypeName& /* targetType */,
-                                                      const IInspectable& /* parameter */,
-                                                      const hstring& /* language */)
+    winrt::Windows::Foundation::IInspectable FileSizeStringConverter::ConvertBack(
+        const winrt::Windows::Foundation::IInspectable& /* value */, const TypeName& /* targetType */,
+        const winrt::Windows::Foundation::IInspectable& /* parameter */, const hstring& /* language */)
     {
         // One-way binding only
         throw hresult_not_implemented();

@@ -9,7 +9,6 @@
 
 import Flense.Core;
 
-using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::UI::Xaml::Interop;
 
 namespace winrt::Flense::implementation
@@ -22,12 +21,15 @@ namespace winrt::Flense::implementation
         constexpr std::wstring_view DocumentGlyph = L"\uE8A5"; // Document
     } // namespace
 
-    IInspectable FileKindGlyphConverter::Convert(const IInspectable& value, const TypeName& /* targetType */,
-                                                 const IInspectable& /* parameter */, const hstring& /* language */)
+    winrt::Windows::Foundation::IInspectable FileKindGlyphConverter::Convert(
+        const winrt::Windows::Foundation::IInspectable& value, const TypeName& /* targetType */,
+        const winrt::Windows::Foundation::IInspectable& /* parameter */, const hstring& /* language */)
     {
-        static const IInspectable folderGlyph = winrt::box_value(winrt::hstring(FolderGlyph));
-        static const IInspectable linkGlyph = winrt::box_value(winrt::hstring(LinkGlyph));
-        static const IInspectable documentGlyph = winrt::box_value(winrt::hstring(DocumentGlyph));
+        static const winrt::Windows::Foundation::IInspectable folderGlyph =
+            winrt::box_value(winrt::hstring(FolderGlyph));
+        static const winrt::Windows::Foundation::IInspectable linkGlyph = winrt::box_value(winrt::hstring(LinkGlyph));
+        static const winrt::Windows::Foundation::IInspectable documentGlyph =
+            winrt::box_value(winrt::hstring(DocumentGlyph));
 
         const auto kind = value.as<Flense::FileKind>();
 
@@ -44,8 +46,9 @@ namespace winrt::Flense::implementation
         }
     }
 
-    IInspectable FileKindGlyphConverter::ConvertBack(const IInspectable& /* value */, const TypeName& /* targetType */,
-                                                     const IInspectable& /* parameter */, const hstring& /* language */)
+    winrt::Windows::Foundation::IInspectable FileKindGlyphConverter::ConvertBack(
+        const winrt::Windows::Foundation::IInspectable& /* value */, const TypeName& /* targetType */,
+        const winrt::Windows::Foundation::IInspectable& /* parameter */, const hstring& /* language */)
     {
         // One-way binding only
         throw hresult_not_implemented();
