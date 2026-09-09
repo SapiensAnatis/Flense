@@ -137,9 +137,6 @@ namespace winrt::Flense::implementation
         LoadingProgress(0);
         IsLoading(true);
 
-        // Bridge the coroutine's cancellation into a stop_token, which is what Flense.Core reads. Without this the
-        // only cancellation check would be the one between top-level entries below, and a multi-gigabyte layer blob
-        // would have to be parsed to completion before we noticed.
         std::stop_source stopSource;
         cancellation.callback([&stopSource] { stopSource.request_stop(); });
 
