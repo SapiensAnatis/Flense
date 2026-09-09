@@ -44,6 +44,9 @@
     <Midl Include="RatioToGridLengthConverter.idl">
       <Filter>Converters</Filter>
     </Midl>
+    <Midl Include="InverseBoolToVisibilityConverter.idl">
+      <Filter>Converters</Filter>
+    </Midl>
     <Midl Include="FilesystemChangeKind.idl">
       <Filter>Wrappers</Filter>
     </Midl>

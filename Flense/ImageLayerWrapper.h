@@ -13,7 +13,8 @@ namespace winrt::Flense::implementation
     {
         ImageLayerWrapper(::Flense::Core::ImageLayer);
 
-        winrt::hstring Command();
+        wil::single_threaded_property<winrt::hstring> Command;
+
         winrt::Flense::FilesystemTreeNode FilesystemChanges();
 
         void UnloadTree();

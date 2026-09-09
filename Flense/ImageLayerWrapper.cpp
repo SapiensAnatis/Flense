@@ -9,14 +9,9 @@
 
 namespace winrt::Flense::implementation
 {
-    ImageLayerWrapper::ImageLayerWrapper(::Flense::Core::ImageLayer layer) : m_layer(std::move(layer))
+    ImageLayerWrapper::ImageLayerWrapper(::Flense::Core::ImageLayer layer)
+        : Command(winrt::to_hstring(layer.Command())), m_layer(std::move(layer))
     {
-    }
-
-    winrt::hstring ImageLayerWrapper::Command()
-    {
-        // TODO: Cache strings
-        return winrt::to_hstring(m_layer.Command());
     }
 
     winrt::Flense::FilesystemTreeNode ImageLayerWrapper::FilesystemChanges()

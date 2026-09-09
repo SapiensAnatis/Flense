@@ -4,9 +4,13 @@
 
 namespace winrt::Flense::implementation
 {
-    struct FilesystemChangesViewModel : FilesystemChangesViewModelT<FilesystemChangesViewModel>
+    struct FilesystemChangesViewModel : FilesystemChangesViewModelT<FilesystemChangesViewModel>,
+                                        wil::notify_property_changed_base<FilesystemChangesViewModel>
     {
         FilesystemChangesViewModel() = default;
+
+        // We can't use wil::single_threaded_notifying_property here as all of these setters have custom logic in the
+        // setters to ensure the filtering re-runs when they are changed
 
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> Nodes();
         void Nodes(
@@ -18,10 +22,6 @@ namespace winrt::Flense::implementation
         winrt::Flense::FilesystemChangeVisibility ChangeVisibility();
         void ChangeVisibility(const winrt::Flense::FilesystemChangeVisibility& value);
 
-        winrt::event_token PropertyChanged(
-            const winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler& handler);
-        void PropertyChanged(const winrt::event_token& token) noexcept;
-
       private:
         void ApplyFilters();
         void ScheduleApplyFilters();
@@ -31,8 +31,6 @@ namespace winrt::Flense::implementation
         winrt::Flense::FilesystemChangeVisibility m_changeVisibility{true, true, true, true};
 
         winrt::Microsoft::UI::Dispatching::DispatcherQueueTimer m_searchDebounceTimer{nullptr};
-
-        winrt::event<winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
     };
 } // namespace winrt::Flense::implementation
 

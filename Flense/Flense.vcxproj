@@ -136,6 +136,10 @@
       <DependentUpon>RatioToGridLengthConverter.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="InverseBoolToVisibilityConverter.h">
+      <DependentUpon>InverseBoolToVisibilityConverter.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="FilesystemTreeNode.h">
       <DependentUpon>FilesystemTreeNode.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -219,6 +223,10 @@
       <DependentUpon>RatioToGridLengthConverter.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="InverseBoolToVisibilityConverter.cpp">
+      <DependentUpon>InverseBoolToVisibilityConverter.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="FilesystemTreeNode.cpp">
       <DependentUpon>FilesystemTreeNode.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -284,6 +292,9 @@
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="RatioToGridLengthConverter.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="InverseBoolToVisibilityConverter.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="FilesystemTreeNode.idl">

@@ -16,27 +16,8 @@ namespace winrt::Flense::implementation
         return instance;
     }
 
-    void TitleBarService::Title(const winrt::hstring& value)
-    {
-        if (m_title != value)
-        {
-            m_title = value;
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"Title"});
-        }
-    }
-
     void TitleBarService::Reset()
     {
         Title(winrt::hstring{DefaultTitle});
-    }
-
-    event_token TitleBarService::PropertyChanged(const PropertyChangedEventHandler& handler)
-    {
-        return m_propertyChanged.add(handler);
-    }
-
-    void TitleBarService::PropertyChanged(const event_token& token) noexcept
-    {
-        m_propertyChanged.remove(token);
     }
 } // namespace winrt::Flense::implementation

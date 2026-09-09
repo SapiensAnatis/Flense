@@ -13,7 +13,6 @@ namespace Flense
         Flense.ImageLayerWrapper SelectedLayer;
 
         Boolean IsLoading { get; };
-        Boolean IsLoaded { get; };
         Double LoadingProgress { get; };
         String StatusMessage;
 

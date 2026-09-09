@@ -4,30 +4,20 @@
 
 namespace winrt::Flense::implementation
 {
-    struct TitleBarService : TitleBarServiceT<TitleBarService>
+    struct TitleBarService : TitleBarServiceT<TitleBarService>, wil::notify_property_changed_base<TitleBarService>
     {
-        TitleBarService() = default;
+        TitleBarService() : INIT_NOTIFYING_PROPERTY(Title, DefaultTitle)
+        {
+        }
 
         static winrt::Flense::TitleBarService Instance();
 
-        winrt::hstring Title() const
-        {
-            return m_title;
-        }
-
-        void Title(const winrt::hstring& value);
+        wil::single_threaded_notifying_property<winrt::hstring> Title;
 
         void Reset();
 
-        winrt::event_token PropertyChanged(
-            const winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler& handler);
-        void PropertyChanged(const winrt::event_token& token) noexcept;
-
       private:
         static constexpr std::wstring_view DefaultTitle{L"Flense"};
-
-        winrt::hstring m_title{DefaultTitle};
-        winrt::event<winrt::Microsoft::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
     };
 } // namespace winrt::Flense::implementation
 

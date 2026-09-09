@@ -25,34 +25,6 @@ using namespace winrt::Windows::Storage;
 
 namespace winrt::Flense::implementation
 {
-    StorageFile ImageDetailsViewModel::ImageArchive()
-    {
-        return m_imageFile;
-    }
-
-    void ImageDetailsViewModel::ImageArchive(const StorageFile& value)
-    {
-        if (m_imageFile != value)
-        {
-            m_imageFile = value;
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"ImageArchive"});
-        }
-    }
-
-    IObservableVector<winrt::Flense::ImageLayerWrapper> ImageDetailsViewModel::Layers()
-    {
-        return m_layers;
-    }
-
-    void ImageDetailsViewModel::Layers(IObservableVector<winrt::Flense::ImageLayerWrapper> value)
-    {
-        if (m_layers != value)
-        {
-            m_layers = std::move(value);
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"Layers"});
-        }
-    }
-
     winrt::Flense::ImageLayerWrapper ImageDetailsViewModel::SelectedLayer()
     {
         return m_selectedLayer;
@@ -72,54 +44,6 @@ namespace winrt::Flense::implementation
         }
     }
 
-    bool ImageDetailsViewModel::IsLoading()
-    {
-        return m_isLoading;
-    }
-
-    void ImageDetailsViewModel::IsLoading(bool value)
-    {
-        if (m_isLoading != value)
-        {
-            m_isLoading = value;
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"IsLoading"});
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"IsLoaded"});
-        }
-    }
-
-    bool ImageDetailsViewModel::IsLoaded()
-    {
-        return !m_isLoading;
-    }
-
-    double ImageDetailsViewModel::LoadingProgress()
-    {
-        return m_loadingProgress;
-    }
-
-    void ImageDetailsViewModel::LoadingProgress(double value)
-    {
-        if (m_loadingProgress != value)
-        {
-            m_loadingProgress = value;
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"LoadingProgress"});
-        }
-    }
-
-    hstring ImageDetailsViewModel::StatusMessage()
-    {
-        return m_statusMessage;
-    }
-
-    void ImageDetailsViewModel::StatusMessage(const hstring& value)
-    {
-        if (m_statusMessage != value)
-        {
-            m_statusMessage = value;
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"StatusMessage"});
-        }
-    }
-
     IAsyncAction ImageDetailsViewModel::LoadAsync()
     {
         auto lifetime = get_strong();
@@ -127,15 +51,15 @@ namespace winrt::Flense::implementation
 
         auto cancellation = co_await get_cancellation_token();
 
-        auto archive = m_imageFile;
+        auto archive = ImageArchive();
         auto rawStream = co_await archive.OpenReadAsync();
 
         WinRtByteStream stream{rawStream};
 
         const std::uint64_t totalBytes = stream.Size();
 
-        LoadingProgress(0);
-        IsLoading(true);
+        LoadingProgress = 0;
+        IsLoading = true;
 
         std::stop_source stopSource;
         cancellation.callback([&stopSource] { stopSource.request_stop(); });
@@ -159,7 +83,7 @@ namespace winrt::Flense::implementation
             dispatcher.TryEnqueue([weak, percent] {
                 if (auto self = weak.get())
                 {
-                    self->LoadingProgress(percent);
+                    self->LoadingProgress = percent;
                 }
             });
         };
@@ -195,31 +119,21 @@ namespace winrt::Flense::implementation
 
         co_await wil::resume_foreground(dispatcher);
 
-        Layers(winrt::single_threaded_observable_vector<winrt::Flense::ImageLayerWrapper>(std::move(parsedLayers)));
+        Layers = winrt::single_threaded_observable_vector<winrt::Flense::ImageLayerWrapper>(std::move(parsedLayers));
 
         const winrt::hstring name =
             details.repoTag.transform([](const std::string& value) { return winrt::to_hstring(value); })
-                .value_or(m_imageFile.Name());
+                .value_or(archive.Name());
 
         TitleBarService::Instance().Title(name + L" - Flense");
 
-        if (m_layers.Size() > 0)
+        if (Layers().Size() > 0)
         {
-            SelectedLayer(m_layers.GetAt(0));
+            SelectedLayer(Layers().GetAt(0));
         }
 
         LoadingProgress(100);
 
         IsLoading(false);
-    }
-
-    event_token ImageDetailsViewModel::PropertyChanged(const PropertyChangedEventHandler& handler)
-    {
-        return m_propertyChanged.add(handler);
-    }
-
-    void ImageDetailsViewModel::PropertyChanged(const event_token& token) noexcept
-    {
-        m_propertyChanged.remove(token);
     }
 } // namespace winrt::Flense::implementation

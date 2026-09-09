@@ -11,7 +11,6 @@
 
 using namespace winrt;
 using namespace winrt::Microsoft::UI::Dispatching;
-using namespace winrt::Microsoft::UI::Xaml::Data;
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Foundation::Collections;
 
@@ -28,7 +27,7 @@ namespace winrt::Flense::implementation
         {
             m_nodes = value;
             ApplyFilters();
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"Nodes"});
+            RaisePropertyChanged(L"Nodes");
         }
     }
 
@@ -43,7 +42,7 @@ namespace winrt::Flense::implementation
         {
             m_searchQuery = value;
             ScheduleApplyFilters();
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"SearchQuery"});
+            RaisePropertyChanged(L"SearchQuery");
         }
     }
 
@@ -54,16 +53,11 @@ namespace winrt::Flense::implementation
 
     void FilesystemChangesViewModel::ChangeVisibility(const winrt::Flense::FilesystemChangeVisibility& value)
     {
-        bool changed = m_changeVisibility.ShowUnchanged != value.ShowUnchanged ||
-                       m_changeVisibility.ShowAdded != value.ShowAdded ||
-                       m_changeVisibility.ShowModified != value.ShowModified ||
-                       m_changeVisibility.ShowRemoved != value.ShowRemoved;
-
-        if (changed)
+        if (m_changeVisibility != value)
         {
             m_changeVisibility = value;
             ApplyFilters();
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"ChangeVisibility"});
+            RaisePropertyChanged(L"ChangeVisibility");
         }
     }
 
@@ -128,15 +122,5 @@ namespace winrt::Flense::implementation
         {
             get_self<FilesystemTreeNode>(node)->UpdateVisibility(m_searchQuery, m_changeVisibility, false);
         }
-    }
-
-    event_token FilesystemChangesViewModel::PropertyChanged(const PropertyChangedEventHandler& handler)
-    {
-        return m_propertyChanged.add(handler);
-    }
-
-    void FilesystemChangesViewModel::PropertyChanged(const event_token& token) noexcept
-    {
-        m_propertyChanged.remove(token);
     }
 } // namespace winrt::Flense::implementation

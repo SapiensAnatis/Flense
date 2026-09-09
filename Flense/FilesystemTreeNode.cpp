@@ -13,7 +13,8 @@ namespace winrt::Flense::implementation
 {
     FilesystemTreeNode::FilesystemTreeNode(winrt::hstring name, ::Flense::Core::FilesystemChangeTreeNodeRef node,
                                            winrt::weak_ref<winrt::Flense::FilesystemTreeNode> parent)
-        : m_name(std::move(name)), m_node(std::move(node)), m_parent(std::move(parent))
+        : Name(std::move(name)), INIT_NOTIFYING_PROPERTY(Visible, true), m_node(std::move(node)),
+          m_parent(std::move(parent))
     {
         if (auto parentProjected = m_parent.get())
         {
@@ -22,11 +23,6 @@ namespace winrt::Flense::implementation
     }
 
     FilesystemTreeNode::~FilesystemTreeNode() = default;
-
-    winrt::hstring FilesystemTreeNode::Name() const
-    {
-        return m_name;
-    }
 
     winrt::Flense::FileKind FilesystemTreeNode::Kind() const
     {
@@ -99,21 +95,6 @@ namespace winrt::Flense::implementation
         return {.Left = m_depth * IndentSizeInPixels, .Top = 0, .Right = 0, .Bottom = 0};
     }
 
-    bool FilesystemTreeNode::Visible() const
-    {
-        return m_visible;
-    }
-
-    /// <remarks>Not exposed via IDL, intended for internal use only</remarks>
-    void FilesystemTreeNode::Visible(bool value)
-    {
-        if (m_visible != value)
-        {
-            m_visible = value;
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"Visible"});
-        }
-    }
-
     bool FilesystemTreeNode::IsExpanded() const
     {
         return m_isExpanded;
@@ -124,8 +105,8 @@ namespace winrt::Flense::implementation
         if (m_isExpanded != value)
         {
             m_isExpanded = value;
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"IsExpanded"});
-            m_propertyChanged(*this, PropertyChangedEventArgs{L"ChildrenIfExpanded"});
+            RaisePropertyChanged(L"IsExpanded");
+            RaisePropertyChanged(L"ChildrenIfExpanded");
         }
     }
 
@@ -166,16 +147,6 @@ namespace winrt::Flense::implementation
         return !m_node->Children().empty();
     }
 
-    winrt::event_token FilesystemTreeNode::PropertyChanged(const PropertyChangedEventHandler& handler)
-    {
-        return m_propertyChanged.add(handler);
-    }
-
-    void FilesystemTreeNode::PropertyChanged(const winrt::event_token& token) noexcept
-    {
-        m_propertyChanged.remove(token);
-    }
-
     bool FilesystemTreeNode::MatchesChangeKindFilter(const winrt::Flense::FilesystemChangeVisibility& filter)
     {
         switch (ChangeKind())
@@ -207,7 +178,7 @@ namespace winrt::Flense::implementation
         // way to improve this, e.g. searching over the core tree type and materializing only matching nodes.
         bool anyChildVisible = false;
 
-        const bool thisNodeMatch = std::wstring_view{m_name}.contains(query);
+        const bool thisNodeMatch = std::wstring_view{Name}.contains(query);
 
         for (const auto& child : Children())
         {
@@ -220,7 +191,7 @@ namespace winrt::Flense::implementation
 
         const bool visible = anyChildVisible || ownVisible;
 
-        Visible(visible);
+        Visible = visible;
 
         return visible;
     }

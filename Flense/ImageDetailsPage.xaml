@@ -8,6 +8,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <ResourceDictionary>
+            <local:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+        </ResourceDictionary>
+    </Page.Resources>
+
     <Grid>
         <Grid Padding="36" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}">
             <Grid.RowDefinitions>
@@ -44,7 +50,7 @@
         <Grid
             Padding="4,0,0,0"
             ColumnSpacing="4"
-            Visibility="{x:Bind ViewModel.IsLoaded, Mode=OneWay}">
+            Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="500" />
                 <ColumnDefinition Width="*" />
