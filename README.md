@@ -100,7 +100,7 @@ If we do go cross-platform, we will have to put some thought into the build syst
 
 #### Tree representation with `std::shared_ptr`
 
-Each layer of an OCI image is a tarball that contains filesystem diffs for that layer - i.e. it contains any files that were changed or added in that layer (named with a .wh to signal deletion). Because we want to be able to browse the full image filesystem at _any_ layer, it is important to be able to re-use nodes that we defined in earlier layers.
+Each layer of an OCI image is a tarball that contains filesystem diffs for that layer - i.e. it contains any files that were changed, added, or deleted in that layer (deletions are signified by a filename that starts with `.wh`). Because we want to be able to browse the full image filesystem at _any_ layer, it is important to be able to re-use nodes that we defined in earlier layers.
 
 To achieve this, filesystems are represented using an immutable tree based on `std::shared_ptr`. This means that if a single file is added, then the tree can be copied and share all of the previous layer's nodes, save for the newly added path. For example, when parsing `postgres:latest`, we require 79,711 nodes to represent the filesystem at each layer, but only 19,879 of these nodes have a distinct pointer address, meaning that nodes are re-used in roughly 75% of cases.
 
@@ -120,7 +120,7 @@ To avoid the producer thread from advancing too far ahead of the consumers, and 
 
 - **OS:** Windows 11 (Windows App SDK / WinUI 3 desktop app)
 - **IDE/toolchain:** Visual Studio 2026 with the C++ desktop, Windows App SDK, and clang-cl workloads. See the container's [vsconfig](Container/vs.vsconfig) for a precise list.
-- **Language:** C++20 built with MSVC
+- **Language:** C++23 built with MSVC
 - **Formatting:** `.clang-format` at the repo root
 - **Third-party C++ dependencies:** [vcpkg](https://github.com/microsoft/vcpkg), in manifest mode. Install it anywhere (e.g. `X:\vcpkg`), bootstrap
   it (`bootstrap-vcpkg.bat`), and run `vcpkg integrate install` once for machine-wide MSBuild integration. `vcpkg.json` at the repo root declares
