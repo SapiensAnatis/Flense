@@ -14,6 +14,9 @@
 // conflict with Storyboard::GetCurrentTime
 #undef GetCurrentTime
 
+// Must precede any C++/WinRT header so WIL can hook C++/WinRT's error handling.
+#include <wil/cppwinrt.h>
+
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Storage.h>
 #include <winrt/Windows.Foundation.Collections.h>
@@ -30,6 +33,6 @@
 #include <winrt/Microsoft.UI.Xaml.Shapes.h>
 #include <winrt/Microsoft.UI.Dispatching.h>
 
-#include <wil/cppwinrt.h>
 #include <wil/cppwinrt_helpers.h>
 #include <wil/cppwinrt_authoring.h>
+#include <wil/resource.h>
