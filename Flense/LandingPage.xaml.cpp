@@ -15,8 +15,8 @@
 #include <winrt/Windows.UI.Xaml.Interop.h>
 
 using namespace winrt;
-using namespace Microsoft::UI;
-using namespace Microsoft::UI::Xaml;
+using namespace winrt::Microsoft::UI;
+using namespace winrt::Microsoft::UI::Xaml;
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Storage;
 using namespace winrt::Windows::Storage::Pickers;
@@ -26,7 +26,7 @@ using namespace winrt::Windows::Storage::Pickers;
 
 namespace winrt::Flense::implementation
 {
-    fire_and_forget LandingPage::OpenImageFileButton_Click(IInspectable const& sender, RoutedEventArgs const& e)
+    fire_and_forget LandingPage::OpenImageFileButton_Click(const IInspectable& sender, const RoutedEventArgs& e)
     {
         if (auto button = sender.try_as<Controls::Button>())
         {

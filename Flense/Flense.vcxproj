@@ -168,6 +168,7 @@
       <DependentUpon>ImageDetailsViewModel.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="DialogService.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="TitleBarService.h">
@@ -262,6 +263,7 @@
       <DependentUpon>TitleBarService.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="DialogService.cpp" />
     <ClCompile Include="WinRtByteStream.cpp" />
     <ClCompile Include="App.xaml.cpp">
       <DependentUpon>App.xaml</DependentUpon>
