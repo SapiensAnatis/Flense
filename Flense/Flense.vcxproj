@@ -186,6 +186,10 @@
       <DependentUpon>DeveloperMenuBarItem.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="LoadFailureDialog.xaml.h">
+      <DependentUpon>LoadFailureDialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
@@ -200,6 +204,9 @@
     </Page>
     <Page Include="MainWindow.xaml" />
     <Page Include="DeveloperMenuBarItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoadFailureDialog.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
@@ -275,6 +282,10 @@
       <DependentUpon>DeveloperMenuBarItem.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="LoadFailureDialog.xaml.cpp">
+      <DependentUpon>LoadFailureDialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -334,6 +345,10 @@
     </Midl>
     <Midl Include="DeveloperMenuBarItem.idl">
       <DependentUpon>DeveloperMenuBarItem.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="LoadFailureDialog.idl">
+      <DependentUpon>LoadFailureDialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>
   </ItemGroup>

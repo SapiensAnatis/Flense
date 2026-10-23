@@ -17,6 +17,9 @@
     <Page Include="DeveloperMenuBarItem.xaml">
       <Filter>Controls</Filter>
     </Page>
+    <Page Include="LoadFailureDialog.xaml">
+      <Filter>Controls</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />

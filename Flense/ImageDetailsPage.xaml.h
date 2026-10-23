@@ -33,6 +33,8 @@ namespace winrt::Flense::implementation
       private:
         static bool UnboxChecked(const winrt::Windows::Foundation::IReference<bool>& value);
 
+        winrt::Windows::Foundation::IAsyncAction ShowLoadFailureAsync(winrt::hstring message, winrt::hstring details);
+
         winrt::Flense::ImageDetailsViewModel m_viewModel;
         winrt::Windows::Foundation::IAsyncAction m_loadAsyncAction{nullptr};
     };

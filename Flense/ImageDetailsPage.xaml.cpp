@@ -1,6 +1,8 @@
 #include "pch.h"
 
+#include "DialogService.h"
 #include "ImageDetailsPage.xaml.h"
+#include "LoadFailureDialog.xaml.h"
 #include "TitleBarService.h"
 #if __has_include("ImageDetailsPage.g.cpp")
 #include "ImageDetailsPage.g.cpp"
@@ -43,6 +45,11 @@ namespace winrt::Flense::implementation
                     Frame().GoBack();
                 }
             }
+
+            if (const winrt::hstring failure = m_viewModel.ErrorMessage(); !failure.empty())
+            {
+                co_await ShowLoadFailureAsync(failure, m_viewModel.ErrorDetails());
+            }
         }
         else
         {
@@ -50,6 +57,23 @@ namespace winrt::Flense::implementation
         }
 
         m_loadAsyncAction = nullptr;
+    }
+
+    IAsyncAction ImageDetailsPage::ShowLoadFailureAsync(winrt::hstring message, winrt::hstring details)
+    {
+        auto lifetime = get_strong();
+
+        Flense::LoadFailureDialog dialog;
+        dialog.Message(message);
+        dialog.Details(details);
+        dialog.XamlRoot(Frame().XamlRoot());
+
+        const auto shown = co_await DialogService::Instance().ShowAsync(dialog) != nullptr;
+
+        if (shown && Frame().CanGoBack())
+        {
+            Frame().GoBack();
+        }
     }
 
     void ImageDetailsPage::OnNavigatedFrom(const NavigationEventArgs& /* e */)
