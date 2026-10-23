@@ -196,29 +196,25 @@ export namespace Flense::Core
         /// <summary>
         /// Advances to the next entry in the archive. Automatically skips any part of the previous
         /// entry's data that wasn't consumed via ArchiveEntry::ReadInto(). Returns nullopt once
-        /// the archive is exhausted, or once cancellation is requested.
+        /// the archive is exhausted.
         /// </summary>
         /// <param name="stopToken">Cancellation token for interrupting the operation.</param>
         /// <remarks>
         /// Invalidates any string_views or other references obtained from previous entries.
         /// </remarks>
         /// <exception cref="ArchiveError">The archive could not be read.</exception>
+        /// <exception cref="OperationCancelledError">stopToken was triggered before or during the call.</exception>
         std::optional<ArchiveEntry> Next(std::stop_token stopToken)
         {
             const StopTokenScope scope{*m_context, std::move(stopToken)};
 
             if (m_context->stopToken.stop_requested())
             {
-                return std::nullopt;
+                throw OperationCancelledError{};
             }
 
             archive_entry* entry = nullptr;
             const int result = archive_read_next_header(m_archive.get(), &entry);
-
-            if (result == ARCHIVE_EOF)
-            {
-                return std::nullopt;
-            }
 
             // ARCHIVE_WARN means the header was read but something about it was unusual (an attribute
             // libarchive doesn't support, say) - the entry itself is still usable.
@@ -227,9 +223,14 @@ export namespace Flense::Core
                 return ArchiveEntry{entry, m_archive.get()};
             }
 
-            // Both callbacks return ARCHIVE_FATAL to implement cancellation, so a fatal result here may
-            // mean nothing worse than the caller having asked us to stop.
+            // We sometimes return ARCHIVE_FATAL as a hacky way to indicate cancellation
             if (m_context->stopToken.stop_requested())
+            {
+                throw OperationCancelledError{};
+            }
+
+            // All good but no more entries
+            if (result == ARCHIVE_EOF)
             {
                 return std::nullopt;
             }

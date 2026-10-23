@@ -11,8 +11,8 @@ namespace Flense::Core
     /// </summary>
     /// <param name="nestedTarReader"></param>
     /// <param name="stopToken">Handed to ArchiveReader::Next, so the walk can be interrupted part-way through a
-    /// large entry. On cancellation the partial tree built so far is returned, so callers must discard it rather
-    /// than treat it as a layer.</param>
+    /// large entry.</param>
+    /// <exception cref="OperationCancelledError">stopToken was triggered before the walk finished.</exception>
     FilesystemChangeTreeNodeRef ParseLayerFilesystem(ArchiveReader* nestedTarReader, std::stop_token stopToken);
 
     /// <summary>
