@@ -45,6 +45,8 @@ export namespace Flense::Core
         /// it is checked once per entry within the layer's nested archive rather than only between top-level entries.
         /// If cancellation is requested part-way through, the parser is left holding partial state and Build() must
         /// not be called.</param>
+        /// <exception cref="OperationCancelledError">stopToken was triggered before the entry was read in
+        /// full.</exception>
         /// <remarks>
         /// Entries that turn out to be nested layer tars are handed off to a worker thread for parsing and this
         /// call returns as soon as the entry's bytes have been read off the archive, without waiting for that
@@ -60,6 +62,8 @@ export namespace Flense::Core
         /// <param name="onProgress">Optional callback invoked periodically, from a background thread, with
         /// cumulative byte totals while waiting for outstanding work to finish.</param>
         /// <returns>An ImageDetails struct.</returns>
+        /// <exception cref="OperationCancelledError">stopToken was triggered while waiting for outstanding
+        /// work.</exception>
         [[nodiscard]] Image Build(const ProgressCallback& onProgress = {}, std::stop_token stopToken = {});
 
         [[nodiscard]] std::uint64_t BytesProcessed() const
@@ -105,9 +109,10 @@ export namespace Flense::Core
         /// <summary>
         /// Waits for every dispatched worker to finish. If one threw, every worker is still joined (they
         /// capture `this`, so none can be left running) before that exception is rethrown to the caller;
-        /// exceptions from any other workers are discarded.
+        /// exceptions from any other workers are discarded. Throws OperationCancelledError if stopToken is triggered
+        /// while waiting, again only once every worker has been joined.
         /// </summary>
-        [[nodiscard]] bool JoinWorkers(std::stop_token stopToken);
+        void JoinWorkers(std::stop_token stopToken);
 
         static constexpr std::size_t WorkerMaxMemoryUsage = std::size_t{128} * 1024 * 1024;
         static constexpr std::size_t WorkerBufferSize = std::size_t{256} * 1024;

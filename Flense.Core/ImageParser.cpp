@@ -141,7 +141,7 @@ namespace Flense::Core
     {
         if (stopToken.stop_requested())
         {
-            return;
+            throw OperationCancelledError{};
         }
 
         // docker save emits directory entries such as blobs/sha256/, which would otherwise pass for an empty blob.
@@ -249,15 +249,17 @@ namespace Flense::Core
         });
 
         Worker& worker = m_workers.emplace_back(std::move(thread), std::move(future), channel);
+        // The worker has to see the stop before its stream runs dry: otherwise the closed channel reads as a
+        // truncated archive, and cancellation gets reported as corruption.
         worker.upstreamStop.emplace(stopToken, std::function<void()>{[channel = worker.channel, &worker] {
+                                        worker.thread.request_stop();
                                         channel->Drain();
                                         channel->Close();
-                                        worker.thread.request_stop();
                                     }});
 
         if (stopToken.stop_requested())
         {
-            return;
+            throw OperationCancelledError{};
         }
 
         try
@@ -281,8 +283,13 @@ namespace Flense::Core
                 }
             }
 
-            while (!exhausted && !stopToken.stop_requested())
+            while (!exhausted)
             {
+                if (stopToken.stop_requested())
+                {
+                    throw OperationCancelledError{};
+                }
+
                 RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
                 const std::span<std::byte> bufferSpan = buffer.Buffer();
                 const std::size_t length = entry.ReadInto(bufferSpan);
@@ -332,29 +339,27 @@ namespace Flense::Core
         }
     }
 
-    bool ImageParser::JoinWorkers(const std::stop_token stopToken)
+    void ImageParser::JoinWorkers(const std::stop_token stopToken)
     {
-        for (auto it = m_workers.begin(); it != m_workers.end(); ++it)
+        try
         {
-            try
+            for (Worker& worker : m_workers)
             {
-                it->result.get();
-            }
-            catch (...)
-            {
-                m_workers.clear();
-                throw;
-            }
+                worker.result.get();
 
-            if (stopToken.stop_requested())
-            {
-                m_workers.clear();
-                return false;
+                if (stopToken.stop_requested())
+                {
+                    throw OperationCancelledError{};
+                }
             }
+        }
+        catch (...)
+        {
+            m_workers.clear();
+            throw;
         }
 
         m_workers.clear();
-        return true;
     }
 
     Image ImageParser::Build(const ProgressCallback& onProgress, const std::stop_token stopToken)
@@ -369,14 +374,9 @@ namespace Flense::Core
                 });
             }
 
-            if (!JoinWorkers(stopToken))
-            {
-                return Image{};
-            }
+            JoinWorkers(stopToken);
         } // progressReporter is stopped and joined here, before we go on to assemble the Image below.
 
-        // An empty Image means cancellation and nothing else, so everything below reports what went
-        // wrong rather than returning one.
         if (!m_configPath)
         {
             throw ImageFormatError{ImageFormatErrorKind::NoManifest, "No manifest.json entry"};
