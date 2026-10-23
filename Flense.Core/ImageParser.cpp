@@ -68,36 +68,43 @@ namespace Flense::Core
             const std::size_t bytesRead = entry.ReadInto(std::as_writable_bytes(contentsSpan));
             contents.resize(bytesRead);
 
-            const nlohmann::json manifests = nlohmann::json::parse(contents);
+            try
+            {
+                const nlohmann::json manifests = nlohmann::json::parse(contents);
 
-            // TODO: support archives containing multiple images (manifest.json is an array of them) -
-            // for now we just take the first one.
-            const nlohmann::json& manifest = manifests.at(0);
+                // TODO: support archives containing multiple images (manifest.json is an array of them) -
+                // for now we just take the first one.
+                const nlohmann::json& manifest = manifests.at(0);
 
-            const std::string configPath = manifest.at("Config").get<std::string>();
-            const std::optional<std::string> repoTag = [&manifest]() -> std::optional<std::string> {
-                const auto& tags = manifest.at("RepoTags");
+                const std::string configPath = manifest.at("Config").get<std::string>();
+                const std::optional<std::string> repoTag = [&manifest]() -> std::optional<std::string> {
+                    const auto& tags = manifest.at("RepoTags");
 
-                // If an image is untagged, "RepoTags" will be null.
-                if (tags.is_array() && !tags.empty())
+                    // If an image is untagged, "RepoTags" will be null.
+                    if (tags.is_array() && !tags.empty())
+                    {
+                        return tags.at(0).get<std::string>();
+                    }
+
+                    return std::nullopt;
+                }();
+
+                std::vector<std::string> layerPaths;
+                for (const auto& layerPath : manifest.at("Layers"))
                 {
-                    return tags.at(0).get<std::string>();
+                    layerPaths.push_back(layerPath.get<std::string>());
                 }
 
-                return std::nullopt;
-            }();
-
-            std::vector<std::string> layerPaths;
-            for (const auto& layerPath : manifest.at("Layers"))
-            {
-                layerPaths.push_back(layerPath.get<std::string>());
+                return ManifestDetails{
+                    .configPath = configPath,
+                    .repoTag = repoTag,
+                    .layerPaths = std::move(layerPaths),
+                };
             }
-
-            return ManifestDetails{
-                .configPath = configPath,
-                .repoTag = repoTag,
-                .layerPaths = std::move(layerPaths),
-            };
+            catch (const nlohmann::json::exception& e)
+            {
+                throw ImageFormatError{ImageFormatErrorKind::MalformedMetadata, e.what()};
+            }
         }
 
         /// <summary>
@@ -130,8 +137,15 @@ namespace Flense::Core
     } // namespace
 
     void ImageParser::ProcessEntry(ArchiveEntry& entry, std::stop_token stopToken)
+    try
     {
         if (stopToken.stop_requested())
+        {
+            return;
+        }
+
+        // docker save emits directory entries such as blobs/sha256/, which would otherwise pass for an empty blob.
+        if (entry.FileKind() != FileKind::File)
         {
             return;
         }
@@ -187,6 +201,11 @@ namespace Flense::Core
         DispatchLayerWorker(std::string{pathname}, entry, entrySize,
                             std::as_bytes(std::span{sniffBuffer}.first(sniffed)), stopToken);
     }
+    catch (ImageReadError& error)
+    {
+        error.SetEntryPath(std::string{entry.Pathname()});
+        throw;
+    }
 
     void ImageParser::DispatchLayerWorker(std::string archivePath, ArchiveEntry& entry, const std::uint64_t entrySize,
                                           const std::span<const std::byte> sniffedPrefix,
@@ -207,18 +226,25 @@ namespace Flense::Core
 
                 {
                     const MutexLocker locker(&m_filesystemMutex);
-                    m_filesystemsByLayerDigest.emplace(std::move(archivePath), std::move(filesystem));
+                    m_filesystemsByLayerDigest.emplace(archivePath, std::move(filesystem));
                 }
 
                 m_bytesProcessed.fetch_add(entrySize, std::memory_order_relaxed);
 
                 promise.set_value();
             }
-            catch (...)
+            catch (ImageReadError& error)
             {
+                error.SetEntryPath(archivePath);
+                promise.set_exception(std::current_exception());
                 channel->Drain();
                 channel->Close();
+            }
+            catch (...)
+            {
                 promise.set_exception(std::current_exception());
+                channel->Drain();
+                channel->Close();
             }
         });
 
@@ -234,37 +260,47 @@ namespace Flense::Core
             return;
         }
 
-        bool exhausted = false;
-
+        try
         {
-            RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
-            const std::span<std::byte> bufferSpan = buffer.Buffer();
+            bool exhausted = false;
 
-            std::ranges::copy(sniffedPrefix, bufferSpan.begin());
-
-            const std::size_t additionalRead = entry.ReadInto(bufferSpan.subspan(sniffedPrefix.size()));
-            const std::size_t length = sniffedPrefix.size() + additionalRead;
-
-            exhausted = length < bufferSpan.size();
-
-            if (!channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length}))
             {
-                return;
+                RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
+                const std::span<std::byte> bufferSpan = buffer.Buffer();
+
+                std::ranges::copy(sniffedPrefix, bufferSpan.begin());
+
+                const std::size_t additionalRead = entry.ReadInto(bufferSpan.subspan(sniffedPrefix.size()));
+                const std::size_t length = sniffedPrefix.size() + additionalRead;
+
+                exhausted = length < bufferSpan.size();
+
+                if (!channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length}))
+                {
+                    return;
+                }
+            }
+
+            while (!exhausted && !stopToken.stop_requested())
+            {
+                RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
+                const std::span<std::byte> bufferSpan = buffer.Buffer();
+                const std::size_t length = entry.ReadInto(bufferSpan);
+
+                exhausted = length < bufferSpan.size();
+
+                if (!channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length}))
+                {
+                    return;
+                }
             }
         }
-
-        while (!exhausted && !stopToken.stop_requested())
+        catch (...)
         {
-            RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
-            const std::span<std::byte> bufferSpan = buffer.Buffer();
-            const std::size_t length = entry.ReadInto(bufferSpan);
-
-            exhausted = length < bufferSpan.size();
-
-            if (!channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length}))
-            {
-                return;
-            }
+            // The worker blocks on the channel until told nothing more is coming, and never sees the jthread's stop
+            // request while it waits - left open, it would hang ~ImageParser, which joins it.
+            channel->Close();
+            throw;
         }
 
         channel->Close();
@@ -339,51 +375,81 @@ namespace Flense::Core
             }
         } // progressReporter is stopped and joined here, before we go on to assemble the Image below.
 
+        // An empty Image means cancellation and nothing else, so everything below reports what went
+        // wrong rather than returning one.
         if (!m_configPath)
         {
-            return Image{};
+            throw ImageFormatError{ImageFormatErrorKind::NoManifest, "No manifest.json entry"};
         }
 
-        std::vector<ImageLayer> layers;
-
         const auto configIt = m_jsonBlobsByDigest.find(*m_configPath);
-        if (configIt != m_jsonBlobsByDigest.end())
+        if (configIt == m_jsonBlobsByDigest.end())
         {
-            const nlohmann::json config = nlohmann::json::parse(configIt->second);
-            const nlohmann::json& historyArray = config.at("history");
+            throw ImageFormatError{ImageFormatErrorKind::MissingConfiguration, "No entry at the manifest's Config path",
+                                   *m_configPath};
+        }
 
-            const MutexLocker locker(&m_filesystemMutex);
+        // The commands are views into config, so it has to outlive the loop that consumes them below.
+        nlohmann::json config;
+        std::vector<std::string_view> commands;
 
-            std::size_t layerNum = 0;
-            FilesystemChangeTreeNodeRef currentFsSnapshot{nullptr};
+        try
+        {
+            config = nlohmann::json::parse(configIt->second);
 
-            for (const auto& historyObj : historyArray)
+            for (const auto& historyObj : config.at("history"))
             {
                 if (auto it = historyObj.find("empty_layer"); it != historyObj.end() && it->get<bool>())
                 {
                     continue;
                 }
 
-                const std::string_view command = historyObj.at("created_by").get_ref<const std::string&>();
-
-                // TODO: Make this more destructive so the filesystem tree can be moved?
-                // Though, does it really matter if it's just a shared pointer?
-                const std::string& layerPath = m_layerPaths.at(layerNum);
-                const FilesystemChangeTreeNodeRef& diff = m_filesystemsByLayerDigest.at(layerPath);
-
-                if (currentFsSnapshot)
-                {
-                    currentFsSnapshot = ApplyFilesystemChanges(currentFsSnapshot, diff);
-                }
-                else
-                {
-                    currentFsSnapshot = diff;
-                }
-
-                layers.emplace_back(CollapseWhitespace(command), currentFsSnapshot);
-
-                layerNum += 1;
+                commands.emplace_back(historyObj.at("created_by").get_ref<const std::string&>());
             }
+        }
+        catch (const nlohmann::json::exception& e)
+        {
+            throw ImageFormatError{ImageFormatErrorKind::MalformedMetadata, e.what(), *m_configPath};
+        }
+
+        if (commands.size() > m_layerPaths.size())
+        {
+            throw ImageFormatError{ImageFormatErrorKind::MissingLayers,
+                                   "Manifest lists fewer layers than the configuration's history"};
+        }
+
+        std::vector<ImageLayer> layers;
+        layers.reserve(commands.size());
+
+        const MutexLocker locker(&m_filesystemMutex);
+
+        FilesystemChangeTreeNodeRef currentFsSnapshot{nullptr};
+
+        for (std::size_t layerNum = 0; layerNum < commands.size(); ++layerNum)
+        {
+            const std::string& layerPath = m_layerPaths.at(layerNum);
+
+            const auto diffIt = m_filesystemsByLayerDigest.find(layerPath);
+            if (diffIt == m_filesystemsByLayerDigest.end())
+            {
+                throw ImageFormatError{ImageFormatErrorKind::MissingLayers, "No entry at the manifest's layer path",
+                                       layerPath};
+            }
+
+            // TODO: Make this more destructive so the filesystem tree can be moved?
+            // Though, does it really matter if it's just a shared pointer?
+            const FilesystemChangeTreeNodeRef& diff = diffIt->second;
+
+            if (currentFsSnapshot)
+            {
+                currentFsSnapshot = ApplyFilesystemChanges(currentFsSnapshot, diff);
+            }
+            else
+            {
+                currentFsSnapshot = diff;
+            }
+
+            layers.emplace_back(CollapseWhitespace(commands.at(layerNum)), currentFsSnapshot);
         }
 
         return Image{

@@ -3,8 +3,27 @@ module;
 #include <archive_entry.h>
 export module Flense.Core:ArchiveReader;
 
+import :Error;
 import :Filesystem;
 import std;
+
+namespace Flense::Core
+{
+    /// <summary>
+    /// Gets a formatted string describing a libarchive error.
+    /// </summary>
+    /// <param name="functionName">The most recent libarchive function called.</param>
+    /// <param name="archive">Archive handle.</param>
+    /// <returns>A string containing the function name and error, e.g. "archive_read_open1: Unrecognized archive
+    /// format"</returns>
+    inline std::string ErrorString(const std::string_view functionName, archive* archive)
+    {
+        const char* message = archive_error_string(archive);
+        const char* errorDescription = (message != nullptr) ? message : "unknown libarchive error";
+
+        return std::format("{}: {}", functionName, errorDescription);
+    }
+} // namespace Flense::Core
 
 export namespace Flense::Core
 {
@@ -69,6 +88,7 @@ export namespace Flense::Core
         /// </summary>
         /// <returns>The number of bytes actually read, which is less than buffer.size() once this
         /// entry's body is exhausted.</returns>
+        /// <exception cref="ArchiveError">The entry's body could not be read in full.</exception>
         [[nodiscard]] std::size_t ReadInto(std::span<std::byte> buffer) const
         {
             std::size_t totalRead = 0;
@@ -76,9 +96,18 @@ export namespace Flense::Core
             {
                 const std::span<std::byte> remaining = buffer.subspan(totalRead);
                 const la_ssize_t bytesRead = archive_read_data(m_archive, remaining.data(), remaining.size());
-                if (bytesRead <= 0)
+
+                if (bytesRead == 0)
                 {
                     break;
+                }
+
+                // Cancellation can't surface here: the read callback only reports it while the context
+                // is holding a stop token, which ArchiveReader::Next lends for its own duration alone.
+                // So a negative result is a genuine failure rather than the caller asking us to stop.
+                if (bytesRead < 0)
+                {
+                    throw ArchiveError{ArchiveErrorKind::Corrupt, ErrorString("archive_read_data", m_archive)};
                 }
 
                 totalRead += static_cast<std::size_t>(bytesRead);
@@ -152,9 +181,16 @@ export namespace Flense::Core
                 archive_read_set_skip_callback(archive.get(), &ArchiveSkipCallback);
             }
 
-            archive_read_open1(archive.get());
+            const int result = archive_read_open1(archive.get());
 
-            return ArchiveReader{std::move(archive), std::move(context)};
+            if (result == ARCHIVE_OK || result == ARCHIVE_WARN)
+            {
+                return ArchiveReader{std::move(archive), std::move(context)};
+            }
+
+            // TODO(2026-10-23): Handle ARCHIVE_RETRY?
+
+            throw ArchiveError{ArchiveErrorKind::Unreadable, ErrorString("archive_read_open1", archive.get())};
         }
 
         /// <summary>
@@ -162,28 +198,45 @@ export namespace Flense::Core
         /// entry's data that wasn't consumed via ArchiveEntry::ReadInto(). Returns nullopt once
         /// the archive is exhausted, or once cancellation is requested.
         /// </summary>
-        /// <param name="stopToken">Checked as the underlying stream is read, so this call can be interrupted
-        /// part-way through skipping a large entry rather than only between entries. It applies to this call
-        /// alone - the reader holds no cancellation state of its own between operations, and a nullopt return
-        /// means "exhausted or cancelled", so callers that need to tell the two apart test the token
-        /// themselves.</param>
+        /// <param name="stopToken">Cancellation token for interrupting the operation.</param>
         /// <remarks>
         /// Invalidates any string_views or other references obtained from previous entries.
         /// </remarks>
+        /// <exception cref="ArchiveError">The archive could not be read.</exception>
         std::optional<ArchiveEntry> Next(std::stop_token stopToken)
         {
             const StopTokenScope scope{*m_context, std::move(stopToken)};
 
-            archive_entry* entry = nullptr;
-            if (m_context->stopToken.stop_requested() ||
-                archive_read_next_header(m_archive.get(), &entry) != ARCHIVE_OK)
+            if (m_context->stopToken.stop_requested())
             {
                 return std::nullopt;
             }
 
-            // TODO: This always succeeds on paper, we are undoubtedly missing some error handling
+            archive_entry* entry = nullptr;
+            const int result = archive_read_next_header(m_archive.get(), &entry);
 
-            return ArchiveEntry{entry, m_archive.get()};
+            if (result == ARCHIVE_EOF)
+            {
+                return std::nullopt;
+            }
+
+            // ARCHIVE_WARN means the header was read but something about it was unusual (an attribute
+            // libarchive doesn't support, say) - the entry itself is still usable.
+            if (result == ARCHIVE_OK || result == ARCHIVE_WARN)
+            {
+                return ArchiveEntry{entry, m_archive.get()};
+            }
+
+            // Both callbacks return ARCHIVE_FATAL to implement cancellation, so a fatal result here may
+            // mean nothing worse than the caller having asked us to stop.
+            if (m_context->stopToken.stop_requested())
+            {
+                return std::nullopt;
+            }
+
+            // TODO(2026-10-23): Handle ARCHIVE_RETRY?
+
+            throw ArchiveError{ArchiveErrorKind::Corrupt, ErrorString("archive_read_next_header", m_archive.get())};
         }
 
       private:
