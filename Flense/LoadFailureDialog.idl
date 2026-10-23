@@ -1,0 +1,12 @@
+namespace Flense
+{
+    [default_interface]
+    runtimeclass LoadFailureDialog : Microsoft.UI.Xaml.Controls.ContentDialog
+    {
+        LoadFailureDialog();
+
+        String Message;
+        String Details;
+        Boolean HasDetails { get; };
+    }
+}

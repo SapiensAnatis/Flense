@@ -16,7 +16,8 @@ namespace winrt::Flense::implementation
               INIT_NOTIFYING_PROPERTY(Layers,
                                       winrt::single_threaded_observable_vector<winrt::Flense::ImageLayerWrapper>()),
               INIT_NOTIFYING_PROPERTY(IsLoading, true), INIT_NOTIFYING_PROPERTY(LoadingProgress, 0.0),
-              INIT_NOTIFYING_PROPERTY(StatusMessage, L"")
+              INIT_NOTIFYING_PROPERTY(StatusMessage, L""), INIT_NOTIFYING_PROPERTY(ErrorMessage, L""),
+              INIT_NOTIFYING_PROPERTY(ErrorDetails, L"")
         {
         }
 
@@ -27,6 +28,8 @@ namespace winrt::Flense::implementation
         wil::single_threaded_notifying_property<bool> IsLoading;
         wil::single_threaded_notifying_property<double> LoadingProgress;
         wil::single_threaded_notifying_property<winrt::hstring> StatusMessage;
+        wil::single_threaded_notifying_property<winrt::hstring> ErrorMessage;
+        wil::single_threaded_notifying_property<winrt::hstring> ErrorDetails;
 
         // Needs custom logic to deallocate last layer tree on set
         winrt::Flense::ImageLayerWrapper SelectedLayer();
