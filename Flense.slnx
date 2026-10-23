@@ -15,6 +15,10 @@
     <File Path="build-app.ps1" />
     <File Path="vcpkg.json" />
   </Folder>
+  <Folder Name="/Solution Items/.github/" />
+  <Folder Name="/Solution Items/.github/workflows/">
+    <File Path=".github/workflows/claude-code-review.yml" />
+  </Folder>
   <Folder Name="/Solution Items/Container/">
     <File Path="Container/Dockerfile" />
     <File Path="Container/docker-compose.yaml" />
