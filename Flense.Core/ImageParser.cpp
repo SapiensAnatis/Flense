@@ -2,7 +2,7 @@ module;
 
 #include <nlohmann/json.hpp>
 
-module Flense.Core;
+module Flense.Core:ImageParser.Impl;
 
 import :ArchiveReader;
 import :BufferPool;

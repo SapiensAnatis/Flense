@@ -104,6 +104,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <BuildStlModules>true</BuildStlModules>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
