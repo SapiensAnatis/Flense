@@ -1,0 +1,37 @@
+<Project>
+
+  <!--
+    Imported via ForceImportAfterCppTargets so that this definition replaces the stock ClangTidy target from
+    Microsoft.Cpp.ClangTidy.targets, which Directory.Build.targets is imported too early to override.
+
+    This is the stock target from VS 2026 (MSBuild 18.11, VC\v180) minus OutputFile. ClangTidy runs one clang-tidy process per file in parallel, and each
+    one appends every output line to OutputFile with an unsynchronized File.AppendAllText, so two processes printing
+    at once fail the build with MSB6003 (Flense.Core.ClangTidy.log "is being used by another process"). The log only
+    duplicates what is already reported to MSBuild, and the task skips it entirely when OutputFile is empty.
+  -->
+  <Target
+      Name="ClangTidy"
+      DependsOnTargets="$(ClangTidyDependsOn);GetCompileCommands"
+      AfterTargets="$(ClangTidyAfterTargets)">
+
+    <ClangTidy
+        Condition                          ="'@(CompileCommands)'!=''"
+        CompileCommands                    ="@(CompileCommands)"
+        TaskName                           ="Microsoft.Build.CPPTasks.ClangTidy"
+        TrackerLogDirectory                ="$(TLogLocation)"
+        Sources                            ="@(ClCompile)"
+        BuildPath                          ="$(IntDir)$(ClangTidyProjectDirectory)"
+        AdditionalOptions                  ="$(ClangTidyToolExeAdditionalOptions)"
+        Checks                             ="$(ClangTidyChecks)"
+        HeaderFilter                       ="$(ClangTidyHeaderFilter)"
+        WarningsInSystemHeaders            ="$(ClangTidyWarningsInSystemHeaders)"
+        ExtraArgs                          ="$(ClangTidyExtraArgs)"
+        PrependExtraArgs                   ="$(ClangTidyPrependExtraArgs)"
+        MaxNumberOfProcesses               ="$(MaxNumberOfProcesses)"
+
+        SchedulerName                      ="$(MultiProcSchedulerName)"
+        ToolPath                           ="$(ClangTidyToolPath)"
+        ToolExe                            ="$(ClangTidyToolExe)" />
+  </Target>
+
+</Project>
