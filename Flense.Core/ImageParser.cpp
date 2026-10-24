@@ -68,43 +68,36 @@ namespace Flense::Core
             const std::size_t bytesRead = entry.ReadInto(std::as_writable_bytes(contentsSpan));
             contents.resize(bytesRead);
 
-            try
-            {
-                const nlohmann::json manifests = nlohmann::json::parse(contents);
+            const nlohmann::json manifests = nlohmann::json::parse(contents);
 
-                // TODO: support archives containing multiple images (manifest.json is an array of them) -
-                // for now we just take the first one.
-                const nlohmann::json& manifest = manifests.at(0);
+            // TODO: support archives containing multiple images (manifest.json is an array of them) -
+            // for now we just take the first one.
+            const nlohmann::json& manifest = manifests.at(0);
 
-                const std::string configPath = manifest.at("Config").get<std::string>();
-                const std::optional<std::string> repoTag = [&manifest]() -> std::optional<std::string> {
-                    const auto& tags = manifest.at("RepoTags");
+            const std::string configPath = manifest.at("Config").get<std::string>();
+            const std::optional<std::string> repoTag = [&manifest]() -> std::optional<std::string> {
+                const auto& tags = manifest.at("RepoTags");
 
-                    // If an image is untagged, "RepoTags" will be null.
-                    if (tags.is_array() && !tags.empty())
-                    {
-                        return tags.at(0).get<std::string>();
-                    }
-
-                    return std::nullopt;
-                }();
-
-                std::vector<std::string> layerPaths;
-                for (const auto& layerPath : manifest.at("Layers"))
+                // If an image is untagged, "RepoTags" will be null.
+                if (tags.is_array() && !tags.empty())
                 {
-                    layerPaths.push_back(layerPath.get<std::string>());
+                    return tags.at(0).get<std::string>();
                 }
 
-                return ManifestDetails{
-                    .configPath = configPath,
-                    .repoTag = repoTag,
-                    .layerPaths = std::move(layerPaths),
-                };
-            }
-            catch (const nlohmann::json::exception& e)
+                return std::nullopt;
+            }();
+
+            std::vector<std::string> layerPaths;
+            for (const auto& layerPath : manifest.at("Layers"))
             {
-                throw ImageFormatError{ImageFormatErrorKind::MalformedMetadata, e.what()};
+                layerPaths.push_back(layerPath.get<std::string>());
             }
+
+            return ManifestDetails{
+                .configPath = configPath,
+                .repoTag = repoTag,
+                .layerPaths = std::move(layerPaths),
+            };
         }
 
         /// <summary>
@@ -137,14 +130,26 @@ namespace Flense::Core
     } // namespace
 
     void ImageParser::ProcessEntry(ArchiveEntry& entry, std::stop_token stopToken)
-    try
+    {
+        try
+        {
+            ProcessEntryInternal(entry, stopToken);
+        }
+        catch (ImageReadError& error)
+        {
+            error.SetEntryPath(std::string{entry.Pathname()});
+            throw;
+        }
+    }
+
+    void ImageParser::ProcessEntryInternal(ArchiveEntry& entry, std::stop_token stopToken)
     {
         if (stopToken.stop_requested())
         {
             throw OperationCancelledError{};
         }
 
-        // docker save emits directory entries such as blobs/sha256/, which would otherwise pass for an empty blob.
+        // Ignore folders/sockets/symlinks/etc.
         if (entry.FileKind() != FileKind::File)
         {
             return;
@@ -152,10 +157,27 @@ namespace Flense::Core
 
         const std::string_view pathname = entry.Pathname();
 
+        static constexpr std::size_t MaxJsonSize = 10'000'000; // 10 MB
+
         if (pathname == "manifest.json")
         {
+            if (entry.Size() > MaxJsonSize)
+            {
+                // Defend against maliciously crafted images with huge manifests
+                throw ImageFormatError{ImageFormatErrorKind::MalformedMetadata, "manifest.json is too large"};
+            }
+
             const std::uint64_t entrySize = entry.Size();
-            ManifestDetails manifest = ParseManifestJson(entry);
+            ManifestDetails manifest;
+
+            try
+            {
+                manifest = ParseManifestJson(entry);
+            }
+            catch (const nlohmann::json::exception& e)
+            {
+                throw ImageFormatError{ImageFormatErrorKind::MalformedMetadata, e.what()};
+            }
 
             m_bytesProcessed.fetch_add(entrySize, std::memory_order_relaxed);
 
@@ -167,48 +189,44 @@ namespace Flense::Core
 
         if (!pathname.starts_with(BlobPrefix))
         {
+            // Unrelated, random file
             return;
         }
-
-        const std::uint64_t entrySize = entry.Size();
 
         // Sniff a small, bounded prefix first - large layer blobs must never be buffered in
         // full just to find out they're not JSON.
         std::array<char, 64> sniffBuffer{};
-        const std::size_t sniffLength = std::min(sniffBuffer.size(), static_cast<std::size_t>(entrySize));
+        const std::size_t sniffLength = std::min(sniffBuffer.size(), static_cast<std::size_t>(entry.Size()));
         const std::span<char> sniffSpan = std::span{sniffBuffer}.first(sniffLength);
 
         const std::size_t sniffed = entry.ReadInto(std::as_writable_bytes(sniffSpan));
 
         if (LooksLikeJsonObject(std::string_view{sniffBuffer.data(), sniffed}))
         {
-            // Confirmed JSON (manifest/config/etc. - always small) - now safe to buffer in full and parse inline.
             std::string contents(sniffBuffer.data(), sniffed);
-            contents.resize(entrySize);
+
+            // Cap the amount of JSON we buffer into memory. If the entry is larger than this, it will be truncated and
+            // the JSON parser will throw. This is preferable to skipping the entry as it will fail loudly and is easier
+            // to debug.
+            contents.resize(static_cast<std::size_t>(std::min<std::uint64_t>(entry.Size(), MaxJsonSize)));
 
             const std::span<char> remainingSpan = std::span{contents}.subspan(sniffed);
             const std::size_t read = entry.ReadInto(std::as_writable_bytes(remainingSpan));
             contents.resize(sniffed + read);
 
+            m_jsonBlobsByDigest.emplace(std::string{pathname}, std::move(contents));
+
             m_bytesProcessed.fetch_add(sniffed + read, std::memory_order_relaxed);
 
-            m_jsonBlobsByDigest.emplace(std::string{pathname}, std::move(contents));
             return;
         }
 
         // This is a tar file containing layer diffs - hand it off to a worker thread so the (CPU-heavy)
         // parsing can proceed while the reader moves on to the next top-level entry.
-        DispatchLayerWorker(std::string{pathname}, entry, entrySize,
-                            std::as_bytes(std::span{sniffBuffer}.first(sniffed)), stopToken);
-    }
-    catch (ImageReadError& error)
-    {
-        error.SetEntryPath(std::string{entry.Pathname()});
-        throw;
+        DispatchLayerWorker(entry, std::as_bytes(std::span{sniffBuffer}.first(sniffed)), stopToken);
     }
 
-    void ImageParser::DispatchLayerWorker(std::string archivePath, ArchiveEntry& entry, const std::uint64_t entrySize,
-                                          const std::span<const std::byte> sniffedPrefix,
+    void ImageParser::DispatchLayerWorker(ArchiveEntry& entry, const std::span<const std::byte> sniffedPrefix,
                                           const std::stop_token stopToken)
     {
         auto [sender, receiver] = Channel<BufferChunk>::Create();
@@ -216,7 +234,8 @@ namespace Flense::Core
         std::promise<void> promise;
         std::future<void> future = promise.get_future();
 
-        std::jthread thread([this, receiver = std::move(receiver), archivePath = std::move(archivePath), entrySize,
+        std::jthread thread([this, receiver = std::move(receiver), archivePath = std::string(entry.Pathname()),
+                             entrySize = entry.Size(),
                              promise = std::move(promise)](std::stop_token workerStopToken) mutable {
             try
             {
@@ -296,11 +315,6 @@ namespace Flense::Core
         }
     }
 
-    ImageParser::~ImageParser()
-    {
-        m_workers.clear();
-    }
-
     void ImageParser::ReportProgressPeriodically(const ProgressCallback& onProgress,
                                                  const std::stop_token stopToken) const
     {
@@ -308,41 +322,28 @@ namespace Flense::Core
         std::condition_variable_any cv;
         std::unique_lock lock(mutex);
 
-        while (true)
+        while (!stopToken.stop_requested())
         {
             // Interruptible sleep
-            cv.wait_for(lock, stopToken, ProgressInterval, [] { return false; });
-
-            if (stopToken.stop_requested())
-            {
-                break;
-            }
-
             onProgress(m_bytesProcessed.load(std::memory_order_relaxed));
+
+            cv.wait_for(lock, stopToken, ProgressInterval, [] { return false; });
         }
     }
 
     void ImageParser::JoinWorkers(const std::stop_token stopToken)
     {
-        try
+        std::list<Worker> ownedWorkers = std::exchange(m_workers, {});
+
+        for (Worker& worker : ownedWorkers)
         {
-            for (Worker& worker : m_workers)
+            if (stopToken.stop_requested())
             {
-                worker.result.get();
-
-                if (stopToken.stop_requested())
-                {
-                    throw OperationCancelledError{};
-                }
+                throw OperationCancelledError{};
             }
-        }
-        catch (...)
-        {
-            m_workers.clear();
-            throw;
-        }
 
-        m_workers.clear();
+            worker.result.get();
+        }
     }
 
     Image ImageParser::Build(const ProgressCallback& onProgress, const std::stop_token stopToken)
@@ -358,7 +359,7 @@ namespace Flense::Core
             }
 
             JoinWorkers(stopToken);
-        } // progressReporter is stopped and joined here, before we go on to assemble the Image below.
+        } // Join progress thread; we've now read all of the bytes of the file and just have to do some bookkeeping
 
         if (!m_configPath)
         {

@@ -30,7 +30,7 @@ export namespace Flense::Core
         using ProgressCallback = std::function<void(std::uint64_t bytesProcessed)>;
 
         ImageParser() = default;
-        ~ImageParser();
+        ~ImageParser() = default;
 
         ImageParser(const ImageParser&) = delete;
         ImageParser& operator=(const ImageParser&) = delete;
@@ -93,12 +93,11 @@ export namespace Flense::Core
         /// chunks on the calling thread first - this must complete, and so this call must return, before the
         /// owning ArchiveReader's Next() is called again.
         /// </summary>
-        /// <param name="archivePath">The entry's path, to key the resulting filesystem tree by.</param>
         /// <param name="entry">The archive entry, whose sniffed prefix has already been consumed.</param>
-        /// <param name="entrySize">The entry's total size, as reported by the archive header.</param>
         /// <param name="sniffedPrefix">The bytes already read from entry while sniffing for JSON.</param>
-        void DispatchLayerWorker(std::string archivePath, ArchiveEntry& entry, std::uint64_t entrySize,
-                                 std::span<const std::byte> sniffedPrefix, std::stop_token stopToken);
+        /// <param name="stopToken">The token to check for cancellation.</param>
+        void DispatchLayerWorker(ArchiveEntry& entry, std::span<const std::byte> sniffedPrefix,
+                                 std::stop_token stopToken);
 
         /// <summary>
         /// Calls onProgress with the current byte totals every ProgressInterval, until stopToken is stopped.
@@ -113,12 +112,18 @@ export namespace Flense::Core
         /// </summary>
         void JoinWorkers(std::stop_token stopToken);
 
+        /// <summary>
+        /// Implementation of ProcessEntry. ProcessEntry calls this with added error handling.
+        /// </summary>
+        /// <param name="entry">The entry to process.</param>
+        /// <param name="stopToken">The token to check for cancellation.</param>
+        void ProcessEntryInternal(ArchiveEntry& entry, std::stop_token stopToken);
+
         static constexpr std::size_t WorkerMaxMemoryUsage = std::size_t{128} * 1024 * 1024;
         static constexpr std::size_t WorkerBufferSize = std::size_t{256} * 1024;
         static constexpr std::size_t WorkerBufferCount = WorkerMaxMemoryUsage / WorkerBufferSize;
 
         BufferPool m_bufferPool{WorkerBufferSize, WorkerBufferCount};
-        std::list<Worker> m_workers;
 
         std::optional<std::string> m_configPath;
         std::optional<std::string> m_repoTag;
@@ -134,6 +139,9 @@ export namespace Flense::Core
             GUARDED_BY(m_filesystemMutex);
 
         std::atomic<std::uint64_t> m_bytesProcessed{0};
+
+        // Must be destroyed first to ensure any pending threads are stopped before they use-after-free
+        std::list<Worker> m_workers;
     };
 
 } // namespace Flense::Core
