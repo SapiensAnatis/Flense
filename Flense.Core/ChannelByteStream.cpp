@@ -1,4 +1,4 @@
-module Flense.Core;
+module Flense.Core:ChannelByteStream.Impl;
 
 import :BufferPool;
 import :Channel;

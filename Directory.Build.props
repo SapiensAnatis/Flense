@@ -21,5 +21,7 @@
 
   <PropertyGroup>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <UseMultiToolTask>true</UseMultiToolTask>
+    <EnforceProcessCountAcrossBuilds>true</EnforceProcessCountAcrossBuilds>
   </PropertyGroup>
 </Project>
