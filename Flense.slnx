@@ -34,6 +34,9 @@
   <Project Path="Flense.Benchmarks/Flense.Benchmarks.vcxproj" Id="3f1c8a72-6b4e-4d29-9a51-7c0e2f8b41d6">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Flense.Core.Tests/Flense.Core.Tests.vcxproj" Id="d2ba3723-4df1-4ad5-9f07-d40a0c134d32">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Flense.Core/Flense.Core.vcxproj" Id="257839dd-36da-47d5-b884-9118c972f916">
     <Platform Solution="*|ARM64" Project="x64" />
   </Project>
