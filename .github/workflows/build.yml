@@ -1,0 +1,55 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Build (${{ matrix.configuration }})
+    runs-on: windows-2025
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Pin the image's vcpkg checkout to builtin-baseline: the image's commit can predate it, and tracking master would
+      # let upstream triplet/script changes alter package ABI hashes without changing the cache key.
+      - name: Set up vcpkg
+        id: vcpkg
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          $baseline = (Get-Content vcpkg.json | ConvertFrom-Json).'builtin-baseline'
+          git -C "$env:VCPKG_INSTALLATION_ROOT" fetch origin $baseline
+          git -C "$env:VCPKG_INSTALLATION_ROOT" checkout --detach $baseline
+          & "$env:VCPKG_INSTALLATION_ROOT\bootstrap-vcpkg.bat" -disableMetrics
+          vcpkg integrate install
+          $cacheDir = "$env:RUNNER_TEMP\vcpkg-binary-cache"
+          New-Item -ItemType Directory -Force $cacheDir | Out-Null
+          "VCPKG_BINARY_SOURCES=clear;files,$cacheDir,readwrite" >> $env:GITHUB_ENV
+          "image-version=$env:ImageVersion" >> $env:GITHUB_OUTPUT
+
+      # vcpkg's package hashes include the compiler version, so key on the runner image too; otherwise a toolchain
+      # update would keep hitting the old cache entry without ever saving the rebuilt packages.
+      - name: Cache vcpkg packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}\vcpkg-binary-cache
+          key: vcpkg-${{ runner.os }}-${{ steps.vcpkg.outputs.image-version }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
+      - name: Build
+        run: .\Scripts\build-app.ps1 -Configuration ${{ matrix.configuration }}
