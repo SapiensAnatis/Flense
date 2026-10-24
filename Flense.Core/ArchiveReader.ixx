@@ -23,6 +23,22 @@ namespace Flense::Core
 
         return std::format("{}: {}", functionName, errorDescription);
     }
+
+    constexpr std::size_t ArchiveChunkSize = std::size_t{64} * 1024;
+
+    struct ArchiveContext
+    {
+        std::function<std::size_t(std::span<std::byte>)> readSync;
+        std::function<std::int64_t(std::int64_t)> skip;
+
+        // Only set for the duration of a single operation, by StopTokenScope.
+        std::stop_token stopToken;
+
+        std::array<std::byte, ArchiveChunkSize> buffer{};
+
+        std::exception_ptr error;
+    };
+
 } // namespace Flense::Core
 
 export namespace Flense::Core
@@ -107,6 +123,11 @@ export namespace Flense::Core
                 // So a negative result is a genuine failure rather than the caller asking us to stop.
                 if (bytesRead < 0)
                 {
+                    if (m_context->error != nullptr)
+                    {
+                        std::rethrow_exception(m_context->error);
+                    }
+
                     throw ArchiveError{ArchiveErrorKind::Corrupt, ErrorString("archive_read_data", m_archive)};
                 }
 
@@ -138,12 +159,14 @@ export namespace Flense::Core
       private:
         friend class ArchiveReader;
 
-        ArchiveEntry(archive_entry* entry, archive* archive) : m_entry(entry), m_archive(archive)
+        ArchiveEntry(archive_entry* entry, archive* archive, ArchiveContext* context)
+            : m_entry(entry), m_archive(archive), m_context(context)
         {
         }
 
         archive_entry* m_entry;
         archive* m_archive;
+        ArchiveContext* m_context;
     };
 
     /// <summary>
@@ -169,7 +192,7 @@ export namespace Flense::Core
             archive_read_support_format_tar(archive.get());
             archive_read_support_filter_gzip(archive.get());
 
-            auto context = std::make_unique<Context>();
+            auto context = std::make_unique<ArchiveContext>();
             context->readSync = [&source](std::span<std::byte> buffer) { return source.ReadSync(buffer); };
 
             archive_read_set_callback_data(archive.get(), context.get());
@@ -189,6 +212,11 @@ export namespace Flense::Core
             }
 
             // TODO(2026-10-23): Handle ARCHIVE_RETRY?
+
+            if (context->error != nullptr)
+            {
+                std::rethrow_exception(context->error);
+            }
 
             throw ArchiveError{ArchiveErrorKind::Unreadable, ErrorString("archive_read_open1", archive.get())};
         }
@@ -220,7 +248,7 @@ export namespace Flense::Core
             // libarchive doesn't support, say) - the entry itself is still usable.
             if (result == ARCHIVE_OK || result == ARCHIVE_WARN)
             {
-                return ArchiveEntry{entry, m_archive.get()};
+                return ArchiveEntry{entry, m_archive.get(), m_context.get()};
             }
 
             // We sometimes return ARCHIVE_FATAL as a hacky way to indicate cancellation
@@ -237,6 +265,11 @@ export namespace Flense::Core
 
             // TODO(2026-10-23): Handle ARCHIVE_RETRY?
 
+            if (m_context->error != nullptr)
+            {
+                std::rethrow_exception(m_context->error);
+            }
+
             throw ArchiveError{ArchiveErrorKind::Corrupt, ErrorString("archive_read_next_header", m_archive.get())};
         }
 
@@ -251,26 +284,13 @@ export namespace Flense::Core
 
         using ArchivePtr = std::unique_ptr<archive, ArchiveDeleter>;
 
-        static constexpr std::size_t ChunkSize = std::size_t{64} * 1024;
-
-        struct Context
-        {
-            std::function<std::size_t(std::span<std::byte>)> readSync;
-            std::function<std::int64_t(std::int64_t)> skip;
-
-            // Only set for the duration of a single operation, by StopTokenScope.
-            std::stop_token stopToken;
-
-            std::array<std::byte, ChunkSize> buffer{};
-        };
-
         /// <summary>
         /// Lends a stop_token to the context for the duration of one operation, so the libarchive callbacks
         /// can see it without the reader keeping cancellation state between calls.
         /// </summary>
         struct StopTokenScope
         {
-            StopTokenScope(Context& context, std::stop_token token) : m_context(context)
+            StopTokenScope(ArchiveContext& context, std::stop_token token) : m_context(context)
             {
                 m_context.stopToken = token;
             }
@@ -286,40 +306,70 @@ export namespace Flense::Core
             StopTokenScope& operator=(StopTokenScope&&) = delete;
 
           private:
-            Context& m_context;
+            ArchiveContext& m_context;
         };
 
-        static la_ssize_t ArchiveReadCallback(archive* /* unused */, void* clientData, const void** buffer)
+        static la_ssize_t ArchiveReadCallback(archive* /* unused */, void* clientData, const void** buffer) noexcept
         {
-            auto& context = *static_cast<Context*>(clientData);
+            auto& context = *static_cast<ArchiveContext*>(clientData);
+
             if (context.stopToken.stop_requested())
             {
                 return ARCHIVE_FATAL;
             }
 
-            const std::size_t bytesRead = context.readSync(std::span(context.buffer));
-            *buffer = context.buffer.data();
-            return static_cast<la_ssize_t>(bytesRead);
-        }
-
-        static la_int64_t ArchiveSkipCallback(archive* /* unused */, void* clientData, la_int64_t request)
-        {
-            auto& context = *static_cast<Context*>(clientData);
-            if (context.stopToken.stop_requested() || request <= 0)
+            if (context.error != nullptr)
             {
+                // May be left over from returning 0 from ArchiveSkipCallback, which tells libarchive to read and
+                // discard instead.
                 return ARCHIVE_FATAL;
             }
 
-            return context.skip(request);
+            // We compile with /EHsc, and at this point we will have libarchive's C frames in the callstack, so we
+            // should try not to unwind through them as things may break. Instead, store the exception to be thrown
+            // later.
+
+            try
+            {
+                const std::size_t bytesRead = context.readSync(std::span(context.buffer));
+                *buffer = context.buffer.data();
+                return static_cast<la_ssize_t>(bytesRead);
+            }
+            catch (...)
+            {
+                context.error = std::current_exception();
+                return ARCHIVE_FATAL;
+            }
         }
 
-        ArchiveReader(ArchivePtr&& archive, std::unique_ptr<Context>&& context)
+        static la_int64_t ArchiveSkipCallback(archive* /* unused */, void* clientData, la_int64_t request) noexcept
+        {
+            auto& context = *static_cast<ArchiveContext*>(clientData);
+            if (context.stopToken.stop_requested() || request <= 0)
+            {
+                // Our version of libarchive doesn't handle < 0 returns from skip properly.
+                // TODO(2026-10-24): Change this when upgrading to 3.8.10 which has a fix
+                return 0;
+            }
+
+            try
+            {
+                return context.skip(request);
+            }
+            catch (...)
+            {
+                context.error = std::current_exception();
+                return 0;
+            }
+        }
+
+        ArchiveReader(ArchivePtr&& archive, std::unique_ptr<ArchiveContext>&& context)
             : m_archive(std::move(archive)), m_context(std::move(context))
         {
         }
 
         ArchivePtr m_archive;
-        std::unique_ptr<Context> m_context;
+        std::unique_ptr<ArchiveContext> m_context;
     };
 
 } // namespace Flense::Core
