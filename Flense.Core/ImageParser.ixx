@@ -78,15 +78,14 @@ export namespace Flense::Core
 
         struct Worker
         {
-            Worker(std::jthread&& thread, std::future<void>&& result, std::shared_ptr<Channel<BufferChunk>> channel)
-                : thread(std::move(thread)), result(std::move(result)), channel(std::move(channel))
+            Worker(std::jthread&& thread, std::future<void>&& result)
+                : thread(std::move(thread)), result(std::move(result))
             {
             }
 
             std::jthread thread;
             std::future<void> result;
-            std::shared_ptr<Channel<BufferChunk>> channel;
-            std::optional<UpstreamStopRegistration> upstreamStop;
+            std::optional<UpstreamStopRegistration> propagateStop;
         };
 
         /// <summary>
