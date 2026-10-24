@@ -17,6 +17,7 @@
   </Folder>
   <Folder Name="/Solution Items/.github/" />
   <Folder Name="/Solution Items/.github/workflows/">
+    <File Path=".github/workflows/build.yml" />
     <File Path=".github/workflows/claude-code-review.yml" />
   </Folder>
   <Folder Name="/Solution Items/Container/">
