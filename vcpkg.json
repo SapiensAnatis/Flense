@@ -8,6 +8,9 @@
       "default-features": false
     },
     {
+      "name": "gtest"
+    },
+    {
       "name": "nlohmann-json"
     }
   ]

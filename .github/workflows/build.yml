@@ -51,5 +51,49 @@ jobs:
           restore-keys: |
             vcpkg-${{ runner.os }}-
 
+      # Generate test data now so we don't have to checkout in the test job
+      - name: Generate test data
+        run: .\TestData\GenerateErrorCases.ps1
+
       - name: Build
-        run: .\Scripts\build-app.ps1 -Configuration ${{ matrix.configuration }}
+        run: .\Scripts\build-app.ps1 -Configuration ${{ matrix.configuration }} -OutputDirectory C:\build
+
+      - name: Upload Flense.Core.Tests
+        uses: actions/upload-artifact@v4
+        with:
+          name: Flense.Core.Tests-${{ matrix.configuration }}
+          path: C:\build\Flense.Core.Tests\x64\${{ matrix.configuration }}
+          if-no-files-found: error
+          retention-days: 7
+
+  test:
+    name: Test (${{ matrix.configuration }})
+    needs: build
+    runs-on: windows-2025
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+
+    steps:
+      - name: Download Flense.Core.Tests
+        uses: actions/download-artifact@v4
+        with:
+          name: Flense.Core.Tests-${{ matrix.configuration }}
+          path: ${{ runner.temp }}\Flense.Core.Tests
+
+      - name: Run Flense.Core.Tests
+        # Backstop for the in-process per-test watchdog.
+        timeout-minutes: 5
+        run: |
+          & "$env:RUNNER_TEMP\Flense.Core.Tests\Flense.Core.Tests.exe" --gtest_output="xml:$env:RUNNER_TEMP\test-results\Flense.Core.Tests.xml"
+          if ($LASTEXITCODE -ne 0) { throw "Flense.Core.Tests failed ($LASTEXITCODE)" }
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.configuration }}
+          path: ${{ runner.temp }}\test-results
+          if-no-files-found: ignore
