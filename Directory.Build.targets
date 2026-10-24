@@ -1,6 +1,15 @@
 <Project>
 
   <!--
+    vcpkg installs manifest dependencies just before ClCompile, but the C++ modules dependency scan runs before that.
+    On a clean checkout the scan can't find vcpkg headers, silently produces an incomplete module graph (MSB8074),
+    and the compile then fails with errors like "could not find module 'std'".
+  -->
+  <PropertyGroup Condition="'$(VcpkgEnabled)' == 'true' and '$(VcpkgEnableManifest)' == 'true'">
+    <SetModuleDependenciesDependsOn>$(SetModuleDependenciesDependsOn);VcpkgInstallManifestDependencies</SetModuleDependenciesDependsOn>
+  </PropertyGroup>
+
+  <!--
     Custom wiring around Microsoft.Cpp.ClangTidy.targets to get clang-tidy to analyze C++ modules.
 	We pre-build the clang .pcms using the module dependency graph that MSBuild has already worked
 	out for us, and pass them as AdditionalOptions to clang-tidy.
