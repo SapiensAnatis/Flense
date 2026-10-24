@@ -27,18 +27,17 @@ export namespace Flense::Core
         /// <summary>
         /// Constructs a new instance of the ChannelByteStream class.
         /// </summary>
-        /// <param name="channel">Non-owning reference to the channel to read buffer chunks from. Must outlive
-        /// this instance.</param>
+        /// <param name="receiver">Receiver end for the channel.</param>
         /// <param name="totalSize">The total number of bytes that will be delivered across the channel, as
         /// reported by Size().</param>
-        ChannelByteStream(Channel<BufferChunk>* channel, std::uint64_t totalSize);
+        ChannelByteStream(Channel<BufferChunk>::Receiver&& receiver, std::uint64_t totalSize);
 
         std::size_t ReadSync(std::span<std::byte> buffer);
         [[nodiscard]] std::uint64_t Size() const;
         [[nodiscard]] std::uint64_t Position() const;
 
       private:
-        Channel<BufferChunk>* m_channel;
+        Channel<BufferChunk>::Receiver m_receiver;
         std::uint64_t m_totalSize;
         std::uint64_t m_position{0};
 

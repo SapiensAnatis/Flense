@@ -211,16 +211,16 @@ namespace Flense::Core
                                           const std::span<const std::byte> sniffedPrefix,
                                           const std::stop_token stopToken)
     {
-        auto channel = std::make_shared<Channel<BufferChunk>>();
+        auto [sender, receiver] = Channel<BufferChunk>::Create();
 
         std::promise<void> promise;
         std::future<void> future = promise.get_future();
 
-        std::jthread thread([this, channel, archivePath = std::move(archivePath), entrySize,
+        std::jthread thread([this, receiver = std::move(receiver), archivePath = std::move(archivePath), entrySize,
                              promise = std::move(promise)](std::stop_token workerStopToken) mutable {
             try
             {
-                ChannelByteStream stream(channel.get(), entrySize);
+                ChannelByteStream stream(std::move(receiver), entrySize);
                 auto reader = ArchiveReader::CreateFromStream(stream);
                 FilesystemChangeTreeNodeRef filesystem = ParseLayerFilesystem(&reader, workerStopToken);
 
@@ -237,80 +237,63 @@ namespace Flense::Core
             {
                 error.SetEntryPath(archivePath);
                 promise.set_exception(std::current_exception());
-                channel->Drain();
-                channel->Close();
             }
             catch (...)
             {
                 promise.set_exception(std::current_exception());
-                channel->Drain();
-                channel->Close();
             }
         });
 
-        Worker& worker = m_workers.emplace_back(std::move(thread), std::move(future), channel);
-        // The worker has to see the stop before its stream runs dry: otherwise the closed channel reads as a
-        // truncated archive, and cancellation gets reported as corruption.
-        worker.upstreamStop.emplace(stopToken, std::function<void()>{[channel = worker.channel, &worker] {
-                                        worker.thread.request_stop();
-                                        channel->Drain();
-                                        channel->Close();
-                                    }});
+        Worker& worker = m_workers.emplace_back(std::move(thread), std::move(future));
+
+        // Store stop callback in worker so that it can outlive the producer thread
+        worker.propagateStop.emplace(stopToken, [&worker] { worker.thread.request_stop(); });
+
+        // If the producer thread quits, through cancellation or an error, the sender will be destroyed and the channel
+        // will be automatically closed in ~Sender.
 
         if (stopToken.stop_requested())
         {
             throw OperationCancelledError{};
         }
 
-        try
+        bool exhausted = false;
+
         {
-            bool exhausted = false;
+            RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
+            const std::span<std::byte> bufferSpan = buffer.Buffer();
 
+            std::ranges::copy(sniffedPrefix, bufferSpan.begin());
+
+            const std::size_t additionalRead = entry.ReadInto(bufferSpan.subspan(sniffedPrefix.size()));
+            const std::size_t length = sniffedPrefix.size() + additionalRead;
+
+            exhausted = length < bufferSpan.size();
+
+            if (!sender.Push(BufferChunk{.buffer = std::move(buffer), .length = length}))
             {
-                RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
-                const std::span<std::byte> bufferSpan = buffer.Buffer();
-
-                std::ranges::copy(sniffedPrefix, bufferSpan.begin());
-
-                const std::size_t additionalRead = entry.ReadInto(bufferSpan.subspan(sniffedPrefix.size()));
-                const std::size_t length = sniffedPrefix.size() + additionalRead;
-
-                exhausted = length < bufferSpan.size();
-
-                if (!channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length}))
-                {
-                    return;
-                }
-            }
-
-            while (!exhausted)
-            {
-                if (stopToken.stop_requested())
-                {
-                    throw OperationCancelledError{};
-                }
-
-                RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
-                const std::span<std::byte> bufferSpan = buffer.Buffer();
-                const std::size_t length = entry.ReadInto(bufferSpan);
-
-                exhausted = length < bufferSpan.size();
-
-                if (!channel->Push(BufferChunk{.buffer = std::move(buffer), .length = length}))
-                {
-                    return;
-                }
+                return;
             }
         }
-        catch (...)
-        {
-            // The worker blocks on the channel until told nothing more is coming, and never sees the jthread's stop
-            // request while it waits - left open, it would hang ~ImageParser, which joins it.
-            channel->Close();
-            throw;
-        }
 
-        channel->Close();
+        while (!exhausted)
+        {
+            if (stopToken.stop_requested())
+            {
+                throw OperationCancelledError{};
+            }
+
+            RentedBuffer buffer = RentedBuffer::From(&m_bufferPool);
+            const std::span<std::byte> bufferSpan = buffer.Buffer();
+            const std::size_t length = entry.ReadInto(bufferSpan);
+
+            exhausted = length < bufferSpan.size();
+
+            if (!sender.Push(BufferChunk{.buffer = std::move(buffer), .length = length}))
+            {
+                return;
+            }
+        }
     }
 
     ImageParser::~ImageParser()

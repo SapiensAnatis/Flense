@@ -7,8 +7,8 @@ import std;
 
 namespace Flense::Core
 {
-    ChannelByteStream::ChannelByteStream(Channel<BufferChunk>* channel, const std::uint64_t totalSize)
-        : m_channel(channel), m_totalSize(totalSize)
+    ChannelByteStream::ChannelByteStream(Channel<BufferChunk>::Receiver&& receiver, std::uint64_t totalSize)
+        : m_receiver(std::move(receiver)), m_totalSize(totalSize)
     {
     }
 
@@ -20,7 +20,7 @@ namespace Flense::Core
         {
             if (!m_current || m_currentOffset == m_current->length)
             {
-                std::optional<BufferChunk> next = m_channel->Pop();
+                std::optional<BufferChunk> next = m_receiver.Pop();
                 if (!next)
                 {
                     break;
