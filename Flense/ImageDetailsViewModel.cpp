@@ -107,8 +107,7 @@ namespace winrt::Flense::implementation
 
         try
         {
-            auto archive = ImageArchive();
-            const std::filesystem::path archivePath{std::wstring_view{archive.Path()}};
+            const std::filesystem::path archivePath{std::wstring_view{ImageArchivePath()}};
 
             LoadingProgress = 0;
             IsLoading = true;
@@ -164,7 +163,7 @@ namespace winrt::Flense::implementation
 
             const winrt::hstring name =
                 details.repoTag.transform([](const std::string& value) { return winrt::to_hstring(value); })
-                    .value_or(archive.Name());
+                    .value_or(winrt::hstring{archivePath.filename().wstring()});
 
             TitleBarService::Instance().Title(name + L" - Flense");
 

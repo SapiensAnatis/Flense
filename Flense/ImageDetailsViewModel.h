@@ -12,7 +12,7 @@ namespace winrt::Flense::implementation
                                    wil::notify_property_changed_base<ImageDetailsViewModel>
     {
         ImageDetailsViewModel()
-            : INIT_NOTIFYING_PROPERTY(ImageArchive, nullptr),
+            : INIT_NOTIFYING_PROPERTY(ImageArchivePath, L""),
               INIT_NOTIFYING_PROPERTY(Layers,
                                       winrt::single_threaded_observable_vector<winrt::Flense::ImageLayerWrapper>()),
               INIT_NOTIFYING_PROPERTY(IsLoading, true), INIT_NOTIFYING_PROPERTY(LoadingProgress, 0.0),
@@ -21,7 +21,7 @@ namespace winrt::Flense::implementation
         {
         }
 
-        wil::single_threaded_notifying_property<winrt::Windows::Storage::StorageFile> ImageArchive;
+        wil::single_threaded_notifying_property<winrt::hstring> ImageArchivePath;
         wil::single_threaded_notifying_property<
             winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::ImageLayerWrapper>>
             Layers;

@@ -8,9 +8,10 @@
 #include "ImageDetailsPage.g.cpp"
 #endif
 
+import std;
+
 using namespace winrt;
 using namespace winrt::Windows::Foundation;
-using namespace winrt::Windows::Storage;
 using namespace winrt::Microsoft::UI::Xaml;
 using namespace winrt::Microsoft::UI::Xaml::Navigation;
 
@@ -28,10 +29,12 @@ namespace winrt::Flense::implementation
     {
         auto lifetime = get_strong();
 
-        if (auto imageArchive = e.Parameter().try_as<StorageFile>())
+        if (const auto imagePath = winrt::unbox_value_or<winrt::hstring>(e.Parameter(), L""); !imagePath.empty())
         {
-            m_viewModel.ImageArchive(imageArchive);
-            m_viewModel.StatusMessage(L"Loading image: " + imageArchive.Name());
+            const std::filesystem::path path{std::wstring_view{imagePath}};
+
+            m_viewModel.ImageArchivePath(imagePath);
+            m_viewModel.StatusMessage(L"Loading image: " + winrt::hstring{path.filename().wstring()});
             m_loadAsyncAction = m_viewModel.LoadAsync();
 
             try

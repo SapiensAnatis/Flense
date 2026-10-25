@@ -8,7 +8,7 @@ namespace Flense
     {
         ImageDetailsViewModel();
 
-        Windows.Storage.StorageFile ImageArchive;
+        String ImageArchivePath;
         Windows.Foundation.Collections.IObservableVector<Flense.ImageLayerWrapper> Layers { get; };
         Flense.ImageLayerWrapper SelectedLayer;
 
