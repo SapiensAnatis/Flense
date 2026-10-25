@@ -2,14 +2,9 @@ module;
 
 #include "ThreadSafetyAttributes.h"
 
-#if defined(__INTELLISENSE__)
-#include <chrono>
-#endif
-
 export module Flense.Core:Internal.BufferPool;
 
 import :Internal.Mutex;
-import :Internal.Platform;
 
 import std;
 
@@ -31,26 +26,7 @@ namespace Flense::Core
             }
         }
 
-        [[nodiscard]] std::vector<std::byte> GetBuffer()
-        {
-#if defined(_DEBUG)
-            const std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-#endif
-
-            const MutexLocker locker(&m_mutex);
-
-            m_bufferAvailable.wait(m_mutex, [this]() REQUIRES(m_mutex) { return !m_buffers.empty(); });
-
-#if defined(_DEBUG)
-            const std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-            DebugWriteLine(std::format("BufferPool::GetBuffer waited for {}",
-                                       std::chrono::duration_cast<std::chrono::milliseconds>(end - start)));
-#endif
-
-            std::vector<std::byte> buffer = std::move(m_buffers.back());
-            m_buffers.pop_back();
-            return buffer;
-        }
+        [[nodiscard]] std::vector<std::byte> GetBuffer();
 
         void ReturnBuffer(std::vector<std::byte>&& buffer)
         {

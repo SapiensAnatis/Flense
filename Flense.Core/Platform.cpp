@@ -1,5 +1,5 @@
 // Provides platform-specific functionality.
-export module Flense.Core:Internal.Platform;
+module Flense.Core:Internal.Platform;
 
 import std;
 
