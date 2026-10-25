@@ -9,7 +9,7 @@ using namespace Flense::Core::Tests;
 
 namespace
 {
-    using Stream = FaultyByteStream<MemoryByteStream>;
+    using Stream = FaultyByteStream<FileByteStream>;
 
     const std::filesystem::path ValidArchive = TestDataPath("ErrorCases/valid.tar");
 
@@ -17,11 +17,11 @@ namespace
     /// Advances to the first regular file whose body is too big to have been buffered by the read that fetched its
     /// header, so reading or skipping the rest of it has to go back to the stream.
     /// </summary>
-    ArchiveEntry NextLargeEntry(ArchiveReader& reader, const Stream& stream)
+    ArchiveEntry NextLargeEntry(ArchiveReader& reader)
     {
         while (const std::optional<ArchiveEntry> entry = reader.Next({}))
         {
-            if (entry->FileKind() == FileKind::File && entry->Size() > 2 * stream.Inner().MaxReadSize())
+            if (entry->FileKind() == FileKind::File && entry->Size() > 2 * Stream::MaxReadSize)
             {
                 return *entry;
             }
@@ -123,7 +123,7 @@ TEST(ArchiveReaderTests, ReadFailsMidEntry)
 {
     Stream stream{ValidArchive};
     ArchiveReader reader = ArchiveReader::CreateFromStream(stream);
-    const ArchiveEntry entry = NextLargeEntry(reader, stream);
+    const ArchiveEntry entry = NextLargeEntry(reader);
 
     stream.failReadAt = stream.Position();
     std::vector<std::byte> buffer(entry.Size());
@@ -135,7 +135,7 @@ TEST(ArchiveReaderTests, SkipFailsOverUnreadEntry)
 {
     Stream stream{ValidArchive};
     ArchiveReader reader = ArchiveReader::CreateFromStream(stream);
-    static_cast<void>(NextLargeEntry(reader, stream));
+    static_cast<void>(NextLargeEntry(reader));
 
     stream.failSkip = true;
 
@@ -147,7 +147,7 @@ TEST(ArchiveReaderTests, StopBeforeNextOverUnreadEntry)
 {
     Stream stream{ValidArchive};
     ArchiveReader reader = ArchiveReader::CreateFromStream(stream);
-    static_cast<void>(NextLargeEntry(reader, stream));
+    static_cast<void>(NextLargeEntry(reader));
 
     std::stop_source stopSource;
     stopSource.request_stop();

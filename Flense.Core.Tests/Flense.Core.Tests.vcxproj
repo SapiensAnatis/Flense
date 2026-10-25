@@ -80,7 +80,6 @@
     <ClCompile Include="FaultyByteStream.ixx" />
     <ClCompile Include="FileByteStreamTests.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MemoryByteStream.ixx" />
     <ClCompile Include="Support.ixx" />
     <ClCompile Include="TestData.ixx" />
     <ClCompile Include="TestData.Windows.cpp" />

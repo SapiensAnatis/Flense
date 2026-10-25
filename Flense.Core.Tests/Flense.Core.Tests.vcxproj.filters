@@ -23,9 +23,6 @@
     <ClCompile Include="FaultyByteStream.ixx">
       <Filter>Support</Filter>
     </ClCompile>
-    <ClCompile Include="MemoryByteStream.ixx">
-      <Filter>Support</Filter>
-    </ClCompile>
     <ClCompile Include="Support.ixx">
       <Filter>Support</Filter>
     </ClCompile>

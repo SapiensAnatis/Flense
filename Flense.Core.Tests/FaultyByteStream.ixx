@@ -1,6 +1,5 @@
 export module Flense.Core.Tests.Support:FaultyByteStream;
 
-import :MemoryByteStream;
 import Flense.Core;
 import std;
 
@@ -23,7 +22,7 @@ export namespace Flense::Core::Tests
     };
 
     /// <summary>
-    /// Wraps another ByteStream, throwing from ReadSync or Skip on demand.
+    /// Wraps another ByteStream, capping how much each read returns and throwing from ReadSync or Skip on demand.
     /// </summary>
     template <SkippableByteStream TInner> class FaultyByteStream
     {
@@ -32,6 +31,11 @@ export namespace Flense::Core::Tests
         explicit FaultyByteStream(TArgs&&... args) : m_inner(std::forward<TArgs>(args)...)
         {
         }
+
+        /// <summary>Caps how much each ReadSync returns. ArchiveReader asks for far more than the small test archives
+        /// hold, so without a cap the first read would consume the whole file and later reads and skips would never
+        /// reach the stream.</summary>
+        static constexpr std::size_t MaxReadSize = 512;
 
         /// <summary>ReadSync throws InjectedReadError once Position() reaches this.</summary>
         std::optional<std::uint64_t> failReadAt;
@@ -49,7 +53,7 @@ export namespace Flense::Core::Tests
                 throw InjectedReadError{};
             }
 
-            return m_inner.ReadSync(buffer);
+            return m_inner.ReadSync(buffer.first(std::min(buffer.size(), MaxReadSize)));
         }
 
         std::int64_t Skip(const std::int64_t request)
@@ -74,14 +78,9 @@ export namespace Flense::Core::Tests
             return m_inner.Position();
         }
 
-        [[nodiscard]] const TInner& Inner() const
-        {
-            return m_inner;
-        }
-
       private:
         TInner m_inner;
     };
 
-    static_assert(SkippableByteStream<FaultyByteStream<MemoryByteStream>>);
+    static_assert(SkippableByteStream<FaultyByteStream<FileByteStream>>);
 } // namespace Flense::Core::Tests
