@@ -212,14 +212,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BufferPool.ixx" />
-    <ClCompile Include="BufferPool.cpp" />
+    <ClCompile Include="BufferPool.Impl.cpp" />
     <ClCompile Include="Mutex.ixx" />
-    <ClCompile Include="Mutex.cpp" />
+    <ClCompile Include="Mutex.Impl.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="Platform.Windows.cpp" />
     <ClCompile Include="Channel.ixx" />
     <ClCompile Include="ChannelByteStream.ixx" />
-    <ClCompile Include="ChannelByteStream.cpp" />
+    <ClCompile Include="ChannelByteStream.Impl.cpp" />
     <ClCompile Include="Error.ixx" />
     <ClCompile Include="Tree.ixx" />
     <ClCompile Include="Filesystem.ixx" />
@@ -228,7 +228,7 @@
     <ClCompile Include="FilesystemParsing.cpp" />
     <ClCompile Include="FilesystemParsing.Impl.cpp" />
     <ClCompile Include="ImageParser.ixx" />
-    <ClCompile Include="ImageParser.cpp" />
+    <ClCompile Include="ImageParser.Impl.cpp" />
     <ClCompile Include="Flense.Core.ixx" />
   </ItemGroup>
   <ItemGroup>

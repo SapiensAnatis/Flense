@@ -42,7 +42,7 @@
     <ClCompile Include="ImageParser.ixx">
       <Filter>Source Files\Image</Filter>
     </ClCompile>
-    <ClCompile Include="ImageParser.cpp">
+    <ClCompile Include="ImageParser.Impl.cpp">
       <Filter>Source Files\Image</Filter>
     </ClCompile>
     <ClCompile Include="Flense.Core.ixx">
@@ -57,7 +57,7 @@
     <ClCompile Include="Mutex.ixx">
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
-    <ClCompile Include="Mutex.cpp">
+    <ClCompile Include="Mutex.Impl.cpp">
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
     <ClCompile Include="Filesystem.ixx">
@@ -69,7 +69,7 @@
     <ClCompile Include="Platform.Windows.cpp">
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
-    <ClCompile Include="ChannelByteStream.cpp">
+    <ClCompile Include="ChannelByteStream.Impl.cpp">
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
     <ClCompile Include="ChannelByteStream.ixx">
@@ -78,7 +78,7 @@
     <ClCompile Include="BufferPool.ixx">
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
-    <ClCompile Include="BufferPool.cpp">
+    <ClCompile Include="BufferPool.Impl.cpp">
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
   </ItemGroup>
