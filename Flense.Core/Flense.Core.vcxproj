@@ -224,8 +224,8 @@
     <ClCompile Include="Filesystem.ixx" />
     <ClCompile Include="Image.ixx" />
     <ClCompile Include="ArchiveReader.ixx" />
-    <ClCompile Include="FilesystemParsing.ixx" />
     <ClCompile Include="FilesystemParsing.cpp" />
+    <ClCompile Include="FilesystemParsing.Impl.cpp" />
     <ClCompile Include="ImageParser.ixx" />
     <ClCompile Include="ImageParser.cpp" />
     <ClCompile Include="Flense.Core.ixx" />
