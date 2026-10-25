@@ -60,7 +60,7 @@
     <ClCompile Include="Filesystem.ixx">
       <Filter>Source Files\Image</Filter>
     </ClCompile>
-    <ClCompile Include="Platform.ixx">
+    <ClCompile Include="Platform.cpp">
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
     <ClCompile Include="Platform.Windows.cpp">
@@ -73,6 +73,9 @@
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
     <ClCompile Include="BufferPool.ixx">
+      <Filter>Source Files\Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferPool.cpp">
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
   </ItemGroup>

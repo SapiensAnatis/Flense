@@ -212,9 +212,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BufferPool.ixx" />
+    <ClCompile Include="BufferPool.cpp" />
     <ClCompile Include="Mutex.ixx" />
     <ClCompile Include="Mutex.cpp" />
-    <ClCompile Include="Platform.ixx" />
+    <ClCompile Include="Platform.cpp" />
     <ClCompile Include="Platform.Windows.cpp" />
     <ClCompile Include="Channel.ixx" />
     <ClCompile Include="ChannelByteStream.ixx" />

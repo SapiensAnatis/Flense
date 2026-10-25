@@ -13,5 +13,4 @@ export import :Internal.BufferPool;
 export import :Internal.Channel;
 export import :Internal.ChannelByteStream;
 export import :Internal.Mutex;
-export import :Internal.Platform;
 export import :Internal.Tree;
