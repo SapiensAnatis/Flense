@@ -78,6 +78,7 @@
   <ItemGroup>
     <ClCompile Include="ArchiveReaderTests.cpp" />
     <ClCompile Include="FaultyByteStream.ixx" />
+    <ClCompile Include="FileByteStreamTests.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MemoryByteStream.ixx" />
     <ClCompile Include="Support.ixx" />

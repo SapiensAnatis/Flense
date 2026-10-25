@@ -4,6 +4,7 @@ export import :Error;
 export import :Filesystem;
 export import :Image;
 export import :ArchiveReader;
+export import :FileByteStream;
 export import :ImageParser;
 
 // These partitions export no names, but they are imported by the interface partitions above, so they must be
