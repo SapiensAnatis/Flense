@@ -1,7 +1,7 @@
-export module Flense.Core:ChannelByteStream;
+export module Flense.Core:Internal.ChannelByteStream;
 
-import :BufferPool;
-import :Channel;
+import :Internal.BufferPool;
+import :Internal.Channel;
 import std;
 
 namespace Flense::Core

@@ -4,9 +4,9 @@ module;
 #define NOMINMAX
 #include <windows.h>
 
-module Flense.Core:Platform.Windows.Impl;
+module Flense.Core:Internal.Platform.Windows;
 
-import :Platform;
+import :Internal.Platform;
 
 import std;
 

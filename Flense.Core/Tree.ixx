@@ -1,4 +1,4 @@
-export module Flense.Core:Tree;
+export module Flense.Core:Internal.Tree;
 
 import std;
 

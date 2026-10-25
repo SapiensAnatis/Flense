@@ -2,7 +2,7 @@ module;
 
 #include "ThreadSafetyAttributes.h"
 
-export module Flense.Core:Mutex;
+export module Flense.Core:Internal.Mutex;
 
 import std;
 

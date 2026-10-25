@@ -6,10 +6,10 @@ module;
 #include <chrono>
 #endif
 
-export module Flense.Core:BufferPool;
+export module Flense.Core:Internal.BufferPool;
 
-import :Mutex;
-import :Platform;
+import :Internal.Mutex;
+import :Internal.Platform;
 
 import std;
 

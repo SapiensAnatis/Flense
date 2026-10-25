@@ -1,4 +1,4 @@
-module Flense.Core:FilesystemParsing;
+module Flense.Core:Internal.FilesystemParsing;
 
 import :ArchiveReader;
 import :Filesystem;

@@ -1,6 +1,6 @@
 export module Flense.Core:Filesystem;
 
-import :Tree;
+import :Internal.Tree;
 import std;
 
 export namespace Flense::Core

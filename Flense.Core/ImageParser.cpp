@@ -5,14 +5,14 @@ module;
 module Flense.Core:ImageParser.Impl;
 
 import :ArchiveReader;
-import :BufferPool;
-import :Channel;
-import :ChannelByteStream;
-import :FilesystemParsing;
+import :Internal.BufferPool;
+import :Internal.Channel;
+import :Internal.ChannelByteStream;
+import :Internal.FilesystemParsing;
 import :Filesystem;
 import :Image;
 import :ImageParser;
-import :Mutex;
+import :Internal.Mutex;
 
 import std;
 
