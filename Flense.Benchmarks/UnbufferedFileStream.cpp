@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "FileByteStream.h"
+#include "UnbufferedFileStream.h"
 
 #include <malloc.h>
 
@@ -62,7 +62,7 @@ namespace Flense::Benchmarks
         }
     } // namespace
 
-    FileByteStream::FileByteStream(const std::filesystem::path& path) : m_path(path)
+    UnbufferedFileStream::UnbufferedFileStream(const std::filesystem::path& path) : m_path(path)
     {
         // FILE_FLAG_NO_BUFFERING bypasses the OS page cache entirely - every read reaches disk, which
         // is what makes benchmark runs comparable to a genuine cold start instead of to whichever
@@ -97,19 +97,19 @@ namespace Flense::Benchmarks
         }
     }
 
-    FileByteStream::~FileByteStream() = default;
+    UnbufferedFileStream::~UnbufferedFileStream() = default;
 
-    void FileByteStream::HandleDeleter::operator()(void* handle) const noexcept
+    void UnbufferedFileStream::HandleDeleter::operator()(void* handle) const noexcept
     {
         CloseHandle(handle);
     }
 
-    void FileByteStream::AlignedBufferDeleter::operator()(std::byte* buffer) const noexcept
+    void UnbufferedFileStream::AlignedBufferDeleter::operator()(std::byte* buffer) const noexcept
     {
         _aligned_free(buffer);
     }
 
-    bool FileByteStream::FillBuffer()
+    bool UnbufferedFileStream::FillBuffer()
     {
         if (m_position >= m_size)
         {
@@ -142,7 +142,7 @@ namespace Flense::Benchmarks
         return m_position < m_bufferStart + m_bufferValidLength;
     }
 
-    size_t FileByteStream::ReadSync(const std::span<std::byte> buffer)
+    size_t UnbufferedFileStream::ReadSync(const std::span<std::byte> buffer)
     {
         size_t totalRead = 0;
 
@@ -168,7 +168,7 @@ namespace Flense::Benchmarks
         return totalRead;
     }
 
-    int64_t FileByteStream::Skip(const int64_t request)
+    int64_t UnbufferedFileStream::Skip(const int64_t request)
     {
         if (request <= 0)
         {
@@ -184,15 +184,15 @@ namespace Flense::Benchmarks
         return toSkip;
     }
 
-    uint64_t FileByteStream::Size() const
+    uint64_t UnbufferedFileStream::Size() const
     {
         return m_size;
     }
 
-    uint64_t FileByteStream::Position() const
+    uint64_t UnbufferedFileStream::Position() const
     {
         return m_position;
     }
 
-    static_assert(Core::ByteStream<FileByteStream>);
+    static_assert(Core::ByteStream<UnbufferedFileStream>);
 } // namespace Flense::Benchmarks

@@ -14,7 +14,7 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FileByteStream.h">
+    <ClInclude Include="UnbufferedFileStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Benchmarks.h">
@@ -37,7 +37,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FileByteStream.cpp">
+    <ClCompile Include="UnbufferedFileStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Benchmarks.cpp">

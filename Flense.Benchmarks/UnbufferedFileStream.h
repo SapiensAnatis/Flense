@@ -19,7 +19,7 @@ namespace Flense::Benchmarks
     /// size, into a sector-aligned buffer, so this class keeps one such buffer internally and serves
     /// ReadSync/Skip to its caller as an ordinary, unaligned byte stream on top of it.
     /// </remarks>
-    class FileByteStream
+    class UnbufferedFileStream
     {
       public:
         /// <summary>
@@ -27,12 +27,12 @@ namespace Flense::Benchmarks
         /// </summary>
         /// <param name="path">Path to the file.</param>
         /// <exception cref="std::runtime_error">The file could not be opened or its size read.</exception>
-        explicit FileByteStream(const std::filesystem::path& path);
+        explicit UnbufferedFileStream(const std::filesystem::path& path);
 
-        ~FileByteStream();
+        ~UnbufferedFileStream();
 
-        FileByteStream(const FileByteStream&) = delete;
-        FileByteStream& operator=(const FileByteStream&) = delete;
+        UnbufferedFileStream(const UnbufferedFileStream&) = delete;
+        UnbufferedFileStream& operator=(const UnbufferedFileStream&) = delete;
 
         /// <summary>
         /// Reads up to buffer.size() bytes from the current position.

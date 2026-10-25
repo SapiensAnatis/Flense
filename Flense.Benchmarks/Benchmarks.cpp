@@ -1,7 +1,7 @@
 #include "pch.h"
 
 #include "Benchmarks.h"
-#include "FileByteStream.h"
+#include "UnbufferedFileStream.h"
 #include "Progress.h"
 
 #include <psapi.h>
@@ -36,7 +36,7 @@ namespace Flense::Benchmarks
         }
 
         /// <summary>
-        /// Reads the whole file through FileByteStream, doing nothing with the bytes. Establishes the
+        /// Reads the whole file through UnbufferedFileStream, doing nothing with the bytes. Establishes the
         /// floor that no amount of parser optimisation can beat.
         /// </summary>
         /// <param name="path">The image path.</param>
@@ -47,7 +47,7 @@ namespace Flense::Benchmarks
         {
             reporter.ReportPass(passIndex, "io");
 
-            FileByteStream stream{path};
+            UnbufferedFileStream stream{path};
             std::vector<std::byte> buffer(ReadChunkSize);
 
             const auto start = Clock::now();
@@ -87,7 +87,7 @@ namespace Flense::Benchmarks
 
             ParsePassResult result;
 
-            FileByteStream stream{path};
+            UnbufferedFileStream stream{path};
             Core::ImageParser parser;
 
             const auto parseStart = Clock::now();
@@ -269,7 +269,7 @@ namespace Flense::Benchmarks
 
         ProgressReporter reporter{imagePath.filename().string(), runs + 1};
 
-        // Warm up the allocator. Every pass reads straight from disk regardless (FileByteStream
+        // Warm up the allocator. Every pass reads straight from disk regardless (UnbufferedFileStream
         // bypasses the OS page cache), but the first parse still pays one-off costs - heap growth,
         // page faults on first touch - that would otherwise land entirely on run 1 and skew the max.
         RunIoPass(imagePath, reporter, 0);
