@@ -13,14 +13,8 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\Archive">
-      <UniqueIdentifier>{2E83E3FE-9A67-42E6-9D63-BB75E4B232C1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Internal">
       <UniqueIdentifier>{4295D193-6119-4669-9080-A4F99F0FD8A5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Image">
-      <UniqueIdentifier>{A262826A-28ED-4A9A-B2E1-6F66EE07EA49}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -28,10 +22,10 @@
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
     <ClCompile Include="Image.ixx">
-      <Filter>Source Files\Image</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ArchiveReader.ixx">
-      <Filter>Source Files\Archive</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FilesystemParsing.cpp">
       <Filter>Source Files\Internal</Filter>
@@ -40,10 +34,10 @@
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
     <ClCompile Include="ImageParser.ixx">
-      <Filter>Source Files\Image</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ImageParser.Impl.cpp">
-      <Filter>Source Files\Image</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Flense.Core.ixx">
       <Filter>Source Files</Filter>
@@ -61,7 +55,7 @@
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
     <ClCompile Include="Filesystem.ixx">
-      <Filter>Source Files\Image</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Platform.cpp">
       <Filter>Source Files\Internal</Filter>
