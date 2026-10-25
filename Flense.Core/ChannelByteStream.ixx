@@ -4,7 +4,7 @@ import :BufferPool;
 import :Channel;
 import std;
 
-export namespace Flense::Core
+namespace Flense::Core
 {
     /// <summary>
     /// A rented buffer paired with the number of bytes actually filled in it - a chunk's capacity is fixed by

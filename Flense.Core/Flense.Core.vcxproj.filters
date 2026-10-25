@@ -36,10 +36,10 @@
     <ClCompile Include="ArchiveReader.ixx">
       <Filter>Source Files\Archive</Filter>
     </ClCompile>
-    <ClCompile Include="FilesystemParsing.ixx">
+    <ClCompile Include="FilesystemParsing.cpp">
       <Filter>Source Files\Image</Filter>
     </ClCompile>
-    <ClCompile Include="FilesystemParsing.cpp">
+    <ClCompile Include="FilesystemParsing.Impl.cpp">
       <Filter>Source Files\Image</Filter>
     </ClCompile>
     <ClCompile Include="ImageParser.ixx">
