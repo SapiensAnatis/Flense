@@ -12,13 +12,8 @@ namespace winrt::Flense::implementation
             // See https://github.com/microsoft/cppwinrt/tree/master/nuget#initializecomponent
         }
 
-        winrt::Windows::Storage::StorageFile ImageFile() const;
-
-        fire_and_forget OpenImageFileButton_Click(winrt::Windows::Foundation::IInspectable const& sender,
-                                                  winrt::Microsoft::UI::Xaml::RoutedEventArgs const& e);
-
-      private:
-        winrt::Windows::Storage::StorageFile m_imageFile{nullptr};
+        fire_and_forget OpenImageFileButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
+                                                  const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
     };
 } // namespace winrt::Flense::implementation
 
