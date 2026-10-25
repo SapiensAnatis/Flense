@@ -225,6 +225,9 @@
     <ClCompile Include="Filesystem.ixx" />
     <ClCompile Include="Image.ixx" />
     <ClCompile Include="ArchiveReader.ixx" />
+    <ClCompile Include="FileByteStream.ixx" />
+    <ClCompile Include="FileByteStream.Impl.cpp" />
+    <ClCompile Include="FileByteStream.Windows.cpp" />
     <ClCompile Include="FilesystemParsing.cpp" />
     <ClCompile Include="FilesystemParsing.Impl.cpp" />
     <ClCompile Include="ImageParser.ixx" />

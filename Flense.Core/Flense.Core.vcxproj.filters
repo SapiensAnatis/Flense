@@ -27,6 +27,15 @@
     <ClCompile Include="ArchiveReader.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FileByteStream.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileByteStream.Impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileByteStream.Windows.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="FilesystemParsing.cpp">
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
