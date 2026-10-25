@@ -79,7 +79,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Benchmarks.h" />
-    <ClInclude Include="FileByteStream.h" />
+    <ClInclude Include="UnbufferedFileStream.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Progress.h" />
     <ClInclude Include="Reporting.h" />
@@ -88,7 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Benchmarks.cpp" />
-    <ClCompile Include="FileByteStream.cpp" />
+    <ClCompile Include="UnbufferedFileStream.cpp" />
     <ClCompile Include="main.cpp">
       <!-- Prevent unreachable code warnings from our Release-only sanity check -->
       <DisableSpecificWarnings Condition="'$(Configuration)'=='Debug'">4702;%(DisableSpecificWarnings)</DisableSpecificWarnings>
