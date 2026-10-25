@@ -7,7 +7,6 @@
 
 #include "ImageLayerWrapper.h"
 #include "TitleBarService.h"
-#include "WinRtByteStream.h"
 
 #if defined(__INTELLISENSE__)
 #include <ranges>
@@ -109,11 +108,7 @@ namespace winrt::Flense::implementation
         try
         {
             auto archive = ImageArchive();
-            auto rawStream = co_await archive.OpenReadAsync();
-
-            WinRtByteStream stream{rawStream};
-
-            const std::uint64_t totalBytes = stream.Size();
+            const std::filesystem::path archivePath{std::wstring_view{archive.Path()}};
 
             LoadingProgress = 0;
             IsLoading = true;
@@ -122,6 +117,9 @@ namespace winrt::Flense::implementation
             cancellation.callback([&stopSource] { stopSource.request_stop(); });
 
             co_await winrt::resume_background();
+
+            ::Flense::Core::FileByteStream stream{archivePath};
+            const std::uint64_t totalBytes = stream.Size();
 
             const std::stop_token stopToken = stopSource.get_token();
 
@@ -200,10 +198,15 @@ namespace winrt::Flense::implementation
             failure = Describe(error);
             failureDetails = DescribeDetails(error);
         }
+        catch (const std::filesystem::filesystem_error& error)
+        {
+            failure = L"The provided file couldn't be read. It may have been moved, renamed or deleted since you "
+                      L"picked it.";
+            failureDetails = winrt::to_hstring(error.what());
+        }
         catch (const winrt::hresult_error& error)
         {
-            failure = L"The provided file couldn't be opened. It may have been moved, renamed or deleted since you "
-                      L"picked it.";
+            failure = L"Something went wrong while reading the provided image.";
             failureDetails = DescribeDetails(error);
         }
         catch (const std::exception& error)

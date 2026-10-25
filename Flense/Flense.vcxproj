@@ -175,7 +175,6 @@
       <DependentUpon>TitleBarService.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
-    <ClInclude Include="WinRtByteStream.h" />
     <ClInclude Include="App.xaml.h">
       <DependentUpon>App.xaml</DependentUpon>
     </ClInclude>
@@ -271,7 +270,6 @@
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="DialogService.cpp" />
-    <ClCompile Include="WinRtByteStream.cpp" />
     <ClCompile Include="App.xaml.cpp">
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>
