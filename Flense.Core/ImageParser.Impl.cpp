@@ -31,7 +31,6 @@ namespace Flense::Core
         };
 
         constexpr std::string_view BlobPrefix = "blobs/sha256/";
-        constexpr std::chrono::seconds ProgressInterval{2};
 
         /// <summary>
         /// Checks if a character is a space or a tab. Matches fewer characters than isspace and is locale-independent.
@@ -315,22 +314,6 @@ namespace Flense::Core
         }
     }
 
-    void ImageParser::ReportProgressPeriodically(const ProgressCallback& onProgress,
-                                                 const std::stop_token stopToken) const
-    {
-        std::mutex mutex;
-        std::condition_variable_any cv;
-        std::unique_lock lock(mutex);
-
-        while (!stopToken.stop_requested())
-        {
-            // Interruptible sleep
-            onProgress(m_bytesProcessed.load(std::memory_order_relaxed));
-
-            cv.wait_for(lock, stopToken, ProgressInterval, [] { return false; });
-        }
-    }
-
     void ImageParser::JoinWorkers(const std::stop_token stopToken)
     {
         std::list<Worker> ownedWorkers = std::exchange(m_workers, {});
@@ -346,20 +329,9 @@ namespace Flense::Core
         }
     }
 
-    Image ImageParser::Build(const ProgressCallback& onProgress, const std::stop_token stopToken)
+    Image ImageParser::Build(const std::stop_token stopToken)
     {
-        {
-            std::jthread progressReporter;
-
-            if (onProgress)
-            {
-                progressReporter = std::jthread([this, &onProgress](const std::stop_token stopToken) {
-                    ReportProgressPeriodically(onProgress, stopToken);
-                });
-            }
-
-            JoinWorkers(stopToken);
-        } // Join progress thread; we've now read all of the bytes of the file and just have to do some bookkeeping
+        JoinWorkers(stopToken);
 
         if (!m_configPath)
         {

@@ -102,54 +102,39 @@ namespace winrt::Flense::implementation
 
         auto cancellation = co_await get_cancellation_token();
 
+        auto updateProgress = [dispatcher, weak = get_weak()](const std::uint64_t bytesProcessed,
+                                                              const std::uint64_t totalBytes) {
+            if (totalBytes == 0)
+            {
+                return;
+            }
+
+            const double percent = (static_cast<double>(bytesProcessed) / static_cast<double>(totalBytes)) * 100.0;
+
+            dispatcher.TryEnqueue([weak, percent] {
+                if (auto self = weak.get())
+                {
+                    self->LoadingProgress = percent;
+                }
+            });
+        };
+
+        const std::filesystem::path archivePath{std::wstring_view{ImageArchivePath()}};
+
+        LoadingProgress = 0;
+        IsLoading = true;
+
+        std::stop_source stopSource;
+        cancellation.callback([&stopSource] { stopSource.request_stop(); });
+
+        co_await winrt::resume_background();
+
         winrt::hstring failure;
         winrt::hstring failureDetails;
 
         try
         {
-            const std::filesystem::path archivePath{std::wstring_view{ImageArchivePath()}};
-
-            LoadingProgress = 0;
-            IsLoading = true;
-
-            std::stop_source stopSource;
-            cancellation.callback([&stopSource] { stopSource.request_stop(); });
-
-            co_await winrt::resume_background();
-
-            ::Flense::Core::FileByteStream stream{archivePath};
-            const std::uint64_t totalBytes = stream.Size();
-
-            const std::stop_token stopToken = stopSource.get_token();
-
-            auto reader = ::Flense::Core::ArchiveReader::CreateFromStream(stream);
-
-            ::Flense::Core::ImageParser imageParser;
-
-            auto updateProgress = [dispatcher, weak = get_weak(), totalBytes](const std::uint64_t bytesProcessed) {
-                if (totalBytes == 0)
-                {
-                    return;
-                }
-
-                const double percent = (static_cast<double>(bytesProcessed) / static_cast<double>(totalBytes)) * 100.0;
-
-                dispatcher.TryEnqueue([weak, percent] {
-                    if (auto self = weak.get())
-                    {
-                        self->LoadingProgress = percent;
-                    }
-                });
-            };
-
-            while (auto entry = reader.Next(stopToken))
-            {
-                imageParser.ProcessEntry(*entry, stopToken);
-
-                updateProgress(imageParser.BytesProcessed());
-            }
-
-            auto details = imageParser.Build(updateProgress, stopToken);
+            auto details = ::Flense::Core::ParseImageArchive(archivePath, updateProgress, stopSource.get_token());
 
             auto parsedLayers = details.layers | std::views::transform([](const auto& layer) {
                                     return winrt::make<implementation::ImageLayerWrapper>(layer);

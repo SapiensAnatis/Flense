@@ -5,6 +5,7 @@ module;
 export module Flense.Core:ImageParser;
 
 import :ArchiveReader;
+import :FileByteStream;
 import :Internal.BufferPool;
 import :Internal.Channel;
 import :Internal.ChannelByteStream;
@@ -12,6 +13,25 @@ import :Filesystem;
 import :Image;
 import :Internal.Mutex;
 import std;
+
+namespace Flense::Core
+{
+    namespace
+    {
+        /// <summary>
+        /// Sleeps for the given duration, waking early if stopToken is stopped.
+        /// </summary>
+        void SleepFor(const std::chrono::milliseconds duration, const std::stop_token stopToken)
+        {
+            std::mutex mutex;
+            std::condition_variable_any cv;
+            std::unique_lock lock(mutex);
+
+            // Nothing ever notifies cv, so this only returns on timeout or when stopToken is stopped.
+            cv.wait_for(lock, stopToken, duration, [] { return false; });
+        }
+    } // namespace
+} // namespace Flense::Core
 
 export namespace Flense::Core
 {
@@ -27,8 +47,6 @@ export namespace Flense::Core
     class ImageParser
     {
       public:
-        using ProgressCallback = std::function<void(std::uint64_t bytesProcessed)>;
-
         ImageParser() = default;
         ~ImageParser() = default;
 
@@ -59,12 +77,10 @@ export namespace Flense::Core
         /// Waits for all outstanding layer-parsing work dispatched by ProcessEntry() to finish, then assembles
         /// an Image from the accumulated state.
         /// </summary>
-        /// <param name="onProgress">Optional callback invoked periodically, from a background thread, with
-        /// cumulative byte totals while waiting for outstanding work to finish.</param>
         /// <returns>An ImageDetails struct.</returns>
         /// <exception cref="OperationCancelledError">stopToken was triggered while waiting for outstanding
         /// work.</exception>
-        [[nodiscard]] Image Build(const ProgressCallback& onProgress = {}, std::stop_token stopToken = {});
+        [[nodiscard]] Image Build(std::stop_token stopToken = {});
 
         [[nodiscard]] std::uint64_t BytesProcessed() const
         {
@@ -98,11 +114,6 @@ export namespace Flense::Core
         /// <param name="stopToken">The token to check for cancellation.</param>
         void DispatchLayerWorker(ArchiveEntry& entry, std::span<const std::byte> sniffedPrefix,
                                  std::stop_token stopToken);
-
-        /// <summary>
-        /// Calls onProgress with the current byte totals every ProgressInterval, until stopToken is stopped.
-        /// </summary>
-        void ReportProgressPeriodically(const ProgressCallback& onProgress, std::stop_token stopToken) const;
 
         /// <summary>
         /// Waits for every dispatched worker to finish. If one threw, every worker is still joined (they
@@ -143,5 +154,52 @@ export namespace Flense::Core
         // Must be destroyed first to ensure any pending threads are stopped before they use-after-free
         std::list<Worker> m_workers;
     };
+
+    using ArchiveProgressCallback = std::function<void(std::uint64_t bytesProcessed, std::uint64_t totalBytes)>;
+
+    /// <summary>
+    /// Parses an image archive file on disk into an Image. Blocks until parsing is complete, so it should be called
+    /// from a background thread.
+    /// </summary>
+    /// <param name="path">The path to the image archive.</param>
+    /// <param name="onProgress">Optional callback invoked periodically, from a background thread, with cumulative
+    /// byte totals.</param>
+    /// <param name="stopToken">The token to check for cancellation.</param>
+    /// <returns>The parsed Image.</returns>
+    /// <exception cref="std::filesystem::filesystem_error">The file could not be opened or read.</exception>
+    /// <exception cref="ImageFormatError">The archive is not a valid image.</exception>
+    /// <exception cref="OperationCancelledError">stopToken was triggered before parsing finished.</exception>
+    [[nodiscard]] Image ParseImageArchive(const std::filesystem::path& path,
+                                          const ArchiveProgressCallback& onProgress = {},
+                                          const std::stop_token stopToken = {})
+    {
+        FileByteStream stream{path};
+        const std::uint64_t totalBytes = stream.Size();
+
+        auto reader = ArchiveReader::CreateFromStream(stream);
+        ImageParser parser;
+
+        // Declared after parser so that it is stopped before parser is destroyed.
+        std::jthread progressReporter;
+        if (onProgress)
+        {
+            progressReporter = std::jthread([&parser, &onProgress, totalBytes](const std::stop_token reporterStop) {
+                constexpr std::chrono::milliseconds ProgressInterval{250};
+
+                while (!reporterStop.stop_requested())
+                {
+                    onProgress(parser.BytesProcessed(), totalBytes);
+                    SleepFor(ProgressInterval, reporterStop);
+                }
+            });
+        }
+
+        while (auto entry = reader.Next(stopToken))
+        {
+            parser.ProcessEntry(*entry, stopToken);
+        }
+
+        return parser.Build(stopToken);
+    }
 
 } // namespace Flense::Core
