@@ -26,6 +26,19 @@ For example:
 1. Avoid adding comments, unless the code is unusual and benefits from an explanation of either _why_ it was written this way, or in exceptional 
    cases _what_ it does where the _what_ is difficult to parse.
 
+## C++ modules
+
+`Flense.Core` is one module split into partitions, laid out to keep rebuilds small:
+
+1. `X.ixx` declares interface partition `:X`, which `Flense.Core.ixx` must `export import`.
+2. `X.Impl.cpp` (or `X.Windows.cpp`) declares implementation partition `:X.Impl`, importing only what it uses.
+3. Never write `module Flense.Core;` units: they depend on the whole interface, so rebuild on any change.
+4. `Internal.X` partitions are for Core only. One imported by an interface partition must itself be an exported
+   interface partition; one used only by implementations stays a non-interface partition (`:Internal.FilesystemParsing`).
+5. MSVC rejects defining an exported free function in an implementation partition (C7619): define it in the interface
+   partition or make it a static member.
+6. `import std;` for the standard library; other headers go in the global module fragment.
+
 ## C++/WinRT best practices
 
 1. Never call `InitializeComponent()` from a XAML type's constructor — C++/WinRT now calls it automatically and
