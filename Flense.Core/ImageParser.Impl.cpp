@@ -126,6 +126,39 @@ namespace Flense::Core
 
             return out;
         }
+
+        /// <summary>
+        /// A ByteStream that forwards to another stream, adding the number of bytes read to a counter as it goes.
+        /// </summary>
+        template <ByteStream TStream> class CountingByteStream
+        {
+          public:
+            CountingByteStream(TStream* inner, std::atomic<std::uint64_t>* counter)
+                : m_inner(inner), m_counter(counter)
+            {
+            }
+
+            std::size_t ReadSync(const std::span<std::byte> buffer)
+            {
+                const std::size_t read = m_inner->ReadSync(buffer);
+                m_counter->fetch_add(read, std::memory_order_relaxed);
+                return read;
+            }
+
+            [[nodiscard]] std::uint64_t Size() const
+            {
+                return m_inner->Size();
+            }
+
+            [[nodiscard]] std::uint64_t Position() const
+            {
+                return m_inner->Position();
+            }
+
+          private:
+            TStream* m_inner;
+            std::atomic<std::uint64_t>* m_counter;
+        };
     } // namespace
 
     void ImageParser::ProcessEntry(ArchiveEntry& entry, std::stop_token stopToken)
@@ -238,7 +271,8 @@ namespace Flense::Core
                              promise = std::move(promise)](std::stop_token workerStopToken) mutable {
             try
             {
-                ChannelByteStream stream(std::move(receiver), entrySize);
+                ChannelByteStream channelStream(std::move(receiver), entrySize);
+                CountingByteStream stream(&channelStream, &m_bytesProcessed);
                 auto reader = ArchiveReader::CreateFromStream(stream);
                 FilesystemChangeTreeNodeRef filesystem = ParseLayerFilesystem(&reader, workerStopToken);
 
@@ -247,7 +281,8 @@ namespace Flense::Core
                     m_filesystemsByLayerDigest.emplace(archivePath, std::move(filesystem));
                 }
 
-                m_bytesProcessed.fetch_add(entrySize, std::memory_order_relaxed);
+                m_bytesProcessed.fetch_add(entrySize - std::min(entrySize, stream.Position()),
+                                           std::memory_order_relaxed);
 
                 promise.set_value();
             }

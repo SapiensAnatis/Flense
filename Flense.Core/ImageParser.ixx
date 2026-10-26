@@ -184,7 +184,7 @@ export namespace Flense::Core
         if (onProgress)
         {
             progressReporter = std::jthread([&parser, &onProgress, totalBytes](const std::stop_token reporterStop) {
-                constexpr std::chrono::milliseconds ProgressInterval{250};
+                constexpr std::chrono::milliseconds ProgressInterval{50};
 
                 while (!reporterStop.stop_requested())
                 {

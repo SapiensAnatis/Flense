@@ -109,12 +109,16 @@ namespace winrt::Flense::implementation
                 return;
             }
 
-            const double percent = (static_cast<double>(bytesProcessed) / static_cast<double>(totalBytes)) * 100.0;
+            // Reserve the last 5% for building the image once every byte has been read.
+            const double percent = (static_cast<double>(bytesProcessed) / static_cast<double>(totalBytes)) * 95.0;
 
             dispatcher.TryEnqueue([weak, percent] {
                 if (auto self = weak.get())
                 {
-                    self->LoadingProgress = percent;
+                    if (percent > self->LoadingProgress)
+                    {
+                        self->LoadingProgress = percent;
+                    }
                 }
             });
         };
