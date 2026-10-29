@@ -8,7 +8,6 @@
     <File Path=".clang-format" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Build.targets" />
-    <File Path="Directory.Build.ClangTidy.targets" />
     <File Path="LICENSE.md" />
     <File Path="README.md" />
     <File Path="THIRD-PARTY-NOTICES.md" />

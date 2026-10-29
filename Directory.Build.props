@@ -23,6 +23,5 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <UseMultiToolTask>true</UseMultiToolTask>
     <EnforceProcessCountAcrossBuilds>true</EnforceProcessCountAcrossBuilds>
-    <ForceImportAfterCppTargets>$(MSBuildThisFileDirectory)Directory.Build.ClangTidy.targets</ForceImportAfterCppTargets>
   </PropertyGroup>
 </Project>
