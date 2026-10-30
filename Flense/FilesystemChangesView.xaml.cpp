@@ -20,7 +20,6 @@ namespace winrt::Flense::implementation
     FilesystemChangesView::FilesystemChangesView()
     {
         InitializeProperties();
-        InitializeComponent();
     }
 
     void FilesystemChangesView::InitializeProperties()
@@ -123,7 +122,7 @@ namespace winrt::Flense::implementation
     }
 
     void FilesystemChangesView::OnChangeVisibilityChanged(const DependencyObject& sender,
-                                                           const DependencyPropertyChangedEventArgs& args)
+                                                          const DependencyPropertyChangedEventArgs& args)
     {
         const auto view = winrt::get_self<FilesystemChangesView>(sender.as<winrt::Flense::FilesystemChangesView>());
         view->m_viewModel.ChangeVisibility(

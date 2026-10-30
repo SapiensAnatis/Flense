@@ -1,0 +1,14 @@
+import "DockerEngineImage.idl";
+
+namespace Flense
+{
+    [bindable]
+    [default_interface]
+    runtimeclass ImageSelectionViewModel : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        ImageSelectionViewModel();
+        Windows.Foundation.Collections.IObservableVector<Flense.DockerEngineImage> Images { get; };
+
+        Windows.Foundation.IAsyncAction LoadImageList();
+    }
+}

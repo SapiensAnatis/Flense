@@ -14,6 +14,8 @@ namespace winrt::Flense::implementation
 
         fire_and_forget OpenImageFileButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
                                                   const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
+        void SelectImageButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
+                                     const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
     };
 } // namespace winrt::Flense::implementation
 

@@ -1,0 +1,11 @@
+import "ImageSelectionViewModel.idl";
+
+namespace Flense
+{
+    [default_interface]
+    runtimeclass ImageSelectionPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        ImageSelectionPage();
+        ImageSelectionViewModel ViewModel{ get; };
+    }
+}

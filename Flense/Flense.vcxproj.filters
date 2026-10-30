@@ -20,6 +20,9 @@
     <Page Include="LoadFailureDialog.xaml">
       <Filter>Controls</Filter>
     </Page>
+    <Page Include="ImageSelectionPage.xaml">
+      <Filter>Views</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="MainWindow.idl" />
@@ -65,14 +68,22 @@
     <Midl Include="TitleBarService.idl">
       <Filter>Services</Filter>
     </Midl>
+    <Midl Include="ImageSelectionViewModel.idl">
+      <Filter>ViewModels</Filter>
+    </Midl>
+    <Midl Include="DockerEngineImage.idl">
+      <Filter>Wrappers</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="DialogService.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="DialogService.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
