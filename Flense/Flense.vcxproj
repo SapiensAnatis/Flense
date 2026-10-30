@@ -25,7 +25,7 @@
     <WinUISDKReferences>false</WinUISDKReferences>
     <EnableMsixTooling>true</EnableMsixTooling>
   </PropertyGroup>
-  <PropertyGroup>   
+  <PropertyGroup>
     <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -116,6 +116,10 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DockerEngineImage.h">
+      <DependentUpon>DockerEngineImage.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="FileSizeStringConverter.h">
       <DependentUpon>FileSizeStringConverter.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -126,6 +130,14 @@
     </ClInclude>
     <ClInclude Include="FileKindGlyphConverter.h">
       <DependentUpon>FileKindGlyphConverter.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="ImageSelectionPage.xaml.h">
+      <DependentUpon>ImageSelectionPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="ImageSelectionViewModel.h">
+      <DependentUpon>ImageSelectionViewModel.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="RatioToPercentStringConverter.h">
@@ -198,6 +210,9 @@
     <Page Include="ImageDetailsPage.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="ImageSelectionPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="LandingPage.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -210,6 +225,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DockerEngineImage.cpp">
+      <DependentUpon>DockerEngineImage.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="FileSizeStringConverter.cpp">
       <DependentUpon>FileSizeStringConverter.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -220,6 +239,14 @@
     </ClCompile>
     <ClCompile Include="FileKindGlyphConverter.cpp">
       <DependentUpon>FileKindGlyphConverter.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="ImageSelectionPage.xaml.cpp">
+      <DependentUpon>ImageSelectionPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="ImageSelectionViewModel.cpp">
+      <DependentUpon>ImageSelectionViewModel.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="RatioToPercentStringConverter.cpp">
@@ -287,6 +314,9 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="DockerEngineImage.idl">
+      <SubType>Designer</SubType>
+    </Midl>
     <Midl Include="FileSizeStringConverter.idl">
       <SubType>Designer</SubType>
     </Midl>
@@ -297,6 +327,13 @@
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="FileKindGlyphConverter.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="ImageSelectionPage.idl">
+      <DependentUpon>ImageSelectionPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="ImageSelectionViewModel.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="RatioToPercentStringConverter.idl">

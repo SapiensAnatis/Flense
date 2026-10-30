@@ -48,8 +48,8 @@
                 <Button
                     x:Name="SelectImageButton"
                     HorizontalAlignment="Stretch"
-                    Content="Select from list"
-                    IsEnabled="False" />
+                    Click="SelectImageButton_Click"
+                    Content="Select from list" />
             </StackPanel>
         </StackPanel>
     </Grid>
