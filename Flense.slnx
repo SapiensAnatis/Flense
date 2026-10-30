@@ -39,6 +39,9 @@
   <Project Path="Flense.Core/Flense.Core.vcxproj" Id="257839dd-36da-47d5-b884-9118c972f916">
     <Platform Solution="*|ARM64" Project="x64" />
   </Project>
+  <Project Path="Flense.VcpkgModules/Flense.VcpkgModules.vcxproj" Id="d9a9d7dd-91dc-47f1-ad88-1e09f9a1d351">
+    <Platform Solution="*|ARM64" Project="x64" />
+  </Project>
   <Project Path="Flense/Flense.vcxproj" Id="52ed318b-9ba0-455b-b9e1-8e1b5b3c366d">
     <Deploy />
   </Project>

@@ -2,7 +2,7 @@
 
 #include "Serialization.h"
 
-#include <nlohmann/json.hpp>
+import nlohmann.json;
 
 namespace Flense::Benchmarks
 {

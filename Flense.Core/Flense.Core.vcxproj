@@ -237,6 +237,11 @@
   <ItemGroup>
     <ClInclude Include="ThreadSafetyAttributes.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Flense.VcpkgModules\Flense.VcpkgModules.vcxproj">
+      <Project>{d9a9d7dd-91dc-47f1-ad88-1e09f9a1d351}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

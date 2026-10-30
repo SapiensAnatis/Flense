@@ -1,7 +1,5 @@
 module;
 
-#include <nlohmann/json.hpp>
-
 module Flense.Core:ImageParser.Impl;
 
 import :ArchiveReader;
@@ -13,6 +11,8 @@ import :Filesystem;
 import :Image;
 import :ImageParser;
 import :Internal.Mutex;
+
+import nlohmann.json;
 
 import std;
 
@@ -133,8 +133,7 @@ namespace Flense::Core
         template <ByteStream TStream> class CountingByteStream
         {
           public:
-            CountingByteStream(TStream* inner, std::atomic<std::uint64_t>* counter)
-                : m_inner(inner), m_counter(counter)
+            CountingByteStream(TStream* inner, std::atomic<std::uint64_t>* counter) : m_inner(inner), m_counter(counter)
             {
             }
 
