@@ -213,6 +213,10 @@
   <ItemGroup>
     <ClCompile Include="BufferPool.ixx" />
     <ClCompile Include="BufferPool.Impl.cpp" />
+    <ClCompile Include="DockerClient.Impl.cpp" />
+    <ClCompile Include="DockerClient.ixx" />
+    <ClCompile Include="DockerTransport.ixx" />
+    <ClCompile Include="DockerTransport.Windows.cpp" />
     <ClCompile Include="Mutex.ixx" />
     <ClCompile Include="Mutex.Impl.cpp" />
     <ClCompile Include="Platform.cpp" />

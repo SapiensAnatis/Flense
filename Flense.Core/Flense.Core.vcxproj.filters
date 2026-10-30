@@ -16,6 +16,9 @@
     <Filter Include="Source Files\Internal">
       <UniqueIdentifier>{4295D193-6119-4669-9080-A4F99F0FD8A5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\DockerClient">
+      <UniqueIdentifier>{5a7b84e3-1865-4790-8459-d68de6d7a413}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tree.ixx">
@@ -83,6 +86,18 @@
     </ClCompile>
     <ClCompile Include="BufferPool.Impl.cpp">
       <Filter>Source Files\Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="DockerClient.ixx">
+      <Filter>Source Files\DockerClient</Filter>
+    </ClCompile>
+    <ClCompile Include="DockerTransport.ixx">
+      <Filter>Source Files\DockerClient</Filter>
+    </ClCompile>
+    <ClCompile Include="DockerTransport.Windows.cpp">
+      <Filter>Source Files\DockerClient</Filter>
+    </ClCompile>
+    <ClCompile Include="DockerClient.Impl.cpp">
+      <Filter>Source Files\DockerClient</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

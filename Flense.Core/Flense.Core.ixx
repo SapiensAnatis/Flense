@@ -4,6 +4,8 @@ export import :Error;
 export import :Filesystem;
 export import :Image;
 export import :ArchiveReader;
+export import :DockerClient;
+export import :DockerTransport;
 export import :FileByteStream;
 export import :ImageParser;
 
