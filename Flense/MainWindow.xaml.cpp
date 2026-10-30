@@ -48,6 +48,16 @@ namespace winrt::Flense::implementation
     {
         auto lifetime = get_strong();
 
+        auto detailsPage = rootFrame().Content().try_as<winrt::Flense::ImageDetailsPage>();
+        if (!detailsPage)
+        {
+            if (rootFrame().CanGoBack())
+            {
+                rootFrame().GoBack();
+            }
+            co_return;
+        }
+
         Controls::ContentDialog dialog;
         dialog.XamlRoot(rootFrame().XamlRoot());
         dialog.Title(box_value(L"Close image analysis?"));
@@ -63,11 +73,7 @@ namespace winrt::Flense::implementation
 
         if (result && result.Value() == Controls::ContentDialogResult::Primary && rootFrame().CanGoBack())
         {
-            if (auto detailsPage = rootFrame().Content().try_as<winrt::Flense::ImageDetailsPage>())
-            {
-                detailsPage.CancelLoading();
-            }
-
+            detailsPage.CancelLoading();
             rootFrame().GoBack();
         }
     }

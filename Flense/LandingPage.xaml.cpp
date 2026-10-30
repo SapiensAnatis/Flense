@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "ImageDetailsPage.xaml.h"
+#include "ImageSelectionPage.xaml.h"
 #include "LandingPage.xaml.h"
 
 #if __has_include("LandingPage.g.cpp")
@@ -35,6 +36,7 @@ namespace winrt::Flense::implementation
             picker.SuggestedStartLocation(PickerLocationId::Downloads);
             picker.ViewMode(PickerViewMode::List);
             picker.FileTypeFilter().Append(L".tar");
+            picker.FileTypeFilter().Append(L".tar.gz");
 
             const PickFileResult result = co_await picker.PickSingleFileAsync();
 
@@ -45,5 +47,10 @@ namespace winrt::Flense::implementation
                 Frame().Navigate(xaml_typename<Flense::ImageDetailsPage>(), box_value(result.Path()));
             }
         }
+    }
+
+    void LandingPage::SelectImageButton_Click(const IInspectable& /* sender */, const RoutedEventArgs& /* e */)
+    {
+        Frame().Navigate(xaml_typename<Flense::ImageSelectionPage>());
     }
 } // namespace winrt::Flense::implementation
