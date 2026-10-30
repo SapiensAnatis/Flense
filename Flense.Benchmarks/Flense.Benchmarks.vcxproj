@@ -105,6 +105,9 @@
     <ProjectReference Include="..\Flense.Core\Flense.Core.vcxproj">
       <Project>{257839dd-36da-47d5-b884-9118c972f916}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Flense.VcpkgModules\Flense.VcpkgModules.vcxproj">
+      <Project>{d9a9d7dd-91dc-47f1-ad88-1e09f9a1d351}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
