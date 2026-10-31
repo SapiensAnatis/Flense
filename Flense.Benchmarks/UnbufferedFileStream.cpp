@@ -189,10 +189,5 @@ namespace Flense::Benchmarks
         return m_size;
     }
 
-    uint64_t UnbufferedFileStream::Position() const
-    {
-        return m_position;
-    }
-
     static_assert(Core::ByteStream<UnbufferedFileStream>);
 } // namespace Flense::Benchmarks

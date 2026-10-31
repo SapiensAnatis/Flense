@@ -15,3 +15,4 @@ export import :Internal.Channel;
 export import :Internal.ChannelByteStream;
 export import :Internal.Mutex;
 export import :Internal.Tree;
+export import :Internal.FileHandle;
