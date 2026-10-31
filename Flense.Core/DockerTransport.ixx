@@ -4,6 +4,21 @@ import std;
 
 export namespace Flense::Core
 {
+    class DockerConnection
+    {
+      public:
+        DockerConnection() = default;
+        DockerConnection(const DockerConnection&) = delete;
+        DockerConnection(DockerConnection&&) = delete;
+
+        virtual ~DockerConnection() = default;
+
+        DockerConnection& operator=(const DockerConnection&) = delete;
+        DockerConnection& operator=(DockerConnection&&) = delete;
+
+        virtual std::size_t ReadSync(std::span<std::byte> buffer) = 0;
+    };
+
     class DockerTransport
     {
       public:
@@ -18,6 +33,6 @@ export namespace Flense::Core
 
         [[nodiscard]] static std::unique_ptr<DockerTransport> CreateDefault();
 
-        virtual std::string SendRequest(std::string_view request) = 0;
+        virtual std::unique_ptr<DockerConnection> SendRequest(std::string_view request) = 0;
     };
 } // namespace Flense::Core

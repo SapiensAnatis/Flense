@@ -217,6 +217,7 @@
     <ClCompile Include="DockerClient.ixx" />
     <ClCompile Include="DockerTransport.ixx" />
     <ClCompile Include="DockerTransport.Windows.cpp" />
+    <ClCompile Include="HttpResponse.ixx" />
     <ClCompile Include="Mutex.ixx" />
     <ClCompile Include="Mutex.Impl.cpp" />
     <ClCompile Include="Platform.cpp" />

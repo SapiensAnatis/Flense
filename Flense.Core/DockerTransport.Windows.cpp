@@ -44,12 +44,38 @@ namespace Flense::Core
             return HandlePtr(pipeHandle);
         }
 
+        class WindowsDockerConnection : public DockerConnection
+        {
+          public:
+            explicit WindowsDockerConnection(HandlePtr pipeHandle) : m_pipeHandle(std::move(pipeHandle))
+            {
+            }
+
+            std::size_t ReadSync(std::span<std::byte> buffer) override
+            {
+                DWORD bytesRead = 0;
+                if (ReadFile(m_pipeHandle.get(), buffer.data(), static_cast<DWORD>(buffer.size()), &bytesRead,
+                             nullptr) == FALSE)
+                {
+                    if (GetLastError() == ERROR_BROKEN_PIPE)
+                    {
+                        return 0;
+                    }
+                    ThrowLastError("ReadSync");
+                }
+                return bytesRead;
+            }
+
+          private:
+            HandlePtr m_pipeHandle;
+        };
+
         class WindowsDockerTransport : public DockerTransport
         {
           public:
-            std::string SendRequest(const std::string_view request) override
+            std::unique_ptr<DockerConnection> SendRequest(const std::string_view request) override
             {
-                const HandlePtr pipeHandle = GetDockerPipeHandle();
+                HandlePtr pipeHandle = GetDockerPipeHandle();
 
                 std::string_view remaining = request;
                 while (!remaining.empty())
@@ -64,36 +90,10 @@ namespace Flense::Core
                     remaining.remove_prefix(bytesWritten);
                 }
 
-                // TODO: Add a timeout, since a hung daemon will block this read forever. Overlapped I/O would also
-                // let callers cancel the request.
-                // TODO: Cap the response size so a huge image list can't exhaust memory.
-                std::string response;
-                std::array<char, 4096> buffer{};
-                while (true)
-                {
-                    DWORD bytesRead = 0;
-                    if (ReadFile(pipeHandle.get(), buffer.data(), static_cast<DWORD>(buffer.size()), &bytesRead,
-                                 nullptr) == FALSE)
-                    {
-                        if (GetLastError() == ERROR_BROKEN_PIPE)
-                        {
-                            break;
-                        }
-
-                        ThrowLastError("ReadFile");
-                    }
-
-                    if (bytesRead == 0)
-                    {
-                        break;
-                    }
-
-                    response.append(buffer.data(), bytesRead);
-                }
-
-                return response;
+                return std::make_unique<WindowsDockerConnection>(std::move(pipeHandle));
             }
         };
+
     } // namespace
 
     std::unique_ptr<DockerTransport> DockerTransport::CreateDefault()

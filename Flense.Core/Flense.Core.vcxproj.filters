@@ -99,6 +99,9 @@
     <ClCompile Include="DockerClient.Impl.cpp">
       <Filter>Source Files\DockerClient</Filter>
     </ClCompile>
+    <ClCompile Include="HttpResponse.ixx">
+      <Filter>Source Files\DockerClient</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThreadSafetyAttributes.h">
