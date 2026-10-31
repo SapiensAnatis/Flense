@@ -4,6 +4,8 @@ export import :Error;
 export import :Filesystem;
 export import :Image;
 export import :ArchiveReader;
+export import :DockerClient;
+export import :DockerTransport;
 export import :FileByteStream;
 export import :ImageParser;
 
@@ -15,3 +17,4 @@ export import :Internal.Channel;
 export import :Internal.ChannelByteStream;
 export import :Internal.Mutex;
 export import :Internal.Tree;
+export import :Internal.FileHandle;

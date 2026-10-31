@@ -1,5 +1,7 @@
 export module Flense.Core:FileByteStream;
 
+import :Internal.FileHandle;
+
 import std;
 
 export namespace Flense::Core
@@ -36,11 +38,6 @@ export namespace Flense::Core
       private:
         static constexpr std::size_t ChunkSize = std::size_t{1024} * 1024;
 
-        struct HandleCloser
-        {
-            void operator()(void* handle) const noexcept;
-        };
-
         /// <summary>
         /// Refills the chunk buffer from the current position.
         /// </summary>
@@ -55,7 +52,7 @@ export namespace Flense::Core
 
         std::filesystem::path m_path;
 
-        std::unique_ptr<void, HandleCloser> m_handle;
+        FileHandle m_handle;
 
         std::uint64_t m_size{0};
         std::uint64_t m_position{0};

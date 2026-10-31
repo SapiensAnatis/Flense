@@ -35,7 +35,8 @@
   </PropertyGroup>
   <PropertyGroup Label="clang-tidy">
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
-    <MaxNumberOfProcesses>0</MaxNumberOfProcesses> <!-- Unlimited parallelism -->
+    <MaxNumberOfProcesses>0</MaxNumberOfProcesses>
+    <!-- Unlimited parallelism -->
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -213,6 +214,13 @@
   <ItemGroup>
     <ClCompile Include="BufferPool.ixx" />
     <ClCompile Include="BufferPool.Impl.cpp" />
+    <ClCompile Include="DockerClient.Impl.cpp" />
+    <ClCompile Include="DockerClient.ixx" />
+    <ClCompile Include="DockerTransport.ixx" />
+    <ClCompile Include="DockerTransport.Windows.cpp" />
+    <ClCompile Include="FileHandle.ixx" />
+    <ClCompile Include="FileHandle.Windows.cpp" />
+    <ClCompile Include="HttpResponse.ixx" />
     <ClCompile Include="Mutex.ixx" />
     <ClCompile Include="Mutex.Impl.cpp" />
     <ClCompile Include="Platform.cpp" />

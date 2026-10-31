@@ -53,15 +53,6 @@ namespace Flense::Benchmarks
         /// </summary>
         uint64_t Size() const;
 
-        /// <summary>
-        /// The current read position in bytes from the start of the file.
-        /// </summary>
-        /// <remarks>
-        /// Required by the ByteStream concept rather than by anything here - ArchiveReader itself only
-        /// ever uses ReadSync and Skip.
-        /// </remarks>
-        uint64_t Position() const;
-
       private:
         /// <summary>
         /// Reads the sector-aligned chunk covering the current position into the aligned buffer,

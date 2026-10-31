@@ -15,7 +15,7 @@ namespace Flense::Benchmarks
         {
             void operator()(const HANDLE handle) const noexcept
             {
-                if (handle != nullptr && handle != INVALID_HANDLE_VALUE)
+                if (handle != INVALID_HANDLE_VALUE)
                 {
                     CloseHandle(handle);
                 }
@@ -127,8 +127,8 @@ namespace Flense::Benchmarks
 
         std::wstring commandLine = BuildCommandLine(modulePath.data(), args);
 
-        const BOOL created = CreateProcessW(modulePath.data(), commandLine.data(), nullptr, nullptr, TRUE, 0,
-                                            nullptr, nullptr, &startupInfo, &processInfo);
+        const BOOL created = CreateProcessW(modulePath.data(), commandLine.data(), nullptr, nullptr, TRUE, 0, nullptr,
+                                            nullptr, &startupInfo, &processInfo);
 
         // The child inherited its own copy of the write end; the parent's copy must be closed now, or
         // the ReadFile loop below blocks forever waiting for a write end that will never close.
@@ -136,8 +136,8 @@ namespace Flense::Benchmarks
 
         if (!created)
         {
-            throw std::runtime_error(std::format("Could not start the child benchmark process (error {}).",
-                                                 GetLastError()));
+            throw std::runtime_error(
+                std::format("Could not start the child benchmark process (error {}).", GetLastError()));
         }
 
         const UniqueHandle processHandle{processInfo.hProcess};
