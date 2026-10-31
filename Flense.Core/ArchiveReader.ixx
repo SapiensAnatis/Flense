@@ -52,10 +52,8 @@ export namespace Flense::Core
     /// async - callers are expected to ArchiveReader::ProcessArchive on a background thread.
     /// </remarks>
     template <typename T>
-    concept ByteStream = requires(T& source, std::span<std::byte> buffer, std::int64_t requestedSkip) {
+    concept ByteStream = requires(T& source, std::span<std::byte> buffer) {
         { source.ReadSync(buffer) } -> std::convertible_to<std::size_t>;
-        { source.Size() } -> std::convertible_to<std::uint64_t>;
-        { source.Position() } -> std::convertible_to<std::uint64_t>;
     };
 
     template <typename T>
