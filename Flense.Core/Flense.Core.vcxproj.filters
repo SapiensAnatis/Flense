@@ -84,6 +84,12 @@
     <ClCompile Include="BufferPool.Impl.cpp">
       <Filter>Source Files\Internal</Filter>
     </ClCompile>
+    <ClCompile Include="FileHandle.ixx">
+      <Filter>Source Files\Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="FileHandle.Windows.cpp">
+      <Filter>Source Files\Internal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThreadSafetyAttributes.h">

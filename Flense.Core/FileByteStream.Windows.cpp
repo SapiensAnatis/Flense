@@ -21,11 +21,6 @@ namespace Flense::Core
         }
     } // namespace
 
-    void FileByteStream::HandleCloser::operator()(void* handle) const noexcept
-    {
-        CloseHandle(handle);
-    }
-
     FileByteStream::FileByteStream(const std::filesystem::path& path) : m_path(path)
     {
         HANDLE handle = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
