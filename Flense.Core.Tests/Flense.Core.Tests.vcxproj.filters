@@ -17,10 +17,16 @@
     <ClCompile Include="FileByteStreamTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HttpResponseTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FaultyByteStream.ixx">
+      <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryByteStream.ixx">
       <Filter>Support</Filter>
     </ClCompile>
     <ClCompile Include="Support.ixx">
