@@ -42,6 +42,9 @@
     <ClCompile Include="FileHandle.Windows.cpp">
       <Filter>Source Files\Shared</Filter>
     </ClCompile>
+    <ClCompile Include="Cancellation.ixx">
+      <Filter>Source Files\Shared</Filter>
+    </ClCompile>
     <ClCompile Include="Mutex.ixx">
       <Filter>Source Files\Shared</Filter>
     </ClCompile>

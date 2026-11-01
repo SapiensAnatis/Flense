@@ -16,7 +16,6 @@ namespace winrt::Flense::implementation
         wil::single_threaded_notifying_property<
             winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::DockerEngineImage>>
             Images;
-
         winrt::Windows::Foundation::IAsyncAction LoadImageList();
     };
 } // namespace winrt::Flense::implementation

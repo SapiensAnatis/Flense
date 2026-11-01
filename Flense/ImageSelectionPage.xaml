@@ -15,6 +15,28 @@
     </Page.Resources>
 
     <Grid>
-        <ListView ItemTemplate="{StaticResource ImageTemplate}" ItemsSource="{x:Bind ViewModel.Images, Mode=OneWay}" />
+        <StackPanel
+            x:Name="LoadingPanel"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="16"
+            Visibility="Collapsed">
+            <ProgressRing Width="48" Height="48" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                Style="{ThemeResource BodyLargeTextBlockStyle}"
+                Text="Loading images from Docker" />
+            <Button
+                x:Name="CancelLoadingButton"
+                MinWidth="100"
+                HorizontalAlignment="Center"
+                Click="CancelLoadingButton_Click"
+                Content="Cancel" />
+        </StackPanel>
+
+        <ListView
+            x:Name="ImageList"
+            ItemTemplate="{StaticResource ImageTemplate}"
+            ItemsSource="{x:Bind ViewModel.Images, Mode=OneWay}" />
     </Grid>
 </Page>

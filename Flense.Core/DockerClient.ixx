@@ -16,7 +16,8 @@ export namespace Flense::Core
     class DockerClient
     {
       public:
-        [[nodiscard]] std::vector<DockerEngineImage> ListImages() const;
+        /// <exception cref="OperationCancelledError">stopToken was triggered before the list was read.</exception>
+        [[nodiscard]] std::vector<DockerEngineImage> ListImages(std::stop_token stopToken = {}) const;
 
       private:
         DockerTransport m_transport;

@@ -16,9 +16,21 @@ namespace winrt::Flense::implementation
         wil::single_threaded_property<winrt::Flense::ImageSelectionViewModel> ViewModel;
 
         winrt::fire_and_forget OnNavigatedTo(const winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs& e);
+        void OnNavigatedFrom(const winrt::Microsoft::UI::Xaml::Navigation::NavigationEventArgs& e);
+
+        void CancelLoadingButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
+                                       const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
 
       private:
+        void CancelLoading();
+        void SetLoading(bool loading);
+        void ShowLoading(bool loading);
+
         winrt::Windows::Foundation::IAsyncAction m_loadAsyncAction{nullptr};
+        winrt::Microsoft::UI::Dispatching::DispatcherQueueTimer m_loadingDebounceTimer{nullptr};
+        bool m_loading = false;
+        bool m_showingLoading = false;
+        bool m_navigatedAway = false;
     };
 } // namespace winrt::Flense::implementation
 

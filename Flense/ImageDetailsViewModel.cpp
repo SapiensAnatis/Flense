@@ -13,6 +13,7 @@
 #endif
 
 import Flense.Core.ImageParsing;
+import Flense.Core.Shared;
 import std;
 
 using namespace winrt;
@@ -129,7 +130,8 @@ namespace winrt::Flense::implementation
         IsLoading = true;
 
         std::stop_source stopSource;
-        cancellation.callback([&stopSource] { stopSource.request_stop(); });
+        // The callback can run after this frame's locals are destroyed, so it holds its own handle to the stop state.
+        cancellation.callback([stopSource]() mutable { stopSource.request_stop(); });
 
         co_await winrt::resume_background();
 

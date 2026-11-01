@@ -177,14 +177,14 @@ namespace Flense::Core
         };
     } // namespace
 
-    std::vector<DockerEngineImage> DockerClient::ListImages() const
+    std::vector<DockerEngineImage> DockerClient::ListImages(std::stop_token stopToken) const
     {
         HttpRequest request(HttpMethod::Get, std::format("/{}/images/json", ApiVersion));
         request.AddHeader("Host", "localhost");
         request.AddHeader("Connection", "close");
         request.AddHeader("Accept", "application/json");
 
-        HttpResponse response(m_transport.SendRequest(request));
+        HttpResponse response(m_transport.SendRequest(request, stopToken));
 
         // TODO: Error responses carry a {"message": ...} body that we should surface.
         if (response.StatusCode() != 200)
