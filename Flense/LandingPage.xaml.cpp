@@ -8,11 +8,6 @@
 #include "LandingPage.g.cpp"
 #endif
 
-#include <winrt/Microsoft.UI.Content.h>
-#include <winrt/Microsoft.UI.Windowing.h>
-#include <winrt/Microsoft.Windows.Storage.Pickers.h>
-#include <winrt/Windows.UI.Xaml.Interop.h>
-
 using namespace winrt;
 using namespace winrt::Microsoft::UI;
 using namespace winrt::Microsoft::UI::Xaml;

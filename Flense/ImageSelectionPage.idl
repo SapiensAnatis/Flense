@@ -6,6 +6,6 @@ namespace Flense
     runtimeclass ImageSelectionPage : Microsoft.UI.Xaml.Controls.Page
     {
         ImageSelectionPage();
-        ImageSelectionViewModel ViewModel{ get; };
+        ImageSelectionViewModel ViewModel { get; };
     }
 }

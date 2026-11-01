@@ -12,6 +12,7 @@ namespace winrt::Flense::implementation
 
         wil::single_threaded_property<winrt::hstring> Id;
         wil::single_threaded_property<winrt::hstring> RepoTag;
+        wil::single_threaded_property<winrt::Windows::Foundation::DateTime> Created;
         wil::single_threaded_property<uint64_t> Size;
     };
 } // namespace winrt::Flense::implementation
