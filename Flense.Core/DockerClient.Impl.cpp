@@ -192,15 +192,10 @@ namespace Flense::Core
             throw std::runtime_error(std::format("Docker returned HTTP status {}", response.StatusCode()));
         }
 
-        std::string responseBody;
-        std::array<char, 4096> buffer{};
-        while (const std::size_t read = response.ReadSync(std::as_writable_bytes(std::span(buffer))))
-        {
-            responseBody.append(buffer.data(), read);
-        }
+        ByteStreamRange responseBody(response);
 
         ImageListHandler handler;
-        if (!nlohmann::json::sax_parse(responseBody, &handler))
+        if (!nlohmann::json::sax_parse(responseBody.begin(), responseBody.end(), &handler))
         {
             throw std::runtime_error("Failed to parse image list JSON");
         }

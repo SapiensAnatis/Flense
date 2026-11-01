@@ -77,6 +77,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ArchiveReaderTests.cpp" />
+    <ClCompile Include="ByteStreamRangeTests.cpp" />
     <ClCompile Include="FaultyByteStream.ixx" />
     <ClCompile Include="FileByteStreamTests.cpp" />
     <ClCompile Include="HttpResponseTests.cpp" />
