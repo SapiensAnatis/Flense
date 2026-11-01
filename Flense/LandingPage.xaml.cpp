@@ -36,7 +36,7 @@ namespace winrt::Flense::implementation
             picker.SuggestedStartLocation(PickerLocationId::Downloads);
             picker.ViewMode(PickerViewMode::List);
             picker.FileTypeFilter().Append(L".tar");
-            picker.FileTypeFilter().Append(L".tar.gz");
+            picker.FileTypeFilter().Append(L".gz");
 
             const PickFileResult result = co_await picker.PickSingleFileAsync();
 
