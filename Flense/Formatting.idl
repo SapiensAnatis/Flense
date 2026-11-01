@@ -1,0 +1,8 @@
+namespace Flense
+{
+    static runtimeclass Formatting
+    {
+        static String FormatDate(Windows.Foundation.DateTime value);
+        static String FormatRelativeTime(Windows.Foundation.DateTime value);
+    };
+}

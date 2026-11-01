@@ -19,6 +19,7 @@ namespace Flense::Core
         {
             std::string id;
             std::vector<std::string> repoTags;
+            std::chrono::system_clock::time_point created;
             std::uint64_t size = 0;
         };
 
@@ -159,6 +160,10 @@ namespace Flense::Core
                 {
                     return Field::Size;
                 }
+                if (name == "Created")
+                {
+                    return Field::Created;
+                }
                 return Field::Other;
             }
 
@@ -167,6 +172,18 @@ namespace Flense::Core
                 if (m_field == Field::Size)
                 {
                     m_images.back().size = value;
+                }
+                if (m_field == Field::Created)
+                {
+                    constexpr auto MaxSecs = static_cast<std::uint64_t>(
+                        std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::duration::max())
+                            .count());
+
+                    if (value < MaxSecs)
+                    {
+                        m_images.back().created =
+                            std::chrono::system_clock::from_time_t(static_cast<std::time_t>(value));
+                    }
                 }
             }
 
@@ -209,10 +226,23 @@ namespace Flense::Core
             {
                 if (repoTag != "<none>:<none>") // Skip dangling images
                 {
-                    images.emplace_back(apiImage.id, repoTag, apiImage.size);
+                    images.emplace_back(apiImage.id, repoTag, apiImage.created, apiImage.size);
                 }
             }
         }
+
+        // The API already returns images in chronological order, but we'll do our own sort to be double sure in case
+        // this undocumented behaviour changes
+        std::ranges::sort(images, [](const DockerEngineImage& lhs, const DockerEngineImage& rhs) {
+            if (lhs.created != rhs.created)
+            {
+                return lhs.created > rhs.created;
+            }
+
+            // We flatten the repo tags into a single list, so use the tag as a tie-breaker to get a stable order for
+            // images with multiple tags which would otherwise have identical build dates.
+            return lhs.repoTag < rhs.repoTag;
+        });
 
         return images;
     }

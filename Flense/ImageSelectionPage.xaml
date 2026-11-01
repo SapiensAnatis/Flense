@@ -9,12 +9,12 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <DataTemplate x:Key="ImageTemplate" x:DataType="local:DockerEngineImage">
-            <TextBlock Text="{x:Bind RepoTag}" />
-        </DataTemplate>
+        <ResourceDictionary>
+            <local:FileSizeStringConverter x:Key="FileSizeStringConverter" />
+        </ResourceDictionary>
     </Page.Resources>
 
-    <Grid>
+    <Grid Padding="16" HorizontalAlignment="Stretch">
         <StackPanel
             x:Name="LoadingPanel"
             HorizontalAlignment="Center"
@@ -34,9 +34,76 @@
                 Content="Cancel" />
         </StackPanel>
 
-        <ListView
-            x:Name="ImageList"
-            ItemTemplate="{StaticResource ImageTemplate}"
-            ItemsSource="{x:Bind ViewModel.Images, Mode=OneWay}" />
+        <Grid
+            MaxWidth="1400"
+            Padding="24"
+            Background="{ThemeResource LayerFillColorDefaultBrush}"
+            CornerRadius="{ThemeResource ControlCornerRadius}"
+            RowSpacing="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="200" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="0"
+                Style="{StaticResource TitleTextBlockStyle}">
+                Available images
+            </TextBlock>
+            <TextBox
+                x:Name="ImageSearchBox"
+                Grid.Row="0"
+                Grid.Column="1"
+                VerticalAlignment="Bottom"
+                PlaceholderText="Search" />
+
+            <ItemsView
+                x:Name="ImageList"
+                Grid.Row="1"
+                Grid.ColumnSpan="2"
+                IsItemInvokedEnabled="True"
+                ItemsSource="{x:Bind ViewModel.Images, Mode=OneWay}"
+                SelectionMode="Single">
+                <ItemsView.Layout>
+                    <StackLayout Spacing="4" />
+                </ItemsView.Layout>
+                <ItemsView.ItemTemplate>
+                    <DataTemplate x:DataType="local:DockerEngineImage">
+                        <ItemContainer AutomationProperties.Name="{x:Bind RepoTag}" CornerRadius="{StaticResource ControlCornerRadius}">
+                            <Grid
+                                MinHeight="44"
+                                Padding="16,0"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                ColumnSpacing="12"
+                                CornerRadius="{StaticResource ControlCornerRadius}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="240" />
+                                    <ColumnDefinition Width="120" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center" Text="{x:Bind RepoTag}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    ToolTipService.ToolTip="{x:Bind local:Formatting.FormatDate(Created)}">
+                                    <Run Text="Created" />
+                                    <Run Text="{x:Bind local:Formatting.FormatRelativeTime(Created)}" />
+                                </TextBlock>
+                                <TextBlock
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    Text="{x:Bind Size, Converter={StaticResource FileSizeStringConverter}}" />
+                            </Grid>
+                        </ItemContainer>
+                    </DataTemplate>
+                </ItemsView.ItemTemplate>
+            </ItemsView>
+        </Grid>
     </Grid>
 </Page>
