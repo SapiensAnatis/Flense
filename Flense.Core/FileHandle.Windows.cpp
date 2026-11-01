@@ -5,9 +5,9 @@ module;
 
 #include <windows.h>
 
-module Flense.Core:Internal.FileHandle.Windows;
+module Flense.Core.Shared:FileHandle.Windows;
 
-import :Internal.FileHandle;
+import :FileHandle;
 
 namespace Flense::Core
 {

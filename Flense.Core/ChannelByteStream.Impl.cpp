@@ -1,8 +1,8 @@
-module Flense.Core:Internal.ChannelByteStream.Impl;
+module Flense.Core.ImageParsing:ChannelByteStream.Impl;
 
-import :Internal.BufferPool;
-import :Internal.Channel;
-import :Internal.ChannelByteStream;
+import :BufferPool;
+import :Channel;
+import :ChannelByteStream;
 import std;
 
 namespace Flense::Core

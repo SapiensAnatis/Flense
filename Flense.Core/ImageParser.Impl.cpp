@@ -1,17 +1,17 @@
 module;
 
-module Flense.Core:ImageParser.Impl;
+module Flense.Core.ImageParsing:ImageParser.Impl;
+
+import Flense.Core.Shared;
 
 import :ArchiveReader;
-import :ByteStream;
-import :Internal.BufferPool;
-import :Internal.Channel;
-import :Internal.ChannelByteStream;
-import :Internal.FilesystemParsing;
+import :BufferPool;
+import :Channel;
+import :ChannelByteStream;
+import :FilesystemParsing;
 import :Filesystem;
 import :Image;
 import :ImageParser;
-import :Internal.Mutex;
 
 import nlohmann.json;
 

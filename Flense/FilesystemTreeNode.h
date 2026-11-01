@@ -5,7 +5,7 @@
 
 #include <string_view>
 
-import Flense.Core;
+import Flense.Core.ImageParsing;
 
 namespace winrt::Flense::implementation
 {

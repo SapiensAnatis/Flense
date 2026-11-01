@@ -12,7 +12,7 @@
 #include <ranges>
 #endif
 
-import Flense.Core;
+import Flense.Core.ImageParsing;
 import std;
 
 using namespace winrt;

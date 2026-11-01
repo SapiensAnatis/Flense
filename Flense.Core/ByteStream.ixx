@@ -1,4 +1,4 @@
-export module Flense.Core:ByteStream;
+export module Flense.Core.Shared:ByteStream;
 
 import std;
 

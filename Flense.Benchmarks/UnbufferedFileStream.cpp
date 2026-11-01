@@ -8,8 +8,6 @@
 #include <format>
 #include <stdexcept>
 
-import Flense.Core;
-
 namespace Flense::Benchmarks
 {
     namespace

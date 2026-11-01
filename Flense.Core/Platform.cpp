@@ -1,5 +1,5 @@
 // Provides platform-specific functionality.
-module Flense.Core:Internal.Platform;
+module Flense.Core.ImageParsing:Platform;
 
 import std;
 

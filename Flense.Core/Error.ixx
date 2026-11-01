@@ -1,4 +1,4 @@
-export module Flense.Core:Error;
+export module Flense.Core.ImageParsing:Error;
 
 import std;
 

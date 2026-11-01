@@ -1,6 +1,6 @@
 export module Flense.Core.Tests.Support:FaultyByteStream;
 
-import Flense.Core;
+import Flense.Core.Shared;
 import std;
 
 export namespace Flense::Core::Tests

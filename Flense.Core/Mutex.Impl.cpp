@@ -2,9 +2,9 @@ module;
 
 #include "ThreadSafetyAttributes.h"
 
-module Flense.Core:Internal.Mutex.Impl;
+module Flense.Core.Shared:Mutex.Impl;
 
-import :Internal.Mutex;
+import :Mutex;
 
 import std;
 

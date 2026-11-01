@@ -7,7 +7,7 @@
 
 #include "winrt/Flense.h"
 
-import Flense.Core;
+import Flense.Core.ImageParsing;
 
 using namespace winrt::Windows::UI::Xaml::Interop;
 

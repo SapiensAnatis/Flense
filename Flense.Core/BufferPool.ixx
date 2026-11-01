@@ -2,9 +2,9 @@ module;
 
 #include "ThreadSafetyAttributes.h"
 
-export module Flense.Core:Internal.BufferPool;
+export module Flense.Core.ImageParsing:BufferPool;
 
-import :Internal.Mutex;
+import Flense.Core.Shared;
 
 import std;
 

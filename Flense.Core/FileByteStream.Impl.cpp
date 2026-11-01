@@ -1,4 +1,4 @@
-module Flense.Core:FileByteStream.Impl;
+module Flense.Core.ImageParsing:FileByteStream.Impl;
 
 import :FileByteStream;
 

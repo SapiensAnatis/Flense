@@ -2,11 +2,11 @@ module;
 
 #include "ThreadSafetyAttributes.h"
 
-export module Flense.Core:Internal.Mutex;
+export module Flense.Core.Shared:Mutex;
 
 import std;
 
-namespace Flense::Core
+export namespace Flense::Core
 {
     // Defines an annotated interface for mutexes.
     // Implemented using std::mutex.

@@ -1,9 +1,10 @@
 module;
 #include <archive.h>
 #include <archive_entry.h>
-export module Flense.Core:ArchiveReader;
+export module Flense.Core.ImageParsing:ArchiveReader;
 
-import :ByteStream;
+import Flense.Core.Shared;
+
 import :Error;
 import :Filesystem;
 import std;

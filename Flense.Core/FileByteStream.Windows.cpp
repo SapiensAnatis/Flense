@@ -4,7 +4,7 @@ module;
 #define NOMINMAX
 #include <windows.h>
 
-module Flense.Core:FileByteStream.Windows;
+module Flense.Core.ImageParsing:FileByteStream.Windows;
 
 import :FileByteStream;
 

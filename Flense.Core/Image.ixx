@@ -1,4 +1,4 @@
-export module Flense.Core:Image;
+export module Flense.Core.ImageParsing:Image;
 
 import :Filesystem;
 import std;
