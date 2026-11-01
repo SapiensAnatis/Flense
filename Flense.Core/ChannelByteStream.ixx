@@ -1,5 +1,6 @@
 export module Flense.Core:Internal.ChannelByteStream;
 
+import :ByteStream;
 import :Internal.BufferPool;
 import :Internal.Channel;
 import std;
@@ -21,7 +22,7 @@ namespace Flense::Core
     /// source's contents chunk-by-chunk to a consumer running on another thread. Each chunk's buffer is returned
     /// to its pool as soon as it's fully consumed.
     /// </summary>
-    class ChannelByteStream
+    class ChannelByteStream : public ByteStream
     {
       public:
         /// <summary>
@@ -32,7 +33,7 @@ namespace Flense::Core
         /// reported by Size().</param>
         ChannelByteStream(Channel<BufferChunk>::Receiver&& receiver, std::uint64_t totalSize);
 
-        std::size_t ReadSync(std::span<std::byte> buffer);
+        std::size_t ReadSync(std::span<std::byte> buffer) override;
         [[nodiscard]] std::uint64_t Size() const;
         [[nodiscard]] std::uint64_t Position() const;
 

@@ -1,6 +1,5 @@
 module Flense.Core:FileByteStream.Impl;
 
-import :ArchiveReader;
 import :FileByteStream;
 
 import std;
@@ -62,6 +61,4 @@ namespace Flense::Core
     {
         return m_position;
     }
-
-    static_assert(SkippableByteStream<FileByteStream>);
 } // namespace Flense::Core

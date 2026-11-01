@@ -1,5 +1,6 @@
 export module Flense.Core:FileByteStream;
 
+import :ByteStream;
 import :Internal.FileHandle;
 
 import std;
@@ -13,13 +14,13 @@ export namespace Flense::Core
     /// Reads the file in large chunks, whatever size the caller asks for, as small reads are noticeably slower from a
     /// cold disk. Blocking, like every other ByteStream here, so it should be driven from a background thread.
     /// </remarks>
-    class FileByteStream
+    class FileByteStream : public ByteStream
     {
       public:
         /// <exception cref="std::filesystem::filesystem_error">The file could not be opened.</exception>
         explicit FileByteStream(const std::filesystem::path& path);
 
-        ~FileByteStream() = default;
+        ~FileByteStream() override = default;
 
         FileByteStream(const FileByteStream&) = delete;
         FileByteStream& operator=(const FileByteStream&) = delete;
@@ -27,9 +28,9 @@ export namespace Flense::Core
         FileByteStream& operator=(FileByteStream&&) = delete;
 
         /// <exception cref="std::filesystem::filesystem_error">The file could not be read.</exception>
-        std::size_t ReadSync(std::span<std::byte> buffer);
+        std::size_t ReadSync(std::span<std::byte> buffer) override;
 
-        std::int64_t Skip(std::int64_t request);
+        std::int64_t Skip(std::int64_t request) override;
 
         [[nodiscard]] std::uint64_t Size() const;
 

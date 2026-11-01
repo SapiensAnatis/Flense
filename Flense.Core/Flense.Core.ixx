@@ -4,6 +4,7 @@ export import :Error;
 export import :Filesystem;
 export import :Image;
 export import :ArchiveReader;
+export import :ByteStream;
 export import :FileByteStream;
 export import :ImageParser;
 

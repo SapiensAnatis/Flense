@@ -24,11 +24,10 @@ export namespace Flense::Core::Tests
     /// <summary>
     /// Wraps another ByteStream, capping how much each read returns and throwing from ReadSync or Skip on demand.
     /// </summary>
-    template <SkippableByteStream TInner> class FaultyByteStream
+    template <std::derived_from<ByteStream> TInner> class FaultyByteStream : public ByteStream
     {
       public:
-        template <typename... TArgs>
-        explicit FaultyByteStream(TArgs&&... args) : m_inner(std::forward<TArgs>(args)...)
+        template <typename... TArgs> explicit FaultyByteStream(TArgs&&... args) : m_inner(std::forward<TArgs>(args)...)
         {
         }
 
@@ -46,7 +45,7 @@ export namespace Flense::Core::Tests
         /// <summary>How many times Skip has been called, whether or not it threw.</summary>
         int skipCalls{0};
 
-        std::size_t ReadSync(const std::span<std::byte> buffer)
+        std::size_t ReadSync(const std::span<std::byte> buffer) override
         {
             if (failReadAt.has_value() && Position() >= *failReadAt)
             {
@@ -56,7 +55,7 @@ export namespace Flense::Core::Tests
             return m_inner.ReadSync(buffer.first(std::min(buffer.size(), MaxReadSize)));
         }
 
-        std::int64_t Skip(const std::int64_t request)
+        std::int64_t Skip(const std::int64_t request) override
         {
             ++skipCalls;
 
@@ -81,6 +80,4 @@ export namespace Flense::Core::Tests
       private:
         TInner m_inner;
     };
-
-    static_assert(SkippableByteStream<FaultyByteStream<FileByteStream>>);
 } // namespace Flense::Core::Tests
