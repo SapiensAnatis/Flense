@@ -228,6 +228,7 @@
     <ClCompile Include="Filesystem.ixx" />
     <ClCompile Include="Image.ixx" />
     <ClCompile Include="ArchiveReader.ixx" />
+    <ClCompile Include="ByteStream.ixx" />
     <ClCompile Include="FileByteStream.ixx" />
     <ClCompile Include="FileByteStream.Impl.cpp" />
     <ClCompile Include="FileByteStream.Windows.cpp" />

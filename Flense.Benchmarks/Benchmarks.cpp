@@ -1,8 +1,8 @@
 #include "pch.h"
 
 #include "Benchmarks.h"
-#include "UnbufferedFileStream.h"
 #include "Progress.h"
+#include "UnbufferedFileStream.h"
 
 #include <psapi.h>
 
@@ -23,6 +23,31 @@ namespace Flense::Benchmarks
         using Clock = std::chrono::steady_clock;
 
         constexpr size_t ReadChunkSize = 64 * 1024;
+
+        /// <summary>
+        /// Exposes an UnbufferedFileStream as a ByteStream. UnbufferedFileStream can't derive from ByteStream itself
+        /// because importing Flense.Core from a header breaks any standard library includes that follow it.
+        /// </summary>
+        class UnbufferedByteStream final : public Core::ByteStream
+        {
+          public:
+            explicit UnbufferedByteStream(UnbufferedFileStream* file) : m_file(file)
+            {
+            }
+
+            std::size_t ReadSync(const std::span<std::byte> buffer) override
+            {
+                return m_file->ReadSync(buffer);
+            }
+
+            std::int64_t Skip(const std::int64_t request) override
+            {
+                return m_file->Skip(request);
+            }
+
+          private:
+            UnbufferedFileStream* m_file;
+        };
         constexpr size_t SlowestEntryCount = 10;
 
         /// <summary>
@@ -92,7 +117,8 @@ namespace Flense::Benchmarks
 
             const auto parseStart = Clock::now();
 
-            auto reader = Core::ArchiveReader::CreateFromStream(stream);
+            UnbufferedByteStream byteStream{&stream};
+            auto reader = Core::ArchiveReader::CreateFromStream(byteStream);
 
             while (auto entry = reader.Next(std::stop_token{}))
             {

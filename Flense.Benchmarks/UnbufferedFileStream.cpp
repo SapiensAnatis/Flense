@@ -188,6 +188,4 @@ namespace Flense::Benchmarks
     {
         return m_size;
     }
-
-    static_assert(Core::ByteStream<UnbufferedFileStream>);
 } // namespace Flense::Benchmarks

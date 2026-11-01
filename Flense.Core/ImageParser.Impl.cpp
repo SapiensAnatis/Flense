@@ -3,6 +3,7 @@ module;
 module Flense.Core:ImageParser.Impl;
 
 import :ArchiveReader;
+import :ByteStream;
 import :Internal.BufferPool;
 import :Internal.Channel;
 import :Internal.ChannelByteStream;
@@ -130,32 +131,30 @@ namespace Flense::Core
         /// <summary>
         /// A ByteStream that forwards to another stream, adding the number of bytes read to a counter as it goes.
         /// </summary>
-        template <ByteStream TStream> class CountingByteStream
+        class CountingByteStream : public ByteStream
         {
           public:
-            CountingByteStream(TStream* inner, std::atomic<std::uint64_t>* counter) : m_inner(inner), m_counter(counter)
+            CountingByteStream(ByteStream* inner, std::atomic<std::uint64_t>* counter)
+                : m_inner(inner), m_counter(counter)
             {
             }
 
-            std::size_t ReadSync(const std::span<std::byte> buffer)
+            std::size_t ReadSync(const std::span<std::byte> buffer) override
             {
                 const std::size_t read = m_inner->ReadSync(buffer);
                 m_counter->fetch_add(read, std::memory_order_relaxed);
                 return read;
             }
 
-            [[nodiscard]] std::uint64_t Size() const
+            std::int64_t Skip(const std::int64_t request) override
             {
-                return m_inner->Size();
-            }
-
-            [[nodiscard]] std::uint64_t Position() const
-            {
-                return m_inner->Position();
+                const std::int64_t skipped = m_inner->Skip(request);
+                m_counter->fetch_add(static_cast<std::uint64_t>(skipped), std::memory_order_relaxed);
+                return skipped;
             }
 
           private:
-            TStream* m_inner;
+            ByteStream* m_inner;
             std::atomic<std::uint64_t>* m_counter;
         };
     } // namespace
@@ -280,7 +279,7 @@ namespace Flense::Core
                     m_filesystemsByLayerDigest.emplace(archivePath, std::move(filesystem));
                 }
 
-                m_bytesProcessed.fetch_add(entrySize - std::min(entrySize, stream.Position()),
+                m_bytesProcessed.fetch_add(entrySize - std::min(entrySize, channelStream.Position()),
                                            std::memory_order_relaxed);
 
                 promise.set_value();

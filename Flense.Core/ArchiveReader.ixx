@@ -3,6 +3,7 @@ module;
 #include <archive_entry.h>
 export module Flense.Core:ArchiveReader;
 
+import :ByteStream;
 import :Error;
 import :Filesystem;
 import std;
@@ -28,8 +29,7 @@ namespace Flense::Core
 
     struct ArchiveContext
     {
-        std::function<std::size_t(std::span<std::byte>)> readSync;
-        std::function<std::int64_t(std::int64_t)> skip;
+        ByteStream* source = nullptr;
 
         // Only set for the duration of a single operation, by StopTokenScope.
         std::stop_token stopToken;
@@ -43,24 +43,6 @@ namespace Flense::Core
 
 export namespace Flense::Core
 {
-    /// <summary>
-    /// A source libarchive can pull compressed bytes from.
-    /// </summary>
-    /// <remarks>
-    /// All operations are synchronous/blocking by design: libarchive drives reading via plain C callbacks
-    /// that block the calling thread until they return, so there is no point in the source itself being
-    /// async - callers are expected to ArchiveReader::ProcessArchive on a background thread.
-    /// </remarks>
-    template <typename T>
-    concept ByteStream = requires(T& source, std::span<std::byte> buffer) {
-        { source.ReadSync(buffer) } -> std::convertible_to<std::size_t>;
-    };
-
-    template <typename T>
-    concept SkippableByteStream = ByteStream<T> && requires(T& source, std::int64_t requestedSkip) {
-        { source.Skip(requestedSkip) } -> std::convertible_to<std::int64_t>;
-    };
-
     /// <summary>
     /// A single entry (file, directory, etc.) within an archive, hiding the underlying libarchive
     /// representation from callers.
@@ -180,10 +162,9 @@ export namespace Flense::Core
         /// <remarks>
         /// Blocking - Next() and ArchiveEntry::ReadInto() must be called from a background thread.
         /// </remarks>
-        /// <typeparam name="TSource">The type of the byte stream.</typeparam>
         /// <param name="source">The byte source to read from. Must outlive the returned ArchiveReader.</param>
         /// <returns>An ArchiveReader instance for enumerating the archive entries.</returns>
-        template <ByteStream TStream> static ArchiveReader CreateFromStream(TStream& source)
+        static ArchiveReader CreateFromStream(ByteStream& source)
         {
             ArchivePtr archive{archive_read_new()};
 
@@ -191,16 +172,11 @@ export namespace Flense::Core
             archive_read_support_filter_gzip(archive.get());
 
             auto context = std::make_unique<ArchiveContext>();
-            context->readSync = [&source](std::span<std::byte> buffer) { return source.ReadSync(buffer); };
+            context->source = &source;
 
             archive_read_set_callback_data(archive.get(), context.get());
             archive_read_set_read_callback(archive.get(), &ArchiveReadCallback);
-
-            if constexpr (SkippableByteStream<TStream>)
-            {
-                context->skip = [&source](std::int64_t request) { return source.Skip(request); };
-                archive_read_set_skip_callback(archive.get(), &ArchiveSkipCallback);
-            }
+            archive_read_set_skip_callback(archive.get(), &ArchiveSkipCallback);
 
             const int result = archive_read_open1(archive.get());
 
@@ -329,7 +305,7 @@ export namespace Flense::Core
 
             try
             {
-                const std::size_t bytesRead = context.readSync(std::span(context.buffer));
+                const std::size_t bytesRead = context.source->ReadSync(std::span(context.buffer));
                 *buffer = context.buffer.data();
                 return static_cast<la_ssize_t>(bytesRead);
             }
@@ -352,7 +328,7 @@ export namespace Flense::Core
 
             try
             {
-                return context.skip(request);
+                return context.source->Skip(request);
             }
             catch (...)
             {

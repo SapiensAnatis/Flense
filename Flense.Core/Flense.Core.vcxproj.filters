@@ -27,6 +27,9 @@
     <ClCompile Include="ArchiveReader.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ByteStream.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="FileByteStream.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>

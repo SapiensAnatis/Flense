@@ -9,7 +9,7 @@
 namespace Flense::Benchmarks
 {
     /// <summary>
-    /// Reads bytes from a file on disk, satisfying the Flense::Core::ByteStream concept.
+    /// Reads bytes from a file on disk, with the same interface as Flense::Core::ByteStream.
     /// </summary>
     /// <remarks>
     /// Opened with FILE_FLAG_NO_BUFFERING, so every read comes from disk rather than the OS page
