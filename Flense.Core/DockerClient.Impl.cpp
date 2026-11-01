@@ -207,7 +207,10 @@ namespace Flense::Core
         {
             for (const auto& repoTag : apiImage.repoTags) // Only include images with at least one repo tag
             {
-                images.emplace_back(apiImage.id, repoTag, apiImage.size);
+                if (repoTag != "<none>:<none>") // Skip dangling images
+                {
+                    images.emplace_back(apiImage.id, repoTag, apiImage.size);
+                }
             }
         }
 
