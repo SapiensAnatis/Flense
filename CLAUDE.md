@@ -28,9 +28,11 @@ For example:
 
 ## C++ modules
 
-The `Flense.Core` project builds two named modules, each split into partitions to keep rebuilds small:
+The `Flense.Core` project builds four named modules, each split into partitions to keep rebuilds small:
 
 - `Flense.Core.Shared`: building blocks used by the other modules (`ByteStream`, `FileHandle`, `Mutex`).
+- `Flense.Core.Http`: HTTP types. Must not know about Docker.
+- `Flense.Core.DockerClient`: talking to the Docker engine. Imports Shared, and may import Http.
 - `Flense.Core.ImageParsing`: reading image archives and building the filesystem tree. Imports Shared.
 
 Modules import each other but never `export import` each other, so consumers import every module they name things from.

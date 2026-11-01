@@ -16,6 +16,12 @@
     <Filter Include="Source Files\Shared">
       <UniqueIdentifier>{7777a66d-9f96-4cf2-b436-3ffc62b04a6a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Http">
+      <UniqueIdentifier>{972ce5e4-759d-4d9b-8dbf-00b3bcb16a2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DockerClient">
+      <UniqueIdentifier>{5a7b84e3-1865-4790-8459-d68de6d7a413}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\ImageParsing">
       <UniqueIdentifier>{54a4d4e4-06ff-494b-afd2-bc9a656e8e22}</UniqueIdentifier>
     </Filter>
@@ -38,6 +44,36 @@
     </ClCompile>
     <ClCompile Include="Mutex.Impl.cpp">
       <Filter>Source Files\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="Flense.Core.Http.ixx">
+      <Filter>Source Files\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="HttpRequest.ixx">
+      <Filter>Source Files\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="HttpRequest.Impl.cpp">
+      <Filter>Source Files\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="HttpResponse.ixx">
+      <Filter>Source Files\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="HttpResponse.Impl.cpp">
+      <Filter>Source Files\Http</Filter>
+    </ClCompile>
+    <ClCompile Include="Flense.Core.DockerClient.ixx">
+      <Filter>Source Files\DockerClient</Filter>
+    </ClCompile>
+    <ClCompile Include="DockerClient.ixx">
+      <Filter>Source Files\DockerClient</Filter>
+    </ClCompile>
+    <ClCompile Include="DockerClient.Impl.cpp">
+      <Filter>Source Files\DockerClient</Filter>
+    </ClCompile>
+    <ClCompile Include="DockerTransport.ixx">
+      <Filter>Source Files\DockerClient</Filter>
+    </ClCompile>
+    <ClCompile Include="DockerTransport.Windows.cpp">
+      <Filter>Source Files\DockerClient</Filter>
     </ClCompile>
     <ClCompile Include="Flense.Core.ImageParsing.ixx">
       <Filter>Source Files\ImageParsing</Filter>
