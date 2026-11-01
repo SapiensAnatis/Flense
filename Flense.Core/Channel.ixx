@@ -2,10 +2,11 @@ module;
 
 #include "ThreadSafetyAttributes.h"
 
-export module Flense.Core:Internal.Channel;
+export module Flense.Core.ImageParsing:Channel;
+
+import Flense.Core.Shared;
 
 import std;
-import :Internal.Mutex;
 
 namespace Flense::Core
 {

@@ -236,7 +236,8 @@
     <ClCompile Include="FilesystemParsing.Impl.cpp" />
     <ClCompile Include="ImageParser.ixx" />
     <ClCompile Include="ImageParser.Impl.cpp" />
-    <ClCompile Include="Flense.Core.ixx" />
+    <ClCompile Include="Flense.Core.Shared.ixx" />
+    <ClCompile Include="Flense.Core.ImageParsing.ixx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThreadSafetyAttributes.h" />

@@ -2,16 +2,17 @@ module;
 
 #include "ThreadSafetyAttributes.h"
 
-export module Flense.Core:ImageParser;
+export module Flense.Core.ImageParsing:ImageParser;
+
+import Flense.Core.Shared;
 
 import :ArchiveReader;
 import :FileByteStream;
-import :Internal.BufferPool;
-import :Internal.Channel;
-import :Internal.ChannelByteStream;
+import :BufferPool;
+import :Channel;
+import :ChannelByteStream;
 import :Filesystem;
 import :Image;
-import :Internal.Mutex;
 import std;
 
 namespace Flense::Core

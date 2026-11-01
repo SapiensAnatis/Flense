@@ -4,9 +4,9 @@ module;
 #define NOMINMAX
 #include <windows.h>
 
-module Flense.Core:Internal.Platform.Windows;
+module Flense.Core.ImageParsing:Platform.Windows;
 
-import :Internal.Platform;
+import :Platform;
 
 import std;
 

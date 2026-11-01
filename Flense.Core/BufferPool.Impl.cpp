@@ -6,11 +6,12 @@ module;
 #include <chrono>
 #endif
 
-module Flense.Core:Internal.BufferPool.Impl;
+module Flense.Core.ImageParsing:BufferPool.Impl;
 
-import :Internal.BufferPool;
-import :Internal.Mutex;
-import :Internal.Platform;
+import Flense.Core.Shared;
+
+import :BufferPool;
+import :Platform;
 
 import std;
 

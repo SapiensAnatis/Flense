@@ -6,7 +6,8 @@
 
 #include <psapi.h>
 
-import Flense.Core;
+import Flense.Core.ImageParsing;
+import Flense.Core.Shared;
 
 #include <algorithm>
 #include <chrono>

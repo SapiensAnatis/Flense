@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-import Flense.Core;
+import Flense.Core.ImageParsing;
 import Flense.Core.Tests.Support;
 import std;
 

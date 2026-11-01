@@ -28,13 +28,20 @@ For example:
 
 ## C++ modules
 
-`Flense.Core` is one module split into partitions, laid out to keep rebuilds small:
+The `Flense.Core` project builds two named modules, each split into partitions to keep rebuilds small:
 
-1. `X.ixx` declares interface partition `:X`, which `Flense.Core.ixx` must `export import`.
-2. `X.Impl.cpp` (or `X.Windows.cpp`) declares implementation partition `:X.Impl`, importing only what it uses.
-3. Never write `module Flense.Core;` units: they depend on the whole interface, so rebuild on any change.
-4. `Internal.X` partitions are for Core only. One imported by an interface partition must itself be an exported
-   interface partition; one used only by implementations stays a non-interface partition (`:Internal.FilesystemParsing`).
+- `Flense.Core.Shared`: building blocks used by the other modules (`ByteStream`, `FileHandle`, `Mutex`).
+- `Flense.Core.ImageParsing`: reading image archives and building the filesystem tree. Imports Shared.
+
+Modules import each other but never `export import` each other, so consumers import every module they name things from.
+The rules below apply within each module `M`, whose primary interface is `M.ixx`:
+
+1. `X.ixx` declares interface partition `M:X`, which `M.ixx` must `export import`.
+2. `X.Impl.cpp` (or `X.Windows.cpp`) declares implementation partition `M:X.Impl`, importing only what it uses.
+3. Never write `module M;` units: they depend on the whole interface, so rebuild on any change.
+4. A partition imported by an interface partition must itself be an interface partition exported from `M.ixx`,
+   even if it exports no names. One used only by implementation units stays a non-interface partition
+   (`:FilesystemParsing`).
 5. MSVC rejects defining an exported free function in an implementation partition (C7619): define it in the interface
    partition or make it a static member.
 6. `import std;` for the standard library; other headers go in the global module fragment.

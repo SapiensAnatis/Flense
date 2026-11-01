@@ -1,6 +1,6 @@
-export module Flense.Core:Filesystem;
+export module Flense.Core.ImageParsing:Filesystem;
 
-import :Internal.Tree;
+import :Tree;
 import std;
 
 export namespace Flense::Core

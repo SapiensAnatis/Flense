@@ -1,7 +1,6 @@
-export module Flense.Core:FileByteStream;
+export module Flense.Core.ImageParsing:FileByteStream;
 
-import :ByteStream;
-import :Internal.FileHandle;
+import Flense.Core.Shared;
 
 import std;
 

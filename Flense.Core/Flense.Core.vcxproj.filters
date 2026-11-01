@@ -13,85 +13,91 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\Internal">
-      <UniqueIdentifier>{4295D193-6119-4669-9080-A4F99F0FD8A5}</UniqueIdentifier>
+    <Filter Include="Source Files\Shared">
+      <UniqueIdentifier>{7777a66d-9f96-4cf2-b436-3ffc62b04a6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ImageParsing">
+      <UniqueIdentifier>{54a4d4e4-06ff-494b-afd2-bc9a656e8e22}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Tree.ixx">
-      <Filter>Source Files\Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="Image.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ArchiveReader.ixx">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Flense.Core.Shared.ixx">
+      <Filter>Source Files\Shared</Filter>
     </ClCompile>
     <ClCompile Include="ByteStream.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FileByteStream.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FileByteStream.Impl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FileByteStream.Windows.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FilesystemParsing.cpp">
-      <Filter>Source Files\Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="FilesystemParsing.Impl.cpp">
-      <Filter>Source Files\Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="ImageParser.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ImageParser.Impl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Flense.Core.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Error.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Channel.ixx">
-      <Filter>Source Files\Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="Mutex.ixx">
-      <Filter>Source Files\Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="Mutex.Impl.cpp">
-      <Filter>Source Files\Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="Filesystem.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Platform.cpp">
-      <Filter>Source Files\Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="Platform.Windows.cpp">
-      <Filter>Source Files\Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="ChannelByteStream.Impl.cpp">
-      <Filter>Source Files\Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="ChannelByteStream.ixx">
-      <Filter>Source Files\Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="BufferPool.ixx">
-      <Filter>Source Files\Internal</Filter>
-    </ClCompile>
-    <ClCompile Include="BufferPool.Impl.cpp">
-      <Filter>Source Files\Internal</Filter>
+      <Filter>Source Files\Shared</Filter>
     </ClCompile>
     <ClCompile Include="FileHandle.ixx">
-      <Filter>Source Files\Internal</Filter>
+      <Filter>Source Files\Shared</Filter>
     </ClCompile>
     <ClCompile Include="FileHandle.Windows.cpp">
-      <Filter>Source Files\Internal</Filter>
+      <Filter>Source Files\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="Mutex.ixx">
+      <Filter>Source Files\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="Mutex.Impl.cpp">
+      <Filter>Source Files\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="Flense.Core.ImageParsing.ixx">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="ArchiveReader.ixx">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="Error.ixx">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="FileByteStream.ixx">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="FileByteStream.Impl.cpp">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="FileByteStream.Windows.cpp">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="Filesystem.ixx">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.ixx">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageParser.ixx">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageParser.Impl.cpp">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferPool.ixx">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferPool.Impl.cpp">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="Channel.ixx">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="ChannelByteStream.ixx">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="ChannelByteStream.Impl.cpp">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="FilesystemParsing.cpp">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="FilesystemParsing.Impl.cpp">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform.cpp">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform.Windows.cpp">
+      <Filter>Source Files\ImageParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="Tree.ixx">
+      <Filter>Source Files\ImageParsing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

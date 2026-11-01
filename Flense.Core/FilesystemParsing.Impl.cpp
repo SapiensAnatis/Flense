@@ -1,9 +1,9 @@
-module Flense.Core:Internal.FilesystemParsing.Impl;
+module Flense.Core.ImageParsing:FilesystemParsing.Impl;
 
 import :ArchiveReader;
-import :Internal.FilesystemParsing;
+import :FilesystemParsing;
 import :Filesystem;
-import :Internal.Tree;
+import :Tree;
 import std;
 
 namespace Flense::Core
