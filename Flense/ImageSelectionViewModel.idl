@@ -8,7 +8,6 @@ namespace Flense
     {
         ImageSelectionViewModel();
         Windows.Foundation.Collections.IObservableVector<Flense.DockerEngineImage> Images { get; };
-
         Windows.Foundation.IAsyncAction LoadImageList();
     }
 }

@@ -10,6 +10,7 @@
 #include <vector>
 
 import Flense.Core.DockerClient;
+import Flense.Core.Shared;
 
 using namespace winrt;
 using namespace winrt::Microsoft::UI::Dispatching;
@@ -25,6 +26,12 @@ namespace winrt::Flense::implementation
         auto lifetime = get_strong();
         auto dispatcher = DispatcherQueue::GetForCurrentThread();
 
+        auto cancellation = co_await get_cancellation_token();
+
+        std::stop_source stopSource;
+        // The callback can run after this frame's locals are destroyed, so it holds its own handle to the stop state.
+        cancellation.callback([stopSource]() mutable { stopSource.request_stop(); });
+
         co_await winrt::resume_background();
 
         ::Flense::Core::DockerClient dockerClient;
@@ -32,7 +39,11 @@ namespace winrt::Flense::implementation
         std::vector<::Flense::Core::DockerEngineImage> images;
         try
         {
-            images = dockerClient.ListImages();
+            images = dockerClient.ListImages(stopSource.get_token());
+        }
+        catch (const ::Flense::Core::OperationCancelledError&)
+        {
+            throw winrt::hresult_canceled();
         }
         catch (const std::system_error& ex)
         {
