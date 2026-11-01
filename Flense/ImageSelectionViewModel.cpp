@@ -29,7 +29,28 @@ namespace winrt::Flense::implementation
 
         ::Flense::Core::DockerClient dockerClient;
 
-        auto images = dockerClient.ListImages();
+        std::vector<::Flense::Core::DockerEngineImage> images;
+        try
+        {
+            images = dockerClient.ListImages();
+        }
+        catch (const std::system_error& ex)
+        {
+            // The engine's named pipe only exists while the daemon is running.
+            if (ex.code() == std::error_code(ERROR_FILE_NOT_FOUND, std::system_category()))
+            {
+                throw winrt::hresult_error(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND),
+                                           L"Couldn't connect to Docker. Ensure Docker Desktop is running.");
+            }
+
+            throw winrt::hresult_error(E_FAIL, winrt::to_hstring(ex.what()));
+        }
+        catch (const std::exception& ex)
+        {
+            // WIL's C++/WinRT integration turns a std::exception escaping a coroutine into a generic
+            // ERROR_UNHANDLED_EXCEPTION and discards its message, so convert it while we still have the text.
+            throw winrt::hresult_error(E_FAIL, winrt::to_hstring(ex.what()));
+        }
 
         auto winrtImages = images | std::views::transform([](const auto& image) {
                                return winrt::make<implementation::DockerEngineImage>(image);

@@ -26,10 +26,6 @@ namespace winrt::Flense::implementation
             m_loadAsyncAction = ViewModel().LoadImageList();
             co_await m_loadAsyncAction;
         }
-        catch (const std::exception& ex)
-        {
-            failure = winrt::to_hstring(ex.what());
-        }
         catch (const winrt::hresult_error& e)
         {
             failure = e.message();
@@ -44,12 +40,17 @@ namespace winrt::Flense::implementation
         if (!failure.empty())
         {
             Controls::ContentDialog dialog;
-            dialog.XamlRoot(XamlRoot());
+            dialog.XamlRoot(Frame().XamlRoot());
             dialog.Title(box_value(L"Couldn't load images"));
             dialog.Content(box_value(failure));
             dialog.CloseButtonText(L"OK");
 
-            co_await DialogService::Instance().ShowAsync(dialog);
+            const auto shown = co_await DialogService::Instance().ShowAsync(dialog) != nullptr;
+
+            if (shown && Frame().CanGoBack())
+            {
+                Frame().GoBack();
+            }
         }
     }
 } // namespace winrt::Flense::implementation
