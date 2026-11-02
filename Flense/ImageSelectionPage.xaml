@@ -35,11 +35,18 @@
         </StackPanel>
 
         <Grid
+            x:Name="ImageListGrid"
             MaxWidth="1400"
             Padding="24"
+            x:Load="{x:Bind local:BindingHelpers.AndNot(ViewModel.HasLoaded, ViewModel.IsLoading), Mode=OneWay}"
             Background="{ThemeResource LayerFillColorDefaultBrush}"
             CornerRadius="{ThemeResource ControlCornerRadius}"
             RowSpacing="16">
+            <Grid.Transitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition />
+                </TransitionCollection>
+            </Grid.Transitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -88,10 +95,12 @@
                                     <ColumnDefinition Width="120" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock VerticalAlignment="Center" Text="{x:Bind RepoTag}" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    ToolTipService.ToolTip="{x:Bind local:Formatting.FormatDate(Created)}">
+                                <TextBlock Grid.Column="1" VerticalAlignment="Center">
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock Text="{x:Bind local:Formatting.FormatDate(Created)}" />
+                                        </ToolTip>
+                                    </ToolTipService.ToolTip>
                                     <Run Text="Created" />
                                     <Run Text="{x:Bind local:Formatting.FormatRelativeTime(Created)}" />
                                 </TextBlock>
