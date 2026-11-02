@@ -73,5 +73,7 @@ namespace winrt::Flense::implementation
         co_await wil::resume_foreground(dispatcher);
 
         Images = winrt::single_threaded_observable_vector<winrt::Flense::DockerEngineImage>(std::move(winrtImages));
+        HasLoaded = true;
+        IsLoading = false;
     }
 } // namespace winrt::Flense::implementation

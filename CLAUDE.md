@@ -14,6 +14,9 @@ If you are in a container, you cannot run the app as there is no GUI stack, so y
 
 You can build the app using the script at `.\Scripts\build-app.ps1`. Regardless of whether you are in a container or not, you should always pass -OutputDirectory C:\build to avoid conflicting with Visual Studio builds on the host.
 
+If you are working in a git worktree (e.g. under `.claude\worktrees\`), use `C:\build\<worktree name>` instead, so concurrent
+sessions don't overwrite each other's intermediates.
+
 For example:
 
 ```

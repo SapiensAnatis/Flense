@@ -1,0 +1,8 @@
+namespace Flense
+{
+    static runtimeclass BindingHelpers 
+    {
+        static Boolean Not(Boolean value);
+        static Boolean AndNot(Boolean value, Boolean negated);
+    }
+}

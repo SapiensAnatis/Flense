@@ -50,9 +50,6 @@
     <Midl Include="RatioToGridLengthConverter.idl">
       <Filter>Converters</Filter>
     </Midl>
-    <Midl Include="InverseBoolToVisibilityConverter.idl">
-      <Filter>Converters</Filter>
-    </Midl>
     <Midl Include="FilesystemChangeKind.idl">
       <Filter>Wrappers</Filter>
     </Midl>
@@ -75,6 +72,9 @@
       <Filter>Wrappers</Filter>
     </Midl>
     <Midl Include="Formatting.idl">
+      <Filter>Helpers</Filter>
+    </Midl>
+    <Midl Include="BindingHelpers.idl">
       <Filter>Helpers</Filter>
     </Midl>
   </ItemGroup>

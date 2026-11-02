@@ -1,7 +1,0 @@
-namespace Flense
-{
-    runtimeclass InverseBoolToVisibilityConverter : [default] Microsoft.UI.Xaml.Data.IValueConverter
-    {
-        InverseBoolToVisibilityConverter();
-    }
-}
