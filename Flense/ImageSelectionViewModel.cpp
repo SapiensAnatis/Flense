@@ -26,6 +26,8 @@ namespace winrt::Flense::implementation
         auto lifetime = get_strong();
         auto dispatcher = DispatcherQueue::GetForCurrentThread();
 
+        IsLoading = true;
+
         auto cancellation = co_await get_cancellation_token();
 
         std::stop_source stopSource;
