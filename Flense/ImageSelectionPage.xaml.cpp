@@ -22,18 +22,6 @@ namespace winrt::Flense::implementation
 
         auto lifetime = get_strong();
 
-        m_loadingDebounceTimer = DispatcherQueue().CreateTimer();
-        m_loadingDebounceTimer.Interval(std::chrono::milliseconds{250});
-        m_loadingDebounceTimer.IsRepeating(false);
-        m_loadingDebounceTimer.Tick([weak = get_weak()](const auto&, const auto&) {
-            if (auto self = weak.get())
-            {
-                self->ShowLoading(self->m_loading);
-            }
-        });
-
-        SetLoading(true);
-
         winrt::hstring failure;
         bool cancelled = false;
 
@@ -69,11 +57,7 @@ namespace winrt::Flense::implementation
                 Frame().GoBack();
             }
         }
-        else if (failure.empty())
-        {
-            SetLoading(false);
-        }
-        else
+        else if (!failure.empty())
         {
             Controls::ContentDialog dialog;
             dialog.XamlRoot(Frame().XamlRoot());
@@ -93,7 +77,6 @@ namespace winrt::Flense::implementation
     void ImageSelectionPage::OnNavigatedFrom(const Navigation::NavigationEventArgs& /* e */)
     {
         m_navigatedAway = true;
-        m_loadingDebounceTimer.Stop();
         CancelLoading();
     }
 
@@ -108,25 +91,5 @@ namespace winrt::Flense::implementation
         {
             m_loadAsyncAction.Cancel();
         }
-    }
-
-    // The loading panel only changes once the loading state has differed from it for the debounce interval, so a
-    // quick load never shows it and a slow one never flashes it away.
-    void ImageSelectionPage::SetLoading(const bool loading)
-    {
-        m_loading = loading;
-        m_loadingDebounceTimer.Stop();
-
-        if (m_loading != m_showingLoading)
-        {
-            m_loadingDebounceTimer.Start();
-        }
-    }
-
-    void ImageSelectionPage::ShowLoading(const bool loading)
-    {
-        m_showingLoading = loading;
-        LoadingPanel().Visibility(loading ? Visibility::Visible : Visibility::Collapsed);
-        ImageList().Visibility(loading ? Visibility::Collapsed : Visibility::Visible);
     }
 } // namespace winrt::Flense::implementation

@@ -23,13 +23,8 @@ namespace winrt::Flense::implementation
 
       private:
         void CancelLoading();
-        void SetLoading(bool loading);
-        void ShowLoading(bool loading);
 
         winrt::Windows::Foundation::IAsyncAction m_loadAsyncAction{nullptr};
-        winrt::Microsoft::UI::Dispatching::DispatcherQueueTimer m_loadingDebounceTimer{nullptr};
-        bool m_loading = false;
-        bool m_showingLoading = false;
         bool m_navigatedAway = false;
     };
 } // namespace winrt::Flense::implementation

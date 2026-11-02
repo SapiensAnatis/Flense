@@ -120,6 +120,8 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    </ClInclude>
+    <ClInclude Include="DebouncedNotifyingProperty.h" />
     <ClInclude Include="DockerEngineImage.h">
       <DependentUpon>DockerEngineImage.idl</DependentUpon>
       <SubType>Code</SubType>
