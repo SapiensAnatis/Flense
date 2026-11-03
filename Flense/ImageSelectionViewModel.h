@@ -1,7 +1,12 @@
 ﻿#pragma once
 
 #include "DebouncedNotifyingProperty.h"
+#include "Debouncer.h"
+#include "DockerEngineImage.h"
 #include "ImageSelectionViewModel.g.h"
+
+#include <chrono>
+#include <vector>
 
 namespace winrt::Flense::implementation
 {
@@ -14,7 +19,8 @@ namespace winrt::Flense::implementation
               INIT_DEBOUNCED_NOTIFYING_PROPERTY(
                   IsLoading, std::chrono::milliseconds(250),
                   false), // Start false so quick loads don't show the loading indicator at all
-              INIT_NOTIFYING_PROPERTY(HasLoaded, false)
+              INIT_NOTIFYING_PROPERTY(HasLoaded, false),
+              m_searchDebouncer([this] { ApplySearchFilter(); }, std::chrono::milliseconds(300))
         {
         }
 
@@ -28,7 +34,18 @@ namespace winrt::Flense::implementation
         // with the loading panel.
         wil::single_threaded_notifying_property<bool> HasLoaded;
 
+        // Manual search query property - needs to call debouncer on set
+        winrt::hstring SearchQuery();
+        void SearchQuery(const winrt::hstring& value);
+
         winrt::Windows::Foundation::IAsyncAction LoadImageList();
+
+      private:
+        void ApplySearchFilter();
+
+        winrt::hstring m_searchQuery;
+        std::vector<winrt::Flense::DockerEngineImage> m_allImages;
+        Debouncer m_searchDebouncer;
     };
 } // namespace winrt::Flense::implementation
 

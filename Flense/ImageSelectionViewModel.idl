@@ -11,5 +11,6 @@ namespace Flense
         Windows.Foundation.IAsyncAction LoadImageList();
         Boolean IsLoading { get; };
         Boolean HasLoaded { get; };
+        String SearchQuery;
     }
 }
