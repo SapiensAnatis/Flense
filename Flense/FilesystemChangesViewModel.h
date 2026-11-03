@@ -29,7 +29,7 @@ namespace winrt::Flense::implementation
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> m_nodes{nullptr};
         winrt::Flense::FilesystemChangeVisibility m_changeVisibility{true, true, true, true};
         winrt::hstring m_searchQuery;
-        Debouncer m_filterDebouncer;
+        Debouncer m_searchDebouncer;
     };
 } // namespace winrt::Flense::implementation
 
