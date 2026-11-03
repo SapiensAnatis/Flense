@@ -24,15 +24,7 @@ namespace winrt::Flense::implementation
 
         void CancelLoading();
 
-        static winrt::Flense::FilesystemChangeVisibility BuildChangeVisibility(
-            const winrt::Windows::Foundation::IReference<bool>& showUnchanged,
-            const winrt::Windows::Foundation::IReference<bool>& showAdded,
-            const winrt::Windows::Foundation::IReference<bool>& showModified,
-            const winrt::Windows::Foundation::IReference<bool>& showRemoved);
-
       private:
-        static bool UnboxChecked(const winrt::Windows::Foundation::IReference<bool>& value);
-
         winrt::Windows::Foundation::IAsyncAction ShowLoadFailureAsync(winrt::hstring message, winrt::hstring details);
 
         winrt::Flense::ImageDetailsViewModel m_viewModel;

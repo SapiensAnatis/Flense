@@ -214,4 +214,12 @@ namespace winrt::Flense::implementation
         ErrorDetails(failureDetails);
         ErrorMessage(failure);
     }
+
+    winrt::Flense::FilesystemChangeVisibility ImageDetailsViewModel::BuildChangeVisibility(bool showUnchanged,
+                                                                                           bool showAdded,
+                                                                                           bool showModified,
+                                                                                           bool showRemoved)
+    {
+        return {showUnchanged, showAdded, showModified, showRemoved};
+    }
 } // namespace winrt::Flense::implementation
