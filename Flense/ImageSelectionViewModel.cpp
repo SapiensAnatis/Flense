@@ -65,15 +65,43 @@ namespace winrt::Flense::implementation
             throw winrt::hresult_error(E_FAIL, winrt::to_hstring(ex.what()));
         }
 
-        auto winrtImages = images | std::views::transform([](const auto& image) {
-                               return winrt::make<implementation::DockerEngineImage>(image);
-                           }) |
-                           std::ranges::to<std::vector>();
+        auto localAllImages = images | std::views::transform([](const auto& image) {
+                                  return winrt::make<implementation::DockerEngineImage>(image);
+                              }) |
+                              std::ranges::to<std::vector>();
 
         co_await wil::resume_foreground(dispatcher);
 
-        Images = winrt::single_threaded_observable_vector<winrt::Flense::DockerEngineImage>(std::move(winrtImages));
+        // Threading discipline: only read/write to member variables from UI thread
+        m_allImages = std::move(localAllImages);
+
+        ApplySearchFilter();
+
         HasLoaded = true;
         IsLoading = false;
+    }
+
+    winrt::hstring ImageSelectionViewModel::SearchQuery()
+    {
+        return m_searchQuery;
+    }
+
+    void ImageSelectionViewModel::SearchQuery(const winrt::hstring& value)
+    {
+        if (m_searchQuery != value)
+        {
+            m_searchQuery = value;
+            RaisePropertyChanged(L"SearchQuery");
+            m_searchDebouncer.Debounce();
+        }
+    }
+
+    void ImageSelectionViewModel::ApplySearchFilter()
+    {
+        auto filteredImages = m_allImages | std::views::filter([this](const winrt::Flense::DockerEngineImage& image) {
+                                  return std::wstring_view{image.RepoTag()}.contains(m_searchQuery);
+                              }) |
+                              std::ranges::to<std::vector>();
+        Images.ReplaceAll(filteredImages);
     }
 } // namespace winrt::Flense::implementation
