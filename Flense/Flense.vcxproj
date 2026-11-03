@@ -125,6 +125,7 @@
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="DebouncedNotifyingProperty.h" />
+    <ClInclude Include="Debouncer.h" />
     <ClInclude Include="DockerEngineImage.h">
       <DependentUpon>DockerEngineImage.idl</DependentUpon>
       <SubType>Code</SubType>

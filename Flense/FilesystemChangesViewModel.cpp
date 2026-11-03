@@ -16,9 +16,8 @@ using namespace winrt::Windows::Foundation::Collections;
 namespace winrt::Flense::implementation
 {
     FilesystemChangesViewModel::FilesystemChangesViewModel()
-        : INIT_DEBOUNCED_NOTIFYING_PROPERTY(SearchQuery, std::chrono::milliseconds(300), winrt::hstring{})
+        : m_filterDebouncer([this] { ApplyFilters(); }, std::chrono::milliseconds(300))
     {
-        SearchQuery.OnCommitted([this] { ApplyFilters(); });
     }
 
     IObservableVector<winrt::Flense::FilesystemTreeNode> FilesystemChangesViewModel::Nodes()
@@ -51,6 +50,21 @@ namespace winrt::Flense::implementation
         }
     }
 
+    winrt::hstring FilesystemChangesViewModel::SearchQuery()
+    {
+        return m_searchQuery;
+    }
+
+    void FilesystemChangesViewModel::SearchQuery(const winrt::hstring& value)
+    {
+        if (m_searchQuery != value)
+        {
+            m_searchQuery = value;
+            m_filterDebouncer.Debounce();
+            RaisePropertyChanged(L"SearchQuery");
+        }
+    }
+
     void FilesystemChangesViewModel::ApplyFilters()
     {
         if (!m_nodes)
@@ -58,7 +72,7 @@ namespace winrt::Flense::implementation
             return;
         }
 
-        bool noFilteringActive = SearchQuery().empty() && m_changeVisibility.ShowUnchanged &&
+        bool noFilteringActive = m_searchQuery.empty() && m_changeVisibility.ShowUnchanged &&
                                  m_changeVisibility.ShowAdded && m_changeVisibility.ShowModified &&
                                  m_changeVisibility.ShowRemoved;
 
@@ -87,7 +101,7 @@ namespace winrt::Flense::implementation
 
         for (const auto& node : m_nodes)
         {
-            get_self<FilesystemTreeNode>(node)->UpdateVisibility(SearchQuery(), m_changeVisibility, false);
+            get_self<FilesystemTreeNode>(node)->UpdateVisibility(m_searchQuery, m_changeVisibility, false);
         }
     }
 } // namespace winrt::Flense::implementation

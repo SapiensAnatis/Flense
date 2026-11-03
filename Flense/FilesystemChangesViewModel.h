@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DebouncedNotifyingProperty.h"
+#include "Debouncer.h"
 #include "FilesystemChangesViewModel.g.h"
 
 namespace winrt::Flense::implementation
@@ -20,13 +20,16 @@ namespace winrt::Flense::implementation
         winrt::Flense::FilesystemChangeVisibility ChangeVisibility();
         void ChangeVisibility(const winrt::Flense::FilesystemChangeVisibility& value);
 
-        DebouncedNotifyingProperty<winrt::hstring> SearchQuery;
+        winrt::hstring SearchQuery();
+        void SearchQuery(const winrt::hstring& value);
 
       private:
         void ApplyFilters();
 
         winrt::Windows::Foundation::Collections::IObservableVector<winrt::Flense::FilesystemTreeNode> m_nodes{nullptr};
         winrt::Flense::FilesystemChangeVisibility m_changeVisibility{true, true, true, true};
+        winrt::hstring m_searchQuery;
+        Debouncer m_filterDebouncer;
     };
 } // namespace winrt::Flense::implementation
 
