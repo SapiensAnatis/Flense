@@ -16,7 +16,7 @@ using namespace winrt::Windows::Foundation::Collections;
 namespace winrt::Flense::implementation
 {
     FilesystemChangesViewModel::FilesystemChangesViewModel()
-        : m_filterDebouncer([this] { ApplyFilters(); }, std::chrono::milliseconds(300))
+        : m_searchDebouncer([this] { ApplyFilters(); }, std::chrono::milliseconds(300))
     {
     }
 
@@ -60,7 +60,7 @@ namespace winrt::Flense::implementation
         if (m_searchQuery != value)
         {
             m_searchQuery = value;
-            m_filterDebouncer.Debounce();
+            m_searchDebouncer.Debounce();
             RaisePropertyChanged(L"SearchQuery");
         }
     }

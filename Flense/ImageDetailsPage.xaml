@@ -105,7 +105,7 @@
                         <TextBox
                             Grid.Column="1"
                             PlaceholderText="Search"
-                            Text="{x:Bind ViewModel.FilterQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <Button
                             Grid.Column="2"
                             Padding="12,8"
@@ -136,7 +136,7 @@
                         Grid.Row="1"
                         ChangeVisibility="{x:Bind local:ImageDetailsViewModel.BuildChangeVisibility(ViewModel.ShowUnchanged, ViewModel.ShowAdded, ViewModel.ShowModified, ViewModel.ShowRemoved), Mode=OneWay}"
                         ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}"
-                        SearchQuery="{x:Bind ViewModel.FilterQuery, Mode=OneWay}" />
+                        SearchQuery="{x:Bind ViewModel.SearchQuery, Mode=OneWay}" />
 
                     <Border
                         Grid.Row="2"

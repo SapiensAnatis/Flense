@@ -17,7 +17,7 @@ namespace Flense
         Double LoadingProgress { get; };
         String StatusMessage;
         String ErrorMessage { get; };
-        String FilterQuery;
+        String SearchQuery;
         Boolean ShowUnchanged;
         Boolean ShowAdded;
         Boolean ShowModified;
