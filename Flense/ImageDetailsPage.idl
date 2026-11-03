@@ -1,5 +1,4 @@
 import "ImageDetailsViewModel.idl";
-import "FilesystemChangeVisibility.idl";
 
 namespace Flense
 {
@@ -10,19 +9,5 @@ namespace Flense
         ImageDetailsViewModel ViewModel{ get; };
 
         void CancelLoading();
-
-        // These are inside an x:Load subtree, so the generated bindings reach them through the projected type.
-        // TODO: Bind the search box and filter checkboxes two-way to view model properties instead, so these
-        // controls don't need to be exposed here.
-        Microsoft.UI.Xaml.Controls.CheckBox UnchangedFilterItem{ get; };
-        Microsoft.UI.Xaml.Controls.CheckBox AddedFilterItem{ get; };
-        Microsoft.UI.Xaml.Controls.CheckBox ModifiedFilterItem{ get; };
-        Microsoft.UI.Xaml.Controls.CheckBox RemovedFilterItem{ get; };
-
-        static FilesystemChangeVisibility BuildChangeVisibility(
-            Windows.Foundation.IReference<Boolean> showUnchanged,
-            Windows.Foundation.IReference<Boolean> showAdded,
-            Windows.Foundation.IReference<Boolean> showModified,
-            Windows.Foundation.IReference<Boolean> showRemoved);
     }
 }

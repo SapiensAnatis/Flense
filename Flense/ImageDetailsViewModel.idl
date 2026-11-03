@@ -1,3 +1,4 @@
+import "FilesystemChangeVisibility.idl";
 import "ImageLayerWrapper.idl";
 
 namespace Flense
@@ -17,8 +18,15 @@ namespace Flense
         String StatusMessage;
         String ErrorMessage { get; };
         String FilterQuery;
+        Boolean ShowUnchanged;
+        Boolean ShowAdded;
+        Boolean ShowModified;
+        Boolean ShowRemoved;
         String ErrorDetails { get; };
 
         Windows.Foundation.IAsyncAction LoadAsync();
+
+        static FilesystemChangeVisibility BuildChangeVisibility(
+            Boolean showUnchanged, Boolean showAdded, Boolean showModified, Boolean showRemoved);
     }
 }

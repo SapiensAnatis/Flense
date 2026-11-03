@@ -103,7 +103,6 @@
                             Style="{ThemeResource SubtitleTextBlockStyle}"
                             Text="Filesystem changes" />
                         <TextBox
-                            x:Name="FilesystemSearchBox"
                             Grid.Column="1"
                             PlaceholderText="Search"
                             Text="{x:Bind ViewModel.FilterQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -116,21 +115,17 @@
                                 <Flyout Placement="Bottom">
                                     <StackPanel Spacing="8">
                                         <CheckBox
-                                            x:Name="UnchangedFilterItem"
                                             Content="Unchanged"
-                                            IsChecked="True" />
+                                            IsChecked="{x:Bind ViewModel.ShowUnchanged, Mode=TwoWay}" />
                                         <CheckBox
-                                            x:Name="AddedFilterItem"
                                             Content="Added"
-                                            IsChecked="True" />
+                                            IsChecked="{x:Bind ViewModel.ShowAdded, Mode=TwoWay}" />
                                         <CheckBox
-                                            x:Name="ModifiedFilterItem"
                                             Content="Modified"
-                                            IsChecked="True" />
+                                            IsChecked="{x:Bind ViewModel.ShowModified, Mode=TwoWay}" />
                                         <CheckBox
-                                            x:Name="RemovedFilterItem"
                                             Content="Removed"
-                                            IsChecked="True" />
+                                            IsChecked="{x:Bind ViewModel.ShowRemoved, Mode=TwoWay}" />
                                     </StackPanel>
                                 </Flyout>
                             </Button.Flyout>
@@ -139,7 +134,7 @@
 
                     <local:FilesystemChangesView
                         Grid.Row="1"
-                        ChangeVisibility="{x:Bind local:ImageDetailsPage.BuildChangeVisibility(UnchangedFilterItem.IsChecked, AddedFilterItem.IsChecked, ModifiedFilterItem.IsChecked, RemovedFilterItem.IsChecked), Mode=OneWay}"
+                        ChangeVisibility="{x:Bind local:ImageDetailsViewModel.BuildChangeVisibility(ViewModel.ShowUnchanged, ViewModel.ShowAdded, ViewModel.ShowModified, ViewModel.ShowRemoved), Mode=OneWay}"
                         ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}"
                         SearchQuery="{x:Bind ViewModel.FilterQuery, Mode=OneWay}" />
 
