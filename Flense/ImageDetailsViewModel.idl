@@ -16,6 +16,7 @@ namespace Flense
         Double LoadingProgress { get; };
         String StatusMessage;
         String ErrorMessage { get; };
+        String FilterQuery;
         String ErrorDetails { get; };
 
         Windows.Foundation.IAsyncAction LoadAsync();

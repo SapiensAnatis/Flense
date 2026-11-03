@@ -105,7 +105,8 @@
                         <TextBox
                             x:Name="FilesystemSearchBox"
                             Grid.Column="1"
-                            PlaceholderText="Search" />
+                            PlaceholderText="Search"
+                            Text="{x:Bind ViewModel.FilterQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <Button
                             Grid.Column="2"
                             Padding="12,8"
@@ -140,7 +141,7 @@
                         Grid.Row="1"
                         ChangeVisibility="{x:Bind local:ImageDetailsPage.BuildChangeVisibility(UnchangedFilterItem.IsChecked, AddedFilterItem.IsChecked, ModifiedFilterItem.IsChecked, RemovedFilterItem.IsChecked), Mode=OneWay}"
                         ItemsSource="{x:Bind ViewModel.SelectedLayer.FilesystemChanges.Children, Mode=OneWay}"
-                        SearchQuery="{x:Bind FilesystemSearchBox.Text, Mode=OneWay}" />
+                        SearchQuery="{x:Bind ViewModel.FilterQuery, Mode=OneWay}" />
 
                     <Border
                         Grid.Row="2"
