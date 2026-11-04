@@ -1,5 +1,6 @@
 import "FilesystemChangeVisibility.idl";
 import "ImageLayerWrapper.idl";
+import "DockerEngineImage.idl";
 
 namespace Flense
 {
@@ -9,7 +10,6 @@ namespace Flense
     {
         ImageDetailsViewModel();
 
-        String ImageArchivePath;
         Windows.Foundation.Collections.IObservableVector<Flense.ImageLayerWrapper> Layers { get; };
         Flense.ImageLayerWrapper SelectedLayer;
 
@@ -24,7 +24,8 @@ namespace Flense
         Boolean ShowRemoved;
         String ErrorDetails { get; };
 
-        Windows.Foundation.IAsyncAction LoadAsync();
+        Windows.Foundation.IAsyncAction LoadImageFromTarFileAsync(String tarPath);
+        Windows.Foundation.IAsyncAction LoadImageFromEngineAsync(Flense.DockerEngineImage image);
 
         static FilesystemChangeVisibility BuildChangeVisibility(
             Boolean showUnchanged, Boolean showAdded, Boolean showModified, Boolean showRemoved);

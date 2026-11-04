@@ -93,10 +93,15 @@ namespace winrt::Flense::implementation
         }
     }
 
+    void ImageSelectionPage::SelectImage(const winrt::Flense::DockerEngineImage& image)
+    {
+        Frame().Navigate(xaml_typename<Flense::ImageDetailsPage>(), box_value(image));
+    }
+
     void ImageSelectionPage::ImageList_ItemInvoked(const Controls::ItemsView& /* sender */,
                                                    const Controls::ItemsViewItemInvokedEventArgs& args)
     {
-        ViewModel().SelectImage(args.InvokedItem().as<Flense::DockerEngineImage>());
+        SelectImage(args.InvokedItem().as<Flense::DockerEngineImage>());
     }
 
     void ImageSelectionPage::ImageList_SelectionChanged(const Controls::ItemsView& sender,
@@ -118,7 +123,10 @@ namespace winrt::Flense::implementation
     void ImageSelectionPage::OpenImageButton_Click(const winrt::Windows::Foundation::IInspectable& /* sender */,
                                                    const RoutedEventArgs& /* e */)
     {
-        ViewModel().SelectImage(ImageList().SelectedItem().as<Flense::DockerEngineImage>());
+        if (const auto selectedItem = ImageList().SelectedItem())
+        {
+            SelectImage(selectedItem.as<Flense::DockerEngineImage>());
+        }
     }
 
     void ImageSelectionPage::CancelButton_Click(const winrt::Windows::Foundation::IInspectable& /* sender */,

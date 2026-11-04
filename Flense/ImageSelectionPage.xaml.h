@@ -20,14 +20,6 @@ namespace winrt::Flense::implementation
 
         void CancelLoadingButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
                                        const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
-
-      private:
-        void CancelLoading();
-
-        winrt::Windows::Foundation::IAsyncAction m_loadAsyncAction{nullptr};
-        bool m_navigatedAway = false;
-
-      public:
         void ImageList_ItemInvoked(const winrt::Microsoft::UI::Xaml::Controls::ItemsView& sender,
                                    const winrt::Microsoft::UI::Xaml::Controls::ItemsViewItemInvokedEventArgs& args);
         void ImageList_SelectionChanged(
@@ -39,6 +31,13 @@ namespace winrt::Flense::implementation
                                     const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
         void CancelButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
                                 const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
+
+      private:
+        void CancelLoading();
+        void SelectImage(const winrt::Flense::DockerEngineImage& image);
+
+        winrt::Windows::Foundation::IAsyncAction m_loadAsyncAction{nullptr};
+        bool m_navigatedAway = false;
     };
 } // namespace winrt::Flense::implementation
 
