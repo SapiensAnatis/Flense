@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include "FilesystemTreeNode.h"
+#include "StringComparison.h"
 #if __has_include("FilesystemTreeNode.g.cpp")
 #include "FilesystemTreeNode.g.cpp"
 #endif
@@ -178,7 +179,7 @@ namespace winrt::Flense::implementation
         // way to improve this, e.g. searching over the core tree type and materializing only matching nodes.
         bool anyChildVisible = false;
 
-        const bool thisNodeMatch = std::wstring_view{Name}.contains(query);
+        const bool thisNodeMatch = ContainsCaseInsensitive(Name, query);
 
         for (const auto& child : Children())
         {

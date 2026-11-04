@@ -2,6 +2,7 @@
 
 #include "DockerEngineImage.h"
 #include "ImageSelectionViewModel.h"
+#include "StringComparison.h"
 #if __has_include("ImageSelectionViewModel.g.cpp")
 #include "ImageSelectionViewModel.g.cpp"
 #endif
@@ -99,7 +100,7 @@ namespace winrt::Flense::implementation
     void ImageSelectionViewModel::ApplySearchFilter()
     {
         auto filteredImages = m_allImages | std::views::filter([this](const winrt::Flense::DockerEngineImage& image) {
-                                  return std::wstring_view{image.RepoTag()}.contains(m_searchQuery);
+                                  return ContainsCaseInsensitive(image.RepoTag(), m_searchQuery);
                               }) |
                               std::ranges::to<std::vector>();
         Images.ReplaceAll(filteredImages);
