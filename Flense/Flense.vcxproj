@@ -193,6 +193,7 @@
     <ClInclude Include="DialogService.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="StringComparison.h" />
     <ClInclude Include="TitleBarService.h">
       <DependentUpon>TitleBarService.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -306,6 +307,7 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="StringComparison.cpp" />
     <ClCompile Include="TitleBarService.cpp">
       <DependentUpon>TitleBarService.idl</DependentUpon>
       <SubType>Code</SubType>

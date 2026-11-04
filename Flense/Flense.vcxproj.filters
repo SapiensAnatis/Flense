@@ -82,6 +82,9 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="DialogService.cpp" />
+    <ClCompile Include="StringComparison.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -91,6 +94,9 @@
       <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="Debouncer.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="StringComparison.h">
       <Filter>Helpers</Filter>
     </ClInclude>
   </ItemGroup>
