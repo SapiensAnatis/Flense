@@ -7,10 +7,13 @@ namespace Flense
     runtimeclass ImageSelectionViewModel : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
     {
         ImageSelectionViewModel();
+        
         Windows.Foundation.Collections.IObservableVector<Flense.DockerEngineImage> Images { get; };
-        Windows.Foundation.IAsyncAction LoadImageList();
         Boolean IsLoading { get; };
         Boolean HasLoaded { get; };
         String SearchQuery;
+
+        Windows.Foundation.IAsyncAction LoadImageList();
+        void SelectImage(Flense.DockerEngineImage image);
     }
 }

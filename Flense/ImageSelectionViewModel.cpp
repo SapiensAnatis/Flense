@@ -82,6 +82,11 @@ namespace winrt::Flense::implementation
         IsLoading = false;
     }
 
+    void ImageSelectionViewModel::SelectImage(const winrt::Flense::DockerEngineImage& image)
+    {
+        (void)image;
+    }
+
     winrt::hstring ImageSelectionViewModel::SearchQuery()
     {
         return m_searchQuery;

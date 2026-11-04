@@ -26,6 +26,19 @@ namespace winrt::Flense::implementation
 
         winrt::Windows::Foundation::IAsyncAction m_loadAsyncAction{nullptr};
         bool m_navigatedAway = false;
+
+      public:
+        void ImageList_ItemInvoked(const winrt::Microsoft::UI::Xaml::Controls::ItemsView& sender,
+                                   const winrt::Microsoft::UI::Xaml::Controls::ItemsViewItemInvokedEventArgs& args);
+        void ImageList_SelectionChanged(
+            const winrt::Microsoft::UI::Xaml::Controls::ItemsView& sender,
+            const winrt::Microsoft::UI::Xaml::Controls::ItemsViewSelectionChangedEventArgs& args);
+        void OpenImageButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
+                                   const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
+        void OpenImageButton_Loaded(const winrt::Windows::Foundation::IInspectable& sender,
+                                    const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
+        void CancelButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
+                                const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
     };
 } // namespace winrt::Flense::implementation
 
