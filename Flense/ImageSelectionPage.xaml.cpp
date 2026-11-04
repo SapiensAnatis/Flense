@@ -92,4 +92,41 @@ namespace winrt::Flense::implementation
             m_loadAsyncAction.Cancel();
         }
     }
+
+    void ImageSelectionPage::ImageList_ItemInvoked(const Controls::ItemsView& /* sender */,
+                                                   const Controls::ItemsViewItemInvokedEventArgs& args)
+    {
+        ViewModel().SelectImage(args.InvokedItem().as<Flense::DockerEngineImage>());
+    }
+
+    void ImageSelectionPage::ImageList_SelectionChanged(const Controls::ItemsView& sender,
+                                                        const Controls::ItemsViewSelectionChangedEventArgs& /* args */)
+    {
+        // This can be called mid-load in which case OpenImageButton returns nullptr and the below would crash
+        if (const auto button = OpenImageButton())
+        {
+            button.IsEnabled(sender.SelectedItem() != nullptr);
+        }
+    }
+
+    void ImageSelectionPage::OpenImageButton_Loaded(const winrt::Windows::Foundation::IInspectable& /* sender */,
+                                                    const RoutedEventArgs& /* e */)
+    {
+        OpenImageButton().IsEnabled(ImageList().SelectedItem() != nullptr);
+    }
+
+    void ImageSelectionPage::OpenImageButton_Click(const winrt::Windows::Foundation::IInspectable& /* sender */,
+                                                   const RoutedEventArgs& /* e */)
+    {
+        ViewModel().SelectImage(ImageList().SelectedItem().as<Flense::DockerEngineImage>());
+    }
+
+    void ImageSelectionPage::CancelButton_Click(const winrt::Windows::Foundation::IInspectable& /* sender */,
+                                                const RoutedEventArgs& /* e */)
+    {
+        if (Frame().CanGoBack())
+        {
+            Frame().GoBack();
+        }
+    }
 } // namespace winrt::Flense::implementation
