@@ -41,3 +41,6 @@
 #include <wil/cppwinrt_helpers.h>
 #include <wil/cppwinrt_authoring.h>
 #include <wil/resource.h>
+
+// Standard headers go here if they cause conflicts with module imports
+#include <functional>

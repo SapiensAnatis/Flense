@@ -5,6 +5,8 @@ module;
 export module Flense.Core.ImageParsing:ImageParser;
 
 import Flense.Core.Shared;
+import Flense.Core.DockerClient;
+import Flense.Core.Http;
 
 import :ArchiveReader;
 import :FileByteStream;
@@ -178,6 +180,55 @@ export namespace Flense::Core
         const std::uint64_t totalBytes = stream.Size();
 
         auto reader = ArchiveReader::CreateFromStream(stream);
+        ImageParser parser;
+
+        // Declared after parser so that it is stopped before parser is destroyed.
+        std::jthread progressReporter;
+        if (onProgress)
+        {
+            progressReporter = std::jthread([&parser, &onProgress, totalBytes](const std::stop_token reporterStop) {
+                constexpr std::chrono::milliseconds ProgressInterval{50};
+
+                while (!reporterStop.stop_requested())
+                {
+                    onProgress(parser.BytesProcessed(), totalBytes);
+                    SleepFor(ProgressInterval, reporterStop);
+                }
+            });
+        }
+
+        while (auto entry = reader.Next(stopToken))
+        {
+            parser.ProcessEntry(*entry, stopToken);
+        }
+
+        return parser.Build(stopToken);
+    }
+
+    /// <summary>
+    /// Parses an image by exporting it from the container engine using the image tag.
+    /// </summary>
+    /// <param name="imageId">The ID of the image.</param>
+    /// <param name="onProgress">Optional callback invoked periodically, from a background thread, with cumulative
+    /// byte totals.</param>
+    /// <param name="stopToken">The token to check for cancellation.</param>
+    /// <returns>The parsed Image.</returns>
+    /// <exception cref="HttpError">An error occurred while communicating with the daemon.</exception>
+    /// <exception cref="std::runtime_error">An error occurred while communicating with the daemon.</exception>
+    /// <exception cref="ImageFormatError">The archive is not a valid image.</exception>
+    /// <exception cref="OperationCancelledError">stopToken was triggered before parsing finished.</exception>
+    [[nodiscard]] Image ParseImageFromEngine(const std::string_view imageId, const std::uint64_t imageSize,
+                                             const ArchiveProgressCallback& onProgress = {},
+                                             const std::stop_token stopToken = {})
+    {
+        const DockerClient client;
+
+        HttpResponse imageStream = client.ExportImage(imageId, stopToken);
+
+        const std::uint64_t totalBytes =
+            imageSize; // TODO: not completely accurate, we can do more to get a more realistic size estimate
+
+        auto reader = ArchiveReader::CreateFromStream(imageStream);
         ImageParser parser;
 
         // Declared after parser so that it is stopped before parser is destroyed.

@@ -33,30 +33,37 @@ namespace winrt::Flense::implementation
         {
             const std::filesystem::path path{std::wstring_view{imagePath}};
 
-            m_viewModel.ImageArchivePath(imagePath);
             m_viewModel.StatusMessage(L"Loading image: " + winrt::hstring{path.filename().wstring()});
-            m_loadAsyncAction = m_viewModel.LoadAsync();
-
-            try
-            {
-                co_await m_loadAsyncAction;
-            }
-            catch (const winrt::hresult_canceled&)
-            {
-                if (Frame().CanGoBack())
-                {
-                    Frame().GoBack();
-                }
-            }
-
-            if (const winrt::hstring failure = m_viewModel.ErrorMessage(); !failure.empty())
-            {
-                co_await ShowLoadFailureAsync(failure, m_viewModel.ErrorDetails());
-            }
+            m_loadAsyncAction = m_viewModel.LoadImageFromTarFileAsync(imagePath);
+        }
+        else if (const auto engineImage =
+                     winrt::unbox_value_or<winrt::Flense::DockerEngineImage>(e.Parameter(), nullptr);
+                 engineImage != nullptr)
+        {
+            m_viewModel.StatusMessage(L"Loading image: " + engineImage.RepoTag());
+            m_loadAsyncAction = m_viewModel.LoadImageFromEngineAsync(engineImage);
         }
         else
         {
             m_viewModel.StatusMessage(L"Invalid parameter passed to ImageDetailsPage.");
+            co_return;
+        }
+
+        try
+        {
+            co_await m_loadAsyncAction;
+        }
+        catch (const winrt::hresult_canceled&)
+        {
+            if (Frame().CanGoBack())
+            {
+                Frame().GoBack();
+            }
+        }
+
+        if (const winrt::hstring failure = m_viewModel.ErrorMessage(); !failure.empty())
+        {
+            co_await ShowLoadFailureAsync(failure, m_viewModel.ErrorDetails());
         }
 
         m_loadAsyncAction = nullptr;

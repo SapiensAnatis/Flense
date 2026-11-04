@@ -246,4 +246,21 @@ namespace Flense::Core
 
         return images;
     }
+
+    HttpResponse DockerClient::ExportImage(const std::string_view id, const std::stop_token stopToken) const
+    {
+        HttpRequest request(HttpMethod::Get, std::format("/{}/images/{}/get", ApiVersion, id));
+        request.AddHeader("Host", "localhost");
+        request.AddHeader("Connection", "close");
+        request.AddHeader("Accept", "application/x-tar");
+
+        HttpResponse response(m_transport.SendRequest(request, stopToken));
+
+        if (response.StatusCode() != 200)
+        {
+            throw std::runtime_error(std::format("Docker returned HTTP status {}", response.StatusCode()));
+        }
+
+        return response;
+    }
 } // namespace Flense::Core

@@ -44,6 +44,24 @@ namespace winrt::Flense::implementation
         }
     }
 
+    winrt::Windows::Foundation::IAsyncAction ImageDetailsViewModel::LoadImageFromTarFileAsync(
+        const winrt::hstring& path)
+    {
+        return LoadAsync(
+            [stdPath = std::filesystem::path{std::wstring_view(path)}](const auto& progress, std::stop_token stop) {
+                return ::Flense::Core::ParseImageArchive(stdPath, progress, stop);
+            });
+    }
+
+    winrt::Windows::Foundation::IAsyncAction ImageDetailsViewModel::LoadImageFromEngineAsync(
+        const winrt::Flense::DockerEngineImage& image)
+    {
+        return LoadAsync(
+            [id = winrt::to_string(image.Id()), size = image.Size()](const auto& progress, std::stop_token stop) {
+                return ::Flense::Core::ParseImageFromEngine(id, size, progress, stop);
+            });
+    }
+
     namespace
     {
         winrt::hstring Describe(const ::Flense::Core::ArchiveError& error)
@@ -96,7 +114,7 @@ namespace winrt::Flense::implementation
         }
     } // namespace
 
-    IAsyncAction ImageDetailsViewModel::LoadAsync()
+    IAsyncAction ImageDetailsViewModel::LoadAsync(ImageLoader loader)
     {
         auto lifetime = get_strong();
         auto dispatcher = DispatcherQueue::GetForCurrentThread();
@@ -124,8 +142,6 @@ namespace winrt::Flense::implementation
             });
         };
 
-        const std::filesystem::path archivePath{std::wstring_view{ImageArchivePath()}};
-
         LoadingProgress = 0;
         IsLoading = true;
 
@@ -140,7 +156,7 @@ namespace winrt::Flense::implementation
 
         try
         {
-            auto details = ::Flense::Core::ParseImageArchive(archivePath, updateProgress, stopSource.get_token());
+            auto details = loader(updateProgress, stopSource.get_token());
 
             auto parsedLayers = details.layers | std::views::transform([](const auto& layer) {
                                     return winrt::make<implementation::ImageLayerWrapper>(layer);
@@ -154,7 +170,7 @@ namespace winrt::Flense::implementation
 
             const winrt::hstring name =
                 details.repoTag.transform([](const std::string& value) { return winrt::to_hstring(value); })
-                    .value_or(winrt::hstring{archivePath.filename().wstring()});
+                    .value_or(L"Untagged image");
 
             TitleBarService::Instance().Title(name + L" - Flense");
 
