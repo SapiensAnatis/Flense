@@ -26,7 +26,7 @@ export namespace Flense::Core
         /// <exception cref="OperationCancelledError">stopToken was triggered before the exort was finished.</exception>
         /// <exception cref="HttpError">An error occurred talking to the Docker engine.</exception>
         /// <exception cref="std::runtime_error">An error occurred talking to the Docker engine.</exception>
-        [[nodiscard]] HttpResponse ExportImage(std::string_view id, std::stop_token stopToken = {}) const;
+        [[nodiscard]] HttpResponse ExportImage(std::string_view tag, std::stop_token stopToken = {}) const;
 
       private:
         DockerTransport m_transport;

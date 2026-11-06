@@ -247,9 +247,9 @@ namespace Flense::Core
         return images;
     }
 
-    HttpResponse DockerClient::ExportImage(const std::string_view id, const std::stop_token stopToken) const
+    HttpResponse DockerClient::ExportImage(const std::string_view tag, const std::stop_token stopToken) const
     {
-        HttpRequest request(HttpMethod::Get, std::format("/{}/images/{}/get", ApiVersion, id));
+        HttpRequest request(HttpMethod::Get, std::format("/{}/images/{}/get", ApiVersion, tag));
         request.AddHeader("Host", "localhost");
         request.AddHeader("Connection", "close");
         request.AddHeader("Accept", "application/x-tar");
