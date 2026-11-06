@@ -9,7 +9,7 @@ namespace winrt::Flense::implementation
 {
     DockerEngineImage::DockerEngineImage(const ::Flense::Core::DockerEngineImage& image)
         : Id(winrt::to_hstring(image.id)), RepoTag(winrt::to_hstring(image.repoTag)),
-          Created(winrt::clock::from_sys(image.created)), Size(image.size)
+          Created(winrt::clock::from_sys(image.created)), Size(image.size), EstimatedTarSize(image.estimatedTarSize)
     {
     }
 } // namespace winrt::Flense::implementation

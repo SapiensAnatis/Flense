@@ -13,7 +13,12 @@ namespace Flense::Core
 {
     namespace
     {
-        constexpr std::string_view ApiVersion = "v1.41";
+        /// <summary>
+        /// The Docker Engine API version.
+        /// 1.47 gives us support for manifests from GET /images/json, which allows us to estimate the size of an image
+        /// tar file for use in the progress bar.
+        /// </summary>
+        constexpr std::string_view ApiVersion = "v1.47";
 
         struct DockerEngineApiImage
         {
@@ -21,6 +26,7 @@ namespace Flense::Core
             std::vector<std::string> repoTags;
             std::chrono::system_clock::time_point created;
             std::uint64_t size = 0;
+            std::uint64_t estimatedTarSize = 0;
         };
 
         class ImageListHandler
@@ -40,89 +46,112 @@ namespace Flense::Core
             // NOLINTBEGIN(readability-identifier-naming)
             bool start_array(std::size_t /* elements */)
             {
-                ++m_depth;
+                PushPendingKey();
                 return true;
             }
 
             bool end_array()
             {
-                --m_depth;
+                m_path.pop_back();
                 return true;
             }
 
             bool start_object(std::size_t /* elements */)
             {
-                ++m_depth;
-                if (m_depth == ImageDepth)
+                if (m_path.empty())
+                {
+                    // We expect the top-level element to be an array
+                    return false;
+                }
+
+                static constexpr auto ImageObjectPath = std::array{PathPart::Root, PathPart::ArrayElement};
+
+                PushPendingKey();
+                if (std::ranges::equal(m_path, ImageObjectPath))
                 {
                     m_images.emplace_back();
                 }
-                return m_depth != 1;
+                return true;
             }
 
             bool end_object()
             {
-                --m_depth;
+                m_path.pop_back();
                 return true;
             }
 
             bool key(std::string& name)
             {
-                if (m_depth == ImageDepth)
-                {
-                    m_field = ToField(name);
-                }
+                m_pendingKey = ToPathPart(name);
                 return true;
             }
 
             bool string(std::string& value)
             {
-                if (m_depth == ImageDepth && m_field == Field::Id)
+                static constexpr auto ImageIdPath = std::array{PathPart::Root, PathPart::ArrayElement, PathPart::Id};
+
+                static constexpr auto RepoTagsPath =
+                    std::array{PathPart::Root, PathPart::ArrayElement, PathPart::RepoTags, PathPart::ArrayElement};
+
+                PushPendingKey();
+
+                if (std::ranges::equal(m_path, ImageIdPath))
                 {
                     m_images.back().id = std::move(value);
                 }
-                else if (m_depth == ImageDepth + 1 && m_field == Field::RepoTags)
+                else if (std::ranges::equal(m_path, RepoTagsPath))
                 {
                     m_images.back().repoTags.push_back(std::move(value));
                 }
+
+                m_path.pop_back();
                 return true;
             }
 
             bool number_unsigned(nlohmann::json::number_unsigned_t value)
             {
-                if (m_depth == ImageDepth)
-                {
-                    StoreNumber(value);
-                }
+                PushPendingKey();
+
+                StoreNumber(value);
+
+                m_path.pop_back();
                 return true;
             }
 
             bool number_integer(nlohmann::json::number_integer_t value)
             {
-                if (m_depth == ImageDepth && value >= 0)
+                PushPendingKey();
+
+                if (value >= 0)
                 {
                     StoreNumber(static_cast<std::uint64_t>(value));
                 }
+
+                m_path.pop_back();
                 return true;
             }
 
-            static bool number_float(nlohmann::json::number_float_t /* value */, const std::string& /* text */)
+            bool number_float(nlohmann::json::number_float_t /* value */, const std::string& /* text */)
             {
+                ResetPendingKey();
                 return true;
             }
 
-            static bool boolean(bool /* value */)
+            bool boolean(bool /* value */)
             {
+                ResetPendingKey();
                 return true;
             }
 
-            static bool null()
+            bool null()
             {
+                ResetPendingKey();
                 return true;
             }
 
-            static bool binary(nlohmann::json::binary_t& /* value */)
+            bool binary(nlohmann::json::binary_t& /* value */)
             {
+                ResetPendingKey();
                 return true;
             }
 
@@ -135,45 +164,77 @@ namespace Flense::Core
             // NOLINTEND(readability-identifier-naming)
 
           private:
-            enum class Field : std::uint8_t
+            enum class PathPart : std::uint8_t
             {
-                Other,
+                Unknown,
+                Root,
+                ArrayElement,
                 Id,
                 RepoTags,
                 Size,
                 Created,
+                Manifests,
+                Content,
             };
 
-            static constexpr int ImageDepth = 2;
-
-            static Field ToField(std::string_view name)
+            static PathPart ToPathPart(std::string_view name)
             {
                 if (name == "Id")
                 {
-                    return Field::Id;
+                    return PathPart::Id;
                 }
                 if (name == "RepoTags")
                 {
-                    return Field::RepoTags;
+                    return PathPart::RepoTags;
                 }
                 if (name == "Size")
                 {
-                    return Field::Size;
+                    return PathPart::Size;
                 }
                 if (name == "Created")
                 {
-                    return Field::Created;
+                    return PathPart::Created;
                 }
-                return Field::Other;
+                if (name == "Manifests")
+                {
+                    return PathPart::Manifests;
+                }
+                if (name == "Content")
+                {
+                    return PathPart::Content;
+                }
+                return PathPart::Unknown;
+            }
+
+            void PushPendingKey()
+            {
+                m_path.push_back(m_pendingKey);
+                ResetPendingKey();
+            }
+
+            void ResetPendingKey()
+            {
+                m_pendingKey =
+                    PathPart::ArrayElement; // Default to array element for the next value if no key is provided
             }
 
             void StoreNumber(std::uint64_t value)
             {
-                if (m_field == Field::Size)
+                static constexpr auto ImageSizePath =
+                    std::array{PathPart::Root, PathPart::ArrayElement, PathPart::Size};
+
+                static constexpr auto ImageCreatedPath =
+                    std::array{PathPart::Root, PathPart::ArrayElement, PathPart::Created};
+
+                static constexpr auto ImageManifestContentSizePath =
+                    std::array{PathPart::Root,         PathPart::ArrayElement, PathPart::Manifests,
+                               PathPart::ArrayElement, PathPart::Size,         PathPart::Content};
+
+                if (std::ranges::equal(m_path, ImageSizePath))
                 {
                     m_images.back().size = value;
                 }
-                if (m_field == Field::Created)
+                else if (std::ranges::equal(m_path, ImageCreatedPath))
                 {
                     constexpr auto MaxSecs = static_cast<std::uint64_t>(
                         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::duration::max())
@@ -185,18 +246,22 @@ namespace Flense::Core
                             std::chrono::system_clock::from_time_t(static_cast<std::time_t>(value));
                     }
                 }
+                else if (std::ranges::equal(m_path, ImageManifestContentSizePath))
+                {
+                    m_images.back().estimatedTarSize += value;
+                }
             }
 
             std::vector<DockerEngineApiImage> m_images;
             std::string m_error;
-            Field m_field = Field::Other;
-            int m_depth = 0;
+            PathPart m_pendingKey = PathPart::Root;
+            std::vector<PathPart> m_path;
         };
     } // namespace
 
     std::vector<DockerEngineImage> DockerClient::ListImages(std::stop_token stopToken) const
     {
-        HttpRequest request(HttpMethod::Get, std::format("/{}/images/json", ApiVersion));
+        HttpRequest request(HttpMethod::Get, std::format("/{}/images/json?manifests=1", ApiVersion));
         request.AddHeader("Host", "localhost");
         request.AddHeader("Connection", "close");
         request.AddHeader("Accept", "application/json");
@@ -220,13 +285,15 @@ namespace Flense::Core
         std::vector<DockerEngineImage> images;
         images.reserve(handler.Images().size());
 
+        // Flatten images with multiple repo tags into one image per tag
         for (const auto& apiImage : handler.Images())
         {
-            for (const auto& repoTag : apiImage.repoTags) // Only include images with at least one repo tag
+            for (const auto& repoTag : apiImage.repoTags)
             {
                 if (repoTag != "<none>:<none>") // Skip dangling images
                 {
-                    images.emplace_back(apiImage.id, repoTag, apiImage.created, apiImage.size);
+                    images.emplace_back(apiImage.id, repoTag, apiImage.created, apiImage.size,
+                                        apiImage.estimatedTarSize);
                 }
             }
         }
