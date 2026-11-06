@@ -257,6 +257,27 @@ namespace Flense::Core
             PathPart m_pendingKey = PathPart::Root;
             std::vector<PathPart> m_path;
         };
+
+        std::string UrlEncode(const std::string_view value)
+        {
+            std::string escaped;
+            escaped.reserve(value.size() * 3);
+
+            for (const char c : value)
+            {
+                auto uc = static_cast<unsigned char>(c);
+                if (std::isalnum(uc) != 0 || c == '-' || c == '_' || c == '.' || c == '~')
+                {
+                    escaped.push_back(c);
+                }
+                else
+                {
+                    escaped += std::format("%{:02X}", uc);
+                }
+            }
+
+            return escaped;
+        }
     } // namespace
 
     std::vector<DockerEngineImage> DockerClient::ListImages(std::stop_token stopToken) const
@@ -316,7 +337,7 @@ namespace Flense::Core
 
     HttpResponse DockerClient::ExportImage(const std::string_view tag, const std::stop_token stopToken) const
     {
-        HttpRequest request(HttpMethod::Get, std::format("/{}/images/{}/get", ApiVersion, tag));
+        HttpRequest request(HttpMethod::Get, std::format("/{}/images/{}/get", ApiVersion, UrlEncode(tag)));
         request.AddHeader("Host", "localhost");
         request.AddHeader("Connection", "close");
         request.AddHeader("Accept", "application/x-tar");
