@@ -7,6 +7,11 @@ A WinUI 3 desktop app for analysing Docker images, following in the footsteps of
 
 ![Screenshot of Flense UI, showing image diff view](./Images/DiffView.png)
 
+## System requirements
+
+- Windows 11
+- Docker Desktop 4.34.0 (late 2024) or later
+
 ## Why does this exist?
 
 I use `dive` often, and while it is an incredible tool that has helped me a lot, it's slow for larger images. While researching
