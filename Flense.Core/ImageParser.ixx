@@ -217,13 +217,13 @@ export namespace Flense::Core
     /// <exception cref="std::runtime_error">An error occurred while communicating with the daemon.</exception>
     /// <exception cref="ImageFormatError">The archive is not a valid image.</exception>
     /// <exception cref="OperationCancelledError">stopToken was triggered before parsing finished.</exception>
-    [[nodiscard]] Image ParseImageFromEngine(const std::string_view imageId, const std::uint64_t imageSize,
+    [[nodiscard]] Image ParseImageFromEngine(const std::string_view imageTag, const std::uint64_t imageSize,
                                              const ArchiveProgressCallback& onProgress = {},
                                              const std::stop_token stopToken = {})
     {
         const DockerClient client;
 
-        HttpResponse imageStream = client.ExportImage(imageId, stopToken);
+        HttpResponse imageStream = client.ExportImage(imageTag, stopToken);
 
         const std::uint64_t totalBytes =
             imageSize; // TODO: not completely accurate, we can do more to get a more realistic size estimate

@@ -56,10 +56,10 @@ namespace winrt::Flense::implementation
     winrt::Windows::Foundation::IAsyncAction ImageDetailsViewModel::LoadImageFromEngineAsync(
         const winrt::Flense::DockerEngineImage& image)
     {
-        return LoadAsync(
-            [id = winrt::to_string(image.Id()), size = image.Size()](const auto& progress, std::stop_token stop) {
-                return ::Flense::Core::ParseImageFromEngine(id, size, progress, stop);
-            });
+        return LoadAsync([imageTag = winrt::to_string(image.RepoTag()), size = image.Size()](const auto& progress,
+                                                                                             std::stop_token stop) {
+            return ::Flense::Core::ParseImageFromEngine(imageTag, size, progress, stop);
+        });
     }
 
     namespace
