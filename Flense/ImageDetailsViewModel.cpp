@@ -56,10 +56,15 @@ namespace winrt::Flense::implementation
     winrt::Windows::Foundation::IAsyncAction ImageDetailsViewModel::LoadImageFromEngineAsync(
         const winrt::Flense::DockerEngineImage& image)
     {
-        return LoadAsync([imageTag = winrt::to_string(image.RepoTag()), size = image.Size()](const auto& progress,
-                                                                                             std::stop_token stop) {
-            return ::Flense::Core::ParseImageFromEngine(imageTag, size, progress, stop);
-        });
+        // Use Docker's reported size (a.k.a disk usage including unpacked files) as a fallback if we fail to estimate
+        // tar size from manifest blobs. It will be much larger than the archive and the progress bar will probably
+        // finish at about 30-40%.
+        std::uint64_t size = image.EstimatedTarSize() ? image.EstimatedTarSize() : image.Size();
+
+        return LoadAsync(
+            [imageTag = winrt::to_string(image.RepoTag()), size](const auto& progress, std::stop_token stop) {
+                return ::Flense::Core::ParseImageFromEngine(imageTag, size, progress, stop);
+            });
     }
 
     namespace
@@ -129,7 +134,8 @@ namespace winrt::Flense::implementation
             }
 
             // Reserve the last 5% for building the image once every byte has been read.
-            const double percent = (static_cast<double>(bytesProcessed) / static_cast<double>(totalBytes)) * 95.0;
+            const double percent =
+                std::clamp(static_cast<double>(bytesProcessed) / static_cast<double>(totalBytes), 0.0, 1.0) * 95.0;
 
             dispatcher.TryEnqueue([weak, percent] {
                 if (auto self = weak.get())

@@ -208,25 +208,24 @@ export namespace Flense::Core
     /// <summary>
     /// Parses an image by exporting it from the container engine using the image tag.
     /// </summary>
-    /// <param name="imageId">The ID of the image.</param>
+    /// <param name="imageTag">The tag of the image.</param>
     /// <param name="onProgress">Optional callback invoked periodically, from a background thread, with cumulative
     /// byte totals.</param>
+    /// <param name="imageEstimatedSize">Estimated size of the image. Can be calculated by summing manifest blob
+    /// sizes.</param>
     /// <param name="stopToken">The token to check for cancellation.</param>
     /// <returns>The parsed Image.</returns>
     /// <exception cref="HttpError">An error occurred while communicating with the daemon.</exception>
     /// <exception cref="std::runtime_error">An error occurred while communicating with the daemon.</exception>
     /// <exception cref="ImageFormatError">The archive is not a valid image.</exception>
     /// <exception cref="OperationCancelledError">stopToken was triggered before parsing finished.</exception>
-    [[nodiscard]] Image ParseImageFromEngine(const std::string_view imageTag, const std::uint64_t imageSize,
+    [[nodiscard]] Image ParseImageFromEngine(const std::string_view imageTag, const std::uint64_t imageEstimatedSize,
                                              const ArchiveProgressCallback& onProgress = {},
                                              const std::stop_token stopToken = {})
     {
         const DockerClient client;
 
         HttpResponse imageStream = client.ExportImage(imageTag, stopToken);
-
-        const std::uint64_t totalBytes =
-            imageSize; // TODO: not completely accurate, we can do more to get a more realistic size estimate
 
         auto reader = ArchiveReader::CreateFromStream(imageStream);
         ImageParser parser;
@@ -235,15 +234,16 @@ export namespace Flense::Core
         std::jthread progressReporter;
         if (onProgress)
         {
-            progressReporter = std::jthread([&parser, &onProgress, totalBytes](const std::stop_token reporterStop) {
-                constexpr std::chrono::milliseconds ProgressInterval{50};
+            progressReporter =
+                std::jthread([&parser, &onProgress, imageEstimatedSize](const std::stop_token reporterStop) {
+                    constexpr std::chrono::milliseconds ProgressInterval{50};
 
-                while (!reporterStop.stop_requested())
-                {
-                    onProgress(parser.BytesProcessed(), totalBytes);
-                    SleepFor(ProgressInterval, reporterStop);
-                }
-            });
+                    while (!reporterStop.stop_requested())
+                    {
+                        onProgress(parser.BytesProcessed(), imageEstimatedSize);
+                        SleepFor(ProgressInterval, reporterStop);
+                    }
+                });
         }
 
         while (auto entry = reader.Next(stopToken))

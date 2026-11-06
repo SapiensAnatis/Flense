@@ -13,6 +13,7 @@ export namespace Flense::Core
         std::string repoTag;
         std::chrono::system_clock::time_point created;
         std::uint64_t size;
+        std::uint64_t estimatedTarSize;
     };
 
     class DockerClient

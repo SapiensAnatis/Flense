@@ -14,5 +14,6 @@ namespace winrt::Flense::implementation
         wil::single_threaded_property<winrt::hstring> RepoTag;
         wil::single_threaded_property<winrt::Windows::Foundation::DateTime> Created;
         wil::single_threaded_property<uint64_t> Size;
+        wil::single_threaded_property<uint64_t> EstimatedTarSize;
     };
 } // namespace winrt::Flense::implementation

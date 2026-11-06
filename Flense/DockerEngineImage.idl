@@ -5,6 +5,7 @@ namespace Flense
         String Id { get; };
         String RepoTag { get; };
         UInt64 Size { get; };
+        UInt64 EstimatedTarSize { get; };
         Windows.Foundation.DateTime Created { get; };
     }
 }
