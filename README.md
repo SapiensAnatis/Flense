@@ -35,7 +35,7 @@ Flense is still a work in progress, and lacks some of the features present in Di
 | Feature                                            | Flense | Dive |
 | -------------------------------------------------- | ------ | ---- |
 | Import from .tar files                             | ✅     | ✅   |
-| Import from stored Docker images                   | ❌     | ✅   |
+| Import from stored Docker images                   | ✅     | ✅   |
 | Import from remote Docker images                   | ❌     | ✅   |
 | View layer filesystems                             | ✅     | ✅   |
 | View folder and file sizes                         | ✅     | ✅   |
