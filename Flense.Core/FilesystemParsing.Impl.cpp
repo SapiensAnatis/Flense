@@ -34,8 +34,6 @@ namespace Flense::Core
                                std::sorted_unique, std::move(containers.keys), std::move(frozen)));
         }
 
-        // TODO: This patch logic is entirely AI-generated. Check it over when tidying up the code
-
         FilesystemChangeTreeNodeRef PatchNode(const FilesystemChangeTreeNodeRef& base,
                                               const FilesystemChangeTreeNodeRef& diff);
 
@@ -60,6 +58,10 @@ namespace Flense::Core
             std::size_t baseIndex = 0;
             std::size_t diffIndex = 0;
 
+            const bool opaqueWhiteout = std::ranges::any_of(diffChildren.values(), [](const auto& diffChild) {
+                return diffChild->Data().changeKind == FilesystemChangeKind::OpaqueWhiteout;
+            });
+
             while (baseIndex < baseKeys.size() || diffIndex < diffKeys.size())
             {
                 const bool baseExhausted = baseIndex >= baseKeys.size();
@@ -70,14 +72,27 @@ namespace Flense::Core
                     // Only in base.
                     const FilesystemChangeTreeNodeRef& baseValue = baseValues.at(baseIndex);
 
-                    // If a node was removed in the base snapshot, and is not present in the following snapshot, it
-                    // should be removed from the tree for subsequent layers.
-                    if (baseValue->Data().changeKind != FilesystemChangeKind::Removed)
+                    if (baseValue->Data().changeKind == FilesystemChangeKind::Removed)
                     {
-                        // Otherwise, the node is now considered to be unchanged, as it has survived one layer.
-                        auto newValue = Visit(baseValue, [](const FilesystemChangeInfo& info) {
+                        // If a node was removed in the base snapshot, and is not present in the following snapshot, it
+                        // should be removed from the tree for subsequent layers. Do not add it.
+                    }
+                    else
+                    {
+                        // Otherwise do one of two things:
+                        //
+                        // 1) In most cases, when the directory is not targeted by an opaque whiteout, clear whatever
+                        // change kind the nodes had and mark them as unmodified. Note that it's fine to do this every
+                        // time since Visit will reuse value-equal nodes.
+                        //
+                        // 2) If there is an opaque whiteout, mark all base nodes as deleted by it.
+
+                        const FilesystemChangeKind newChangeKind =
+                            opaqueWhiteout ? FilesystemChangeKind::Removed : FilesystemChangeKind::None;
+
+                        auto newValue = Visit(baseValue, [newChangeKind](const FilesystemChangeInfo& info) {
                             FilesystemChangeInfo infoCopy = info;
-                            infoCopy.changeKind = FilesystemChangeKind::None;
+                            infoCopy.changeKind = newChangeKind;
                             return infoCopy;
                         });
 
@@ -90,7 +105,9 @@ namespace Flense::Core
                 else if (baseExhausted || diffKeys.at(diffIndex) < baseKeys.at(baseIndex))
                 {
                     // Only in diff: a brand new entry. Nothing to remove it from, so skip whiteouts here.
-                    if (diffValues.at(diffIndex)->Data().changeKind != FilesystemChangeKind::Removed)
+                    if (auto changeKind = diffValues.at(diffIndex)->Data().changeKind;
+                        changeKind != FilesystemChangeKind::Removed &&
+                        changeKind != FilesystemChangeKind::OpaqueWhiteout)
                     {
                         outKeys.push_back(diffKeys.at(diffIndex));
                         outValues.push_back(diffValues.at(diffIndex));
@@ -152,8 +169,6 @@ namespace Flense::Core
 
     FilesystemChangeTreeNodeRef ParseLayerFilesystem(ArchiveReader* nestedTarReader, std::stop_token stopToken)
     {
-        static constexpr std::string_view WhiteoutPrefix = ".wh.";
-
         auto root = FilesystemChangeInfo{
             .kind = FileKind::Directory,
             .size = 0,
@@ -168,12 +183,6 @@ namespace Flense::Core
         while (auto entry = nestedTarReader->Next(stopToken))
         {
             const std::string_view path = entry->Pathname();
-
-            // TODO: handle opaque whiteouts, which hide every entry a lower layer put in this directory.
-            if (path.ends_with("/.wh..wh..opq"))
-            {
-                continue;
-            }
 
             auto split = std::views::split(path, '/') |
                          std::views::transform([](auto t) { return std::string_view(t); }) |
@@ -194,7 +203,14 @@ namespace Flense::Core
                 std::string_view pathString = pathComponent;
                 FilesystemChangeKind changeKind{};
 
-                if (pathComponent.starts_with(WhiteoutPrefix) && pathComponent.size() > WhiteoutPrefix.size())
+                static constexpr std::string_view WhiteoutPrefix = ".wh.";
+                static constexpr std::string_view OpaqueWhiteoutName = ".wh..wh..opq";
+
+                if (pathComponent == OpaqueWhiteoutName)
+                {
+                    changeKind = FilesystemChangeKind::OpaqueWhiteout;
+                }
+                else if (pathComponent.starts_with(WhiteoutPrefix) && pathComponent.size() > WhiteoutPrefix.size())
                 {
                     pathString = pathComponent.substr(WhiteoutPrefix.size());
                     changeKind = FilesystemChangeKind::Removed;

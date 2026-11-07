@@ -24,6 +24,7 @@ export namespace Flense::Core
         None,
         Added,
         Removed,
+        OpaqueWhiteout,
         Modified,
     };
 
