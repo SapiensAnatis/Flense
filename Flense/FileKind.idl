@@ -6,6 +6,7 @@ namespace Flense
         File = 1,
         Directory = 2,
         Symlink = 3,
-        Other = 4,
+        Hardlink = 4,
+        Other = 5,
     };
 }

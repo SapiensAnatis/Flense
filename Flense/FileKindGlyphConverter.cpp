@@ -40,6 +40,7 @@ namespace winrt::Flense::implementation
         case Directory:
             return folderGlyph;
         case Symlink:
+        case Hardlink:
             return linkGlyph;
         default:
             return documentGlyph;

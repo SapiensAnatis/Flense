@@ -35,6 +35,8 @@ namespace winrt::Flense::implementation
             return winrt::Flense::FileKind::Directory;
         case ::Flense::Core::FileKind::Symlink:
             return winrt::Flense::FileKind::Symlink;
+        case ::Flense::Core::FileKind::Hardlink:
+            return winrt::Flense::FileKind::Hardlink;
         case ::Flense::Core::FileKind::Other:
             return winrt::Flense::FileKind::Other;
         default:
