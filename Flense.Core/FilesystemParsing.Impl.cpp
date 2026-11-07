@@ -158,6 +158,7 @@ namespace Flense::Core
             .kind = FileKind::Directory,
             .size = 0,
             .changeKind = FilesystemChangeKind::Added,
+            .linkTarget = std::nullopt,
         };
 
         auto rootNode = MutableTreeNode{
@@ -208,14 +209,29 @@ namespace Flense::Core
                                                                               .kind = FileKind::Directory,
                                                                               .size = 0,
                                                                               .changeKind = changeKind,
+                                                                              .linkTarget = std::nullopt,
                                                                           });
 
                 node = &it->second;
             }
 
-            // TODO: handle symlinks
             node->info.kind = entry->FileKind();
             node->info.size = entry->Size();
+
+            if (node->info.kind == FileKind::Symlink)
+            {
+                node->info.linkTarget = entry->Symlink();
+            }
+            else if (node->info.kind == FileKind::Hardlink)
+            {
+                node->info.linkTarget = entry->Hardlink();
+            }
+            else
+            {
+                // We might be overwriting an existing node if the same path appears twice in the archive,
+                // so we should reset here to ensure this field is not set for non link files.
+                node->info.linkTarget = std::nullopt;
+            }
         }
 
         return Freeze(std::move(rootNode));

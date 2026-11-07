@@ -96,6 +96,16 @@ namespace winrt::Flense::implementation
         return {.Left = m_depth * IndentSizeInPixels, .Top = 0, .Right = 0, .Bottom = 0};
     }
 
+    winrt::hstring FilesystemTreeNode::LinkTarget() const
+    {
+        if (const auto& target = m_node->Data().linkTarget)
+        {
+            return winrt::to_hstring(*target);
+        }
+
+        return {};
+    }
+
     bool FilesystemTreeNode::IsExpanded() const
     {
         return m_isExpanded;

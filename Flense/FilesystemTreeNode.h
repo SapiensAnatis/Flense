@@ -23,6 +23,7 @@ namespace winrt::Flense::implementation
         uint64_t Size() const;
         float SizeAsProportionOfParent() const;
         Microsoft::UI::Xaml::Thickness IndentMargin() const;
+        winrt::hstring LinkTarget() const;
 
         // Settable internally only; not exposed as a setter via IDL
         wil::single_threaded_notifying_property<bool> Visible;

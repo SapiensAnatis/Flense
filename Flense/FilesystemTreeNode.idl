@@ -11,6 +11,7 @@ namespace Flense
         FileKind Kind { get; };
         FilesystemChangeKind ChangeKind { get; };
         UInt64 Size { get; };
+        String LinkTarget { get; };
         Single SizeAsProportionOfParent { get; };
         Microsoft.UI.Xaml.Thickness IndentMargin { get; };
         Boolean Visible { get; };
