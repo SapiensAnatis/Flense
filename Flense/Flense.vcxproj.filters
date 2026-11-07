@@ -11,9 +11,6 @@
     <Page Include="ImageDetailsPage.xaml">
       <Filter>Views</Filter>
     </Page>
-    <Page Include="FilesystemChangesView.xaml">
-      <Filter>Controls</Filter>
-    </Page>
     <Page Include="DeveloperMenuBarItem.xaml">
       <Filter>Controls</Filter>
     </Page>
@@ -21,6 +18,9 @@
       <Filter>Controls</Filter>
     </Page>
     <Page Include="ImageSelectionPage.xaml">
+      <Filter>Views</Filter>
+    </Page>
+    <Page Include="FilesystemChangesView.xaml">
       <Filter>Views</Filter>
     </Page>
   </ItemGroup>
