@@ -8,6 +8,7 @@ namespace winrt::Flense::implementation
     {
         static hstring FormatDate(const Windows::Foundation::DateTime& value);
         static hstring FormatRelativeTime(const Windows::Foundation::DateTime& value);
+        static hstring FormatLinkTarget(const hstring& value);
     };
 } // namespace winrt::Flense::implementation
 

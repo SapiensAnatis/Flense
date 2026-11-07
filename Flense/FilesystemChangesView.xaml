@@ -67,9 +67,11 @@
                         </Border>
 
                         <Border Grid.Column="1" Style="{StaticResource FilesystemItemContentStyle}">
-                            <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock TextTrimming="CharacterEllipsis">
+                                <Run Text="{x:Bind Name}" />
+                                <Run Text="{x:Bind local:Formatting.FormatLinkTarget(LinkTarget)}" />
+                            </TextBlock>
                         </Border>
-
 
                         <Border
                             Grid.Column="2"

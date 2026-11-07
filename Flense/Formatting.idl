@@ -4,5 +4,6 @@ namespace Flense
     {
         static String FormatDate(Windows.Foundation.DateTime value);
         static String FormatRelativeTime(Windows.Foundation.DateTime value);
+        static String FormatLinkTarget(String value);
     };
 }

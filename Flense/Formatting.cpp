@@ -98,4 +98,14 @@ namespace winrt::Flense::implementation
 
         return winrt::hstring(reinterpret_cast<wchar_t*>(buffer.data()), length);
     }
+
+    hstring Formatting::FormatLinkTarget(const hstring& value)
+    {
+        if (value.empty())
+        {
+            return value;
+        }
+
+        return winrt::hstring(std::format(L"→ {}", value.c_str()));
+    }
 } // namespace winrt::Flense::implementation
