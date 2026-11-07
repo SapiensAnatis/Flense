@@ -13,7 +13,7 @@ namespace Flense::Core
         struct MutableTreeNode
         {
             FilesystemChangeInfo info{};
-            std::flat_map<std::string, MutableTreeNode> children{};
+            std::flat_map<std::string, MutableTreeNode, std::less<>> children{};
         };
 
         TreeNodeRef<FilesystemChangeInfo> Freeze(MutableTreeNode&& node)
@@ -191,17 +191,16 @@ namespace Flense::Core
 
             for (const std::string_view pathComponent : split)
             {
-                std::string pathString;
+                std::string_view pathString = pathComponent;
                 FilesystemChangeKind changeKind{};
 
                 if (pathComponent.starts_with(WhiteoutPrefix) && pathComponent.size() > WhiteoutPrefix.size())
                 {
-                    pathString = std::string(pathComponent.begin() + WhiteoutPrefix.size(), pathComponent.end());
+                    pathString = pathComponent.substr(WhiteoutPrefix.size());
                     changeKind = FilesystemChangeKind::Removed;
                 }
                 else
                 {
-                    pathString = std::string(pathComponent);
                     changeKind = FilesystemChangeKind::Added;
                 }
 
