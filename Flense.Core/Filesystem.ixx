@@ -11,6 +11,7 @@ export namespace Flense::Core
         File,
         Directory,
         Symlink,
+        Hardlink,
         Other, // Socket / device / etc
     };
 
@@ -34,6 +35,7 @@ export namespace Flense::Core
         FileKind kind{};
         std::uint64_t size{};
         FilesystemChangeKind changeKind{};
+        std::optional<std::string> linkTarget;
 
         bool operator==(const FilesystemChangeInfo& other) const = default;
     };

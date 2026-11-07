@@ -124,6 +124,11 @@ export namespace Flense::Core
         /// <returns>The type of the entry.</returns>
         [[nodiscard]] FileKind FileKind() const
         {
+            if (archive_entry_hardlink_is_set(m_entry) == 1)
+            {
+                return FileKind::Hardlink;
+            }
+
             switch (archive_entry_filetype(m_entry))
             {
             case AE_IFDIR:
@@ -135,6 +140,26 @@ export namespace Flense::Core
             default:
                 return FileKind::Other;
             }
+        }
+
+        [[nodiscard]] std::optional<std::string_view> Symlink() const
+        {
+            if (const auto* const link = archive_entry_symlink(m_entry))
+            {
+                return std::string_view(link);
+            }
+
+            return std::nullopt;
+        }
+
+        [[nodiscard]] std::optional<std::string_view> Hardlink() const
+        {
+            if (const auto* const link = archive_entry_hardlink(m_entry))
+            {
+                return std::string_view(link);
+            }
+
+            return std::nullopt;
         }
 
       private:
