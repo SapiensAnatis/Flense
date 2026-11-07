@@ -158,27 +158,18 @@ export namespace Flense::Core
         std::list<Worker> m_workers;
     };
 
+} // namespace Flense::Core
+
+export namespace Flense::Core
+{
     using ArchiveProgressCallback = std::function<void(std::uint64_t bytesProcessed, std::uint64_t totalBytes)>;
 
     /// <summary>
-    /// Parses an image archive file on disk into an Image. Blocks until parsing is complete, so it should be called
-    /// from a background thread.
+    /// Parses an image archive read from a stream into an Image, reporting progress against totalBytes.
     /// </summary>
-    /// <param name="path">The path to the image archive.</param>
-    /// <param name="onProgress">Optional callback invoked periodically, from a background thread, with cumulative
-    /// byte totals.</param>
-    /// <param name="stopToken">The token to check for cancellation.</param>
-    /// <returns>The parsed Image.</returns>
-    /// <exception cref="std::filesystem::filesystem_error">The file could not be opened or read.</exception>
-    /// <exception cref="ImageFormatError">The archive is not a valid image.</exception>
-    /// <exception cref="OperationCancelledError">stopToken was triggered before parsing finished.</exception>
-    [[nodiscard]] Image ParseImageArchive(const std::filesystem::path& path,
-                                          const ArchiveProgressCallback& onProgress = {},
-                                          const std::stop_token stopToken = {})
+    Image ParseImageStream(ByteStream& stream, const std::uint64_t totalBytes,
+                           const ArchiveProgressCallback& onProgress, const std::stop_token stopToken)
     {
-        FileByteStream stream{path};
-        const std::uint64_t totalBytes = stream.Size();
-
         auto reader = ArchiveReader::CreateFromStream(stream);
         ImageParser parser;
 
@@ -206,6 +197,27 @@ export namespace Flense::Core
     }
 
     /// <summary>
+    /// Parses an image archive file on disk into an Image. Blocks until parsing is complete, so it should be called
+    /// from a background thread.
+    /// </summary>
+    /// <param name="path">The path to the image archive.</param>
+    /// <param name="onProgress">Optional callback invoked periodically, from a background thread, with cumulative
+    /// byte totals.</param>
+    /// <param name="stopToken">The token to check for cancellation.</param>
+    /// <returns>The parsed Image.</returns>
+    /// <exception cref="std::filesystem::filesystem_error">The file could not be opened or read.</exception>
+    /// <exception cref="ImageFormatError">The archive is not a valid image.</exception>
+    /// <exception cref="OperationCancelledError">stopToken was triggered before parsing finished.</exception>
+    [[nodiscard]] Image ParseImageArchive(const std::filesystem::path& path,
+                                          const ArchiveProgressCallback& onProgress = {},
+                                          const std::stop_token stopToken = {})
+    {
+        FileByteStream stream{path};
+
+        return ParseImageStream(stream, stream.Size(), onProgress, stopToken);
+    }
+
+    /// <summary>
     /// Parses an image by exporting it from the container engine using the image tag.
     /// </summary>
     /// <param name="imageTag">The tag of the image.</param>
@@ -227,31 +239,7 @@ export namespace Flense::Core
 
         HttpResponse imageStream = client.ExportImage(imageTag, stopToken);
 
-        auto reader = ArchiveReader::CreateFromStream(imageStream);
-        ImageParser parser;
-
-        // Declared after parser so that it is stopped before parser is destroyed.
-        std::jthread progressReporter;
-        if (onProgress)
-        {
-            progressReporter =
-                std::jthread([&parser, &onProgress, imageEstimatedSize](const std::stop_token reporterStop) {
-                    constexpr std::chrono::milliseconds ProgressInterval{50};
-
-                    while (!reporterStop.stop_requested())
-                    {
-                        onProgress(parser.BytesProcessed(), imageEstimatedSize);
-                        SleepFor(ProgressInterval, reporterStop);
-                    }
-                });
-        }
-
-        while (auto entry = reader.Next(stopToken))
-        {
-            parser.ProcessEntry(*entry, stopToken);
-        }
-
-        return parser.Build(stopToken);
+        return ParseImageStream(imageStream, imageEstimatedSize, onProgress, stopToken);
     }
 
 } // namespace Flense::Core
