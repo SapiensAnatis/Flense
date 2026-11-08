@@ -16,6 +16,14 @@ namespace Flense::Core
             std::flat_map<std::string, MutableTreeNode, std::less<>> children{};
         };
 
+        struct FilesystemPatchContext
+        {
+            /// <summary>
+            /// Was this directory or one of its ancestor directories marked for an opaque whiteout?
+            /// </summary>
+            bool opaqueWhiteout = false;
+        };
+
         TreeNodeRef<FilesystemChangeInfo> Freeze(MutableTreeNode&& node)
         {
             auto containers = std::move(node.children).extract();
@@ -35,7 +43,7 @@ namespace Flense::Core
         }
 
         FilesystemChangeTreeNodeRef PatchNode(const FilesystemChangeTreeNodeRef& base,
-                                              const FilesystemChangeTreeNodeRef& diff);
+                                              const FilesystemChangeTreeNodeRef& diff, FilesystemPatchContext ctx);
 
         /// <summary>
         /// Merges a base node's children with a diff node's children: entries only in base carry over unchanged,
@@ -43,7 +51,7 @@ namespace Flense::Core
         /// </summary>
         FilesystemChangeTreeNode::ChildrenContainer PatchChildren(
             const FilesystemChangeTreeNode::ChildrenContainer& baseChildren,
-            const FilesystemChangeTreeNode::ChildrenContainer& diffChildren)
+            const FilesystemChangeTreeNode::ChildrenContainer& diffChildren, FilesystemPatchContext ctx)
         {
             const auto& baseKeys = baseChildren.keys();
             const auto& baseValues = baseChildren.values();
@@ -58,9 +66,10 @@ namespace Flense::Core
             std::size_t baseIndex = 0;
             std::size_t diffIndex = 0;
 
-            const bool opaqueWhiteout = std::ranges::any_of(diffChildren.values(), [](const auto& diffChild) {
-                return diffChild->Data().changeKind == FilesystemChangeKind::OpaqueWhiteout;
-            });
+            ctx.opaqueWhiteout =
+                ctx.opaqueWhiteout || std::ranges::any_of(diffChildren.values(), [](const auto& diffChild) {
+                    return diffChild->Data().changeKind == FilesystemChangeKind::OpaqueWhiteout;
+                });
 
             while (baseIndex < baseKeys.size() || diffIndex < diffKeys.size())
             {
@@ -82,20 +91,22 @@ namespace Flense::Core
                     // 3) In all other cases, clear the change kind the nodes had and mark them as unmodified. Note that
                     // it's fine to do this every time since Visit will reuse value-equal nodes.
 
-                    auto newValue = VisitWithPruning(
-                        baseValue,
-                        [opaqueWhiteout](const FilesystemChangeInfo& info) -> std::optional<FilesystemChangeInfo> {
-                            if (info.changeKind == FilesystemChangeKind::Removed)
-                            {
-                                return std::nullopt;
-                            }
+                    const auto carryOver =
+                        [opaqueWhiteout = ctx.opaqueWhiteout](
+                            const FilesystemChangeInfo& info) -> std::optional<FilesystemChangeInfo> {
+                        if (info.changeKind == FilesystemChangeKind::Removed)
+                        {
+                            return std::nullopt;
+                        }
 
-                            FilesystemChangeInfo newInfo = info;
-                            newInfo.changeKind =
-                                opaqueWhiteout ? FilesystemChangeKind::Removed : FilesystemChangeKind::None;
+                        FilesystemChangeInfo newInfo = info;
+                        newInfo.changeKind =
+                            opaqueWhiteout ? FilesystemChangeKind::Removed : FilesystemChangeKind::None;
 
-                            return newInfo;
-                        });
+                        return newInfo;
+                    };
+
+                    auto newValue = VisitWithPruning(baseValue, carryOver);
 
                     if (newValue)
                     {
@@ -120,7 +131,7 @@ namespace Flense::Core
                 else
                 {
                     // Present in both: recursively patch;
-                    auto patched = PatchNode(baseValues.at(baseIndex), diffValues.at(diffIndex));
+                    auto patched = PatchNode(baseValues.at(baseIndex), diffValues.at(diffIndex), ctx);
                     outKeys.push_back(baseKeys.at(baseIndex));
                     outValues.push_back(std::move(patched));
 
@@ -137,7 +148,7 @@ namespace Flense::Core
         /// </summary>
         /// <returns>The patched node.</returns>
         FilesystemChangeTreeNodeRef PatchNode(const FilesystemChangeTreeNodeRef& base,
-                                              const FilesystemChangeTreeNodeRef& diff)
+                                              const FilesystemChangeTreeNodeRef& diff, FilesystemPatchContext ctx)
         {
             if (diff->Data().changeKind == FilesystemChangeKind::Removed)
             {
@@ -154,7 +165,7 @@ namespace Flense::Core
             newInfo.changeKind = FilesystemChangeKind::Modified;
 
             const FilesystemChangeTreeNode::ChildrenContainer children =
-                PatchChildren(base->Children(), diff->Children());
+                PatchChildren(base->Children(), diff->Children(), ctx);
 
             if (newInfo.kind == FileKind::Directory)
             {
@@ -258,6 +269,6 @@ namespace Flense::Core
     FilesystemChangeTreeNodeRef ApplyFilesystemChanges(const FilesystemChangeTreeNodeRef& base,
                                                        const FilesystemChangeTreeNodeRef& diff)
     {
-        return PatchNode(base, diff);
+        return PatchNode(base, diff, {});
     }
 } // namespace Flense::Core
