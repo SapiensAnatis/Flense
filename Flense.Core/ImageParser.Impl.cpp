@@ -162,6 +162,37 @@ namespace Flense::Core
             return out;
         }
 
+        std::vector<std::string_view> ParseLayerCommands(const nlohmann::json& configJson)
+        {
+            auto historyIt = configJson.find("history");
+            if (historyIt == configJson.end() || !historyIt->is_array())
+            {
+                // Most tools will write history, but it is optional per the letter of the OCI spec
+                // https://github.com/opencontainers/image-spec/blob/4feed4a6674e59d301b9294f187ac46acb2de99f/config.md
+                return {};
+            }
+
+            std::vector<std::string_view> result;
+
+            for (const auto& historyObj : *historyIt)
+            {
+                if (auto it = historyObj.find("empty_layer"); it != historyObj.end() && it->get<bool>())
+                {
+                    continue;
+                }
+
+                std::string_view label;
+                if (auto commandIt = historyObj.find("created_by"); commandIt != historyObj.end())
+                {
+                    label = commandIt->get_ref<const std::string&>();
+                }
+
+                result.emplace_back(label);
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// A ByteStream that forwards to another stream, adding the number of bytes read to a counter as it goes.
         /// </summary>
@@ -419,36 +450,21 @@ namespace Flense::Core
         try
         {
             config = nlohmann::json::parse(configIt->second);
-
-            for (const auto& historyObj : config.at("history"))
-            {
-                if (auto it = historyObj.find("empty_layer"); it != historyObj.end() && it->get<bool>())
-                {
-                    continue;
-                }
-
-                commands.emplace_back(historyObj.at("created_by").get_ref<const std::string&>());
-            }
+            commands = ParseLayerCommands(config);
         }
         catch (const nlohmann::json::exception& e)
         {
             throw ImageFormatError{ImageFormatErrorKind::MalformedMetadata, e.what(), *m_configPath};
         }
 
-        if (commands.size() > m_layerPaths.size())
-        {
-            throw ImageFormatError{ImageFormatErrorKind::MissingLayers,
-                                   "Manifest lists fewer layers than the configuration's history"};
-        }
-
         std::vector<ImageLayer> layers;
-        layers.reserve(commands.size());
+        layers.reserve(m_layerPaths.size());
 
         const MutexLocker locker(&m_filesystemMutex);
 
         FilesystemChangeTreeNodeRef currentFsSnapshot{nullptr};
 
-        for (std::size_t layerNum = 0; layerNum < commands.size(); ++layerNum)
+        for (std::size_t layerNum = 0; layerNum < m_layerPaths.size(); ++layerNum)
         {
             const std::string& layerPath = m_layerPaths.at(layerNum);
 
@@ -470,7 +486,16 @@ namespace Flense::Core
                 currentFsSnapshot = diff;
             }
 
-            layers.emplace_back(CollapseWhitespace(commands.at(layerNum)), currentFsSnapshot);
+            auto layerLabel = [&commands, this, layerNum] -> std::string {
+                if (m_layerPaths.size() != commands.size() || commands.at(layerNum).empty())
+                {
+                    return "Unknown command";
+                }
+
+                return CollapseWhitespace(commands.at(layerNum));
+            }();
+
+            layers.emplace_back(std::move(layerLabel), currentFsSnapshot);
         }
 
         return Image{
