@@ -31,8 +31,6 @@ namespace Flense::Core
             std::vector<std::string> layerPaths;
         };
 
-        constexpr std::string_view BlobPrefix = "blobs/sha256/";
-
         /// <summary>
         /// Checks if a character is a space or a tab. Matches fewer characters than isspace and is locale-independent.
         /// </summary>
@@ -52,6 +50,42 @@ namespace Flense::Core
         {
             const auto it = std::ranges::find_if(prefix, [](char c) { return !IsSpaceOrTab(c); });
             return it != prefix.end() && *it == '{';
+        }
+
+        /// <summary>
+        /// Tests whether a file's name is plausibly a SHA256 blob.
+        /// </summary>
+        /// <param name="path">The full path to the file inside the archive.</param>
+        /// <returns>A bool indicating whether the entry is likely to be a SHA256 blob.</returns>
+        bool IsContainerBlob(const std::string_view path)
+        {
+            using namespace std::string_view_literals;
+
+            static constexpr std::array AllowedBlobPathPrefixes{
+                "blobs/sha256/"sv, // Modern OCI export
+                "sha256:"sv,       // Ko image builder
+            };
+
+            std::string_view digest = path;
+
+            for (const auto& prefix : AllowedBlobPathPrefixes)
+            {
+                if (path.starts_with(prefix))
+                {
+                    digest = path.substr(prefix.size());
+                    break;
+                }
+            }
+
+            if (const size_t extensionStart = digest.find('.'); extensionStart != std::string_view::npos)
+            {
+                digest = digest.substr(0, extensionStart);
+            }
+
+            // What remains should be a 64 character hex string
+            return digest.size() == 64 && std::ranges::all_of(digest, [](const char c) {
+                       return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
+                   });
         }
 
         /// <summary>
@@ -217,7 +251,7 @@ namespace Flense::Core
             return;
         }
 
-        if (!pathname.starts_with(BlobPrefix))
+        if (!IsContainerBlob(pathname))
         {
             // Unrelated, random file
             return;
@@ -425,8 +459,6 @@ namespace Flense::Core
                                        layerPath};
             }
 
-            // TODO: Make this more destructive so the filesystem tree can be moved?
-            // Though, does it really matter if it's just a shared pointer?
             const FilesystemChangeTreeNodeRef& diff = diffIt->second;
 
             if (currentFsSnapshot)
