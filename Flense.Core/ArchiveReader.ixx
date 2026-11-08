@@ -196,6 +196,7 @@ export namespace Flense::Core
 
             archive_read_support_format_tar(archive.get());
             archive_read_support_filter_gzip(archive.get());
+            archive_read_support_filter_zstd(archive.get());
 
             auto context = std::make_unique<ArchiveContext>();
             context->source = &source;
