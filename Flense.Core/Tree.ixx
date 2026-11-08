@@ -54,12 +54,14 @@ namespace Flense::Core
     template <typename T> using TreeNodeRef = std::shared_ptr<const TreeNode<T>>;
 
     /// <summary>
-    /// Version of Visit that allows dropping nodes and their subtrees by returning nullopt from the lambda.
+    /// Applies a function to a node and each of its descendants, and returns a new tree. Returning a value equal to
+    /// what was passed in results in no new node being created. Returning nullopt will remove the node and its subtree
+    /// from the result.
     /// </summary>
     /// <returns>A modified tree, or nullopt if the root node was deleted.</returns>
     template <typename T, typename F>
         requires std::equality_comparable<T> && std::same_as<std::invoke_result_t<const F&, const T&>, std::optional<T>>
-    std::optional<TreeNodeRef<T>> VisitWithPruning(const TreeNodeRef<T>& node, const F& fn)
+    std::optional<TreeNodeRef<T>> Visit(const TreeNodeRef<T>& node, const F& fn)
     {
         const auto& children = node->Children();
 
@@ -80,7 +82,7 @@ namespace Flense::Core
 
         for (const auto& [key, child] : children)
         {
-            auto next = VisitWithPruning<T, F>(child, fn);
+            auto next = Visit<T, F>(child, fn);
 
             if (next.has_value())
             {
@@ -102,18 +104,5 @@ namespace Flense::Core
 
         return TreeNode<T>::Create(std::move(*data), typename TreeNode<T>::ChildrenContainer(
                                                          std::sorted_unique, std::move(keys), std::move(values)));
-    }
-
-    /// <summary>
-    /// Applies a function to a node and each of its descendants, and returns a new tree. Returning a value equal to
-    /// what was passed in results in no new node being created.
-    /// </summary>
-    /// <returns>A modified tree.</returns>
-    template <typename T, typename F>
-        requires std::equality_comparable<T> && std::same_as<std::invoke_result_t<const F&, const T&>, T>
-    TreeNodeRef<T> Visit(const TreeNodeRef<T>& node, const F& fn)
-    {
-        // Safe because fn can never return nullopt, so VisitWithPruning won't either
-        return *VisitWithPruning(node, [&fn](const auto& node) -> std::optional<T> { return fn(node); });
     }
 } // namespace Flense::Core
