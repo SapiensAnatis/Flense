@@ -53,33 +53,67 @@ namespace Flense::Core
     // Don't use TreeNode<T>::Ref; that would hinder template parameter deducation for Visit
     template <typename T> using TreeNodeRef = std::shared_ptr<const TreeNode<T>>;
 
+    /// <summary>
+    /// Version of Visit that allows dropping nodes and their subtrees by returning nullopt from the lambda.
+    /// </summary>
+    /// <returns>A modified tree, or nullopt if the root node was deleted.</returns>
     template <typename T, typename F>
-        requires std::equality_comparable<T> && std::same_as<std::invoke_result_t<F&, const T&>, T>
-    TreeNodeRef<T> Visit(const TreeNodeRef<T>& node, const F& fn)
+        requires std::equality_comparable<T> && std::same_as<std::invoke_result_t<const F&, const T&>, std::optional<T>>
+    std::optional<TreeNodeRef<T>> VisitWithPruning(const TreeNodeRef<T>& node, const F& fn)
     {
         const auto& children = node->Children();
 
+        std::vector<std::string> keys;
         std::vector<TreeNodeRef<T>> values;
-        values.reserve(children.size());
-
-        bool changed = false;
-
-        for (const auto& child : children.values())
-        {
-            auto next = Visit<T, F>(child, fn);
-            changed = changed || (next.get() != child.get()); // pointer comparison
-            values.push_back(std::move(next));
-        }
 
         auto data = fn(node->Data());
-        changed = changed || !(data == node->Data()); // value comparison
+
+        if (!data.has_value())
+        {
+            return std::nullopt;
+        }
+
+        keys.reserve(children.size());
+        values.reserve(children.size());
+
+        bool changed = !(data == node->Data()); // value comparison
+
+        for (const auto& [key, child] : children)
+        {
+            auto next = VisitWithPruning<T, F>(child, fn);
+
+            if (next.has_value())
+            {
+                changed = changed || (next->get() != child.get()); // pointer comparison
+                keys.push_back(key);
+                values.push_back(std::move(*next));
+            }
+            else
+            {
+                // node pruned, need to recreate children
+                changed = true;
+            }
+        }
 
         if (!changed)
         {
             return node; // entire subtree aliased, zero allocations
         }
 
-        return TreeNode<T>::Create(std::move(data), typename TreeNode<T>::ChildrenContainer(
-                                                        std::sorted_unique, children.keys(), std::move(values)));
+        return TreeNode<T>::Create(std::move(*data), typename TreeNode<T>::ChildrenContainer(
+                                                         std::sorted_unique, std::move(keys), std::move(values)));
+    }
+
+    /// <summary>
+    /// Applies a function to a node and each of its descendants, and returns a new tree. Returning a value equal to
+    /// what was passed in results in no new node being created.
+    /// </summary>
+    /// <returns>A modified tree.</returns>
+    template <typename T, typename F>
+        requires std::equality_comparable<T> && std::same_as<std::invoke_result_t<const F&, const T&>, T>
+    TreeNodeRef<T> Visit(const TreeNodeRef<T>& node, const F& fn)
+    {
+        // Safe because fn can never return nullopt, so VisitWithPruning won't either
+        return *VisitWithPruning(node, [&fn](const auto& node) -> std::optional<T> { return fn(node); });
     }
 } // namespace Flense::Core

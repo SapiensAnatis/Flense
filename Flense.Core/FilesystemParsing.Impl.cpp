@@ -72,32 +72,35 @@ namespace Flense::Core
                     // Only in base.
                     const FilesystemChangeTreeNodeRef& baseValue = baseValues.at(baseIndex);
 
-                    if (baseValue->Data().changeKind == FilesystemChangeKind::Removed)
-                    {
-                        // If a node was removed in the base snapshot, and is not present in the following snapshot, it
-                        // should be removed from the tree for subsequent layers. Do not add it.
-                    }
-                    else
-                    {
-                        // Otherwise do one of two things:
-                        //
-                        // 1) In most cases, when the directory is not targeted by an opaque whiteout, clear whatever
-                        // change kind the nodes had and mark them as unmodified. Note that it's fine to do this every
-                        // time since Visit will reuse value-equal nodes.
-                        //
-                        // 2) If there is an opaque whiteout, mark all base nodes as deleted by it.
+                    // Do one of three things:
+                    //
+                    // 1) Drop nodes currently marked as deleted in the base tree, so that they don't show in subsequent
+                    // layers.
+                    //
+                    // 2) If there is an opaque whiteout in the diff, mark all base nodes as deleted by it.
+                    //
+                    // 3) In all other cases, clear the change kind the nodes had and mark them as unmodified. Note that
+                    // it's fine to do this every time since Visit will reuse value-equal nodes.
 
-                        const FilesystemChangeKind newChangeKind =
-                            opaqueWhiteout ? FilesystemChangeKind::Removed : FilesystemChangeKind::None;
+                    auto newValue = VisitWithPruning(
+                        baseValue,
+                        [opaqueWhiteout](const FilesystemChangeInfo& info) -> std::optional<FilesystemChangeInfo> {
+                            if (info.changeKind == FilesystemChangeKind::Removed)
+                            {
+                                return std::nullopt;
+                            }
 
-                        auto newValue = Visit(baseValue, [newChangeKind](const FilesystemChangeInfo& info) {
-                            FilesystemChangeInfo infoCopy = info;
-                            infoCopy.changeKind = newChangeKind;
-                            return infoCopy;
+                            FilesystemChangeInfo newInfo = info;
+                            newInfo.changeKind =
+                                opaqueWhiteout ? FilesystemChangeKind::Removed : FilesystemChangeKind::None;
+
+                            return newInfo;
                         });
 
+                    if (newValue)
+                    {
                         outKeys.push_back(baseKeys.at(baseIndex));
-                        outValues.push_back(std::move(newValue));
+                        outValues.push_back(std::move(*newValue));
                     }
 
                     ++baseIndex;
