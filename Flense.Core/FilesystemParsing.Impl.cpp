@@ -106,7 +106,7 @@ namespace Flense::Core
                         return newInfo;
                     };
 
-                    auto newValue = VisitWithPruning(baseValue, carryOver);
+                    auto newValue = Visit(baseValue, carryOver);
 
                     if (newValue)
                     {
@@ -152,12 +152,27 @@ namespace Flense::Core
         {
             if (diff->Data().changeKind == FilesystemChangeKind::Removed)
             {
-                // Set all children to be removed
-                return Visit(base, [](const FilesystemChangeInfo& info) {
+                auto deleteChildren = [](const FilesystemChangeInfo& info) -> std::optional<FilesystemChangeInfo> {
+                    if (info.changeKind == FilesystemChangeKind::Removed)
+                    {
+                        // If the node was already marked for removal, don't keep it in the UI
+                        return std::nullopt;
+                    }
                     FilesystemChangeInfo infoCopy = info;
                     infoCopy.changeKind = FilesystemChangeKind::Removed;
                     return infoCopy;
-                });
+                };
+
+                // Set all children to be removed
+                auto newNode = Visit(base, deleteChildren);
+
+                // If the base node was already deleted, and somehow it was deleted in this layer again,
+                // Visit will return nullopt as we have deleted the root node.
+                // This is a silly scenario because what sort of image builder lets you double-tap a file?
+                //
+                // Return 'base' here, i.e. a second deleted node, even though we usually try to only show deletions for
+                // a duration of 1 layer.
+                return newNode.value_or(base);
             }
 
             // The root node exists in both trees, so it is not strictly added but rather modified.
