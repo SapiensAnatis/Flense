@@ -28,37 +28,13 @@ foreach ($ImageName in $CotsImages) {
     Write-Host "Saved $ImageName to $OutputFile"
 }
 
-Get-ChildItem -Path $PSScriptRoot -Filter "*.dockerfile" | ForEach-Object {
-    $dest = (Join-Path $PSScriptRoot "$($_.BaseName).tar")
-    docker build -f $_.FullName -o "type=docker,dest=$dest" $PSScriptRoot
+& (Join-Path $PSScriptRoot 'GenerateTestImages.ps1')
+& (Join-Path $PSScriptRoot 'GenerateHandBuiltImages.ps1')
+& (Join-Path $PSScriptRoot 'GenerateErrorCases.ps1')
 
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "docker build failed for $($_.Name)."
-        exit 1
-    }
-
-    Write-Host "Saved $($_.Name) to $dest"
+if (Get-Command ko -ErrorAction SilentlyContinue) {
+    & (Join-Path $PSScriptRoot 'GenerateKoImage.ps1')
 }
-
-# NoHistoryTest.tar is a valid image whose config has no history array, which the OCI spec allows (buildah's
-# --omit-history produces one). Docker always writes history, so it's assembled by hand instead.
-. (Join-Path $PSScriptRoot 'ImageTools.ps1')
-
-Write-Image (Join-Path $PSScriptRoot 'NoHistoryTest.tar') {
-    param($Staging)
-    $layerPaths = @(
-        Add-Blob $Staging (New-LayerBytes @{ 'etc/app.conf' = "greeting = hello`n" })
-        Add-Blob $Staging (New-LayerBytes @{ 'app/hello.txt' = "Hello from an image with no history.`n" })
-    )
-    $configPath = Add-Blob $Staging (New-ConfigBytes -LayerPaths $layerPaths)
-    Set-Manifest $Staging $configPath $layerPaths 'flense.test/no-history:latest'
-} | Out-Null
-
-# ExtraHistoryTest.tar has more history entries than layers. It should load with every layer labelled as an unknown
-# command, rather than pairing history entries with the wrong layers.
-Write-Image (Join-Path $PSScriptRoot 'ExtraHistoryTest.tar') {
-    param($Staging)
-    $layerPaths = @(Add-Blob $Staging (New-LayerBytes @{ 'app/hello.txt' = "Hello from an image with extra history.`n" }))
-    $configPath = Add-Blob $Staging (New-ConfigBytes -Commands @('COPY hello.txt /app/', 'RUN echo second layer') -LayerPaths $layerPaths)
-    Set-Manifest $Staging $configPath $layerPaths 'flense.test/extra-history:latest'
-} | Out-Null
+else {
+    Write-Warning "ko was not found on PATH, so Images\ko.tar was not generated."
+}
