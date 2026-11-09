@@ -5,7 +5,9 @@ if (-not (Get-Command ko -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-$OutputFile = Join-Path $PSScriptRoot 'ko.tar'
+$OutputDirectory = Join-Path $PSScriptRoot 'Images'
+New-Item -ItemType Directory -Force $OutputDirectory | Out-Null
+$OutputFile = Join-Path $OutputDirectory 'ko.tar'
 $PreviousRepo = $env:KO_DOCKER_REPO
 
 # ko needs a repository name to tag the image with, even when it isn't pushing anywhere. It can't be ko.local,

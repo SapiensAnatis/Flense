@@ -53,7 +53,9 @@ jobs:
 
       # Generate test data now so we don't have to checkout in the test job
       - name: Generate test data
-        run: .\TestData\GenerateErrorCases.ps1
+        run: |
+          .\TestData\GenerateErrorCases.ps1
+          .\TestData\GenerateHandBuiltImages.ps1
 
       - name: Build
         run: .\Scripts\build-app.ps1 -Configuration ${{ matrix.configuration }} -OutputDirectory C:\build
@@ -66,9 +68,45 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  # The Windows runner can't build Linux images, so the Docker-built test images are made here and handed to the test
+  # job as an artifact.
+  test-images:
+    name: Build test images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: TestData/GoProject/go.mod
+          cache: false
+
+      - name: Install ko
+        run: go install github.com/google/ko@v0.18.0
+
+      - name: Generate test images
+        shell: pwsh
+        run: |
+          ./TestData/GenerateTestImages.ps1
+          ./TestData/GenerateKoImage.ps1
+
+      - name: Upload test images
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-images
+          path: TestData/Images
+          if-no-files-found: error
+          retention-days: 7
+
   test:
     name: Test (${{ matrix.configuration }})
-    needs: build
+    needs: [build, test-images]
     runs-on: windows-2025
     timeout-minutes: 10
     strategy:
@@ -82,6 +120,12 @@ jobs:
         with:
           name: Flense.Core.Tests-${{ matrix.configuration }}
           path: ${{ runner.temp }}\Flense.Core.Tests
+
+      - name: Download test images
+        uses: actions/download-artifact@v4
+        with:
+          name: test-images
+          path: ${{ runner.temp }}\Flense.Core.Tests\TestData\Images
 
       - name: Run Flense.Core.Tests
         # Backstop for the in-process per-test watchdog.

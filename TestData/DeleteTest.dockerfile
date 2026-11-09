@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f
 
 RUN mkdir -p /path/to/ && touch /path/to/file.txt && \
     mkdir -p /path/to/directory/1 /path/to/directory/2 && touch /path/to/directory/1/1.txt /path/to/directory/2/2.txt
