@@ -36,6 +36,9 @@
             <MenuBarItem Title="File">
                 <MenuFlyoutItem Click="Exit_Click" Text="Exit" />
             </MenuBarItem>
+            <MenuBarItem Title="Help">
+                <MenuFlyoutItem Click="About_Click" Text="About" />
+            </MenuBarItem>
         </MenuBar>
 
         <!--  App content  -->

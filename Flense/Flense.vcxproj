@@ -29,6 +29,12 @@
     <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <ItemGroup Label="Content">
+    <None Include="..\THIRD-PARTY-NOTICES.md">
+      <DeploymentContent>true</DeploymentContent>
+      <Link>THIRD-PARTY-NOTICES.md</Link>
+    </None>
+  </ItemGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -120,6 +126,10 @@
     <Manifest Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AboutDialog.xaml.h">
+      <DependentUpon>AboutDialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="BindingHelpers.h">
       <DependentUpon>BindingHelpers.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -152,6 +162,10 @@
     </ClInclude>
     <ClInclude Include="ImageSelectionViewModel.h">
       <DependentUpon>ImageSelectionViewModel.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="License.h">
+      <DependentUpon>License.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="RatioToPercentStringConverter.h">
@@ -215,6 +229,9 @@
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
+    <Page Include="AboutDialog.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="FilesystemChangesView.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -236,6 +253,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AboutDialog.xaml.cpp">
+      <DependentUpon>AboutDialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="BindingHelpers.cpp">
       <DependentUpon>BindingHelpers.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -266,6 +287,10 @@
     </ClCompile>
     <ClCompile Include="ImageSelectionViewModel.cpp">
       <DependentUpon>ImageSelectionViewModel.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="License.cpp">
+      <DependentUpon>License.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="RatioToPercentStringConverter.cpp">
@@ -330,6 +355,10 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="AboutDialog.idl">
+      <DependentUpon>AboutDialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
     <Midl Include="BindingHelpers.idl">
       <SubType>Designer</SubType>
     </Midl>
@@ -356,6 +385,9 @@
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="ImageSelectionViewModel.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="License.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="RatioToPercentStringConverter.idl">
