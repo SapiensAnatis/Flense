@@ -60,7 +60,6 @@ namespace winrt::Flense::implementation
         else if (!failure.empty())
         {
             Controls::ContentDialog dialog;
-            dialog.XamlRoot(Frame().XamlRoot());
             dialog.Title(box_value(L"Couldn't load images"));
             dialog.Content(box_value(failure));
             dialog.CloseButtonText(L"OK");

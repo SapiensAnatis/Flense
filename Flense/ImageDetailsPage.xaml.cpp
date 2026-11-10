@@ -76,7 +76,6 @@ namespace winrt::Flense::implementation
         Flense::LoadFailureDialog dialog;
         dialog.Message(message);
         dialog.Details(details);
-        dialog.XamlRoot(Frame().XamlRoot());
 
         const auto shown = co_await DialogService::Instance().ShowAsync(dialog) != nullptr;
 
