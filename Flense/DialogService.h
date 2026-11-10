@@ -26,7 +26,10 @@ namespace winrt::Flense::implementation
             winrt::Windows::Foundation::IReference<winrt::Microsoft::UI::Xaml::Controls::ContentDialogResult>>
         ShowAsync(winrt::Microsoft::UI::Xaml::Controls::ContentDialog dialog);
 
+        void SetWindow(const winrt::Microsoft::UI::Xaml::Window& window);
+
       private:
+        winrt::weak_ref<winrt::Microsoft::UI::Xaml::Window> m_window;
         bool m_showing{false};
     };
 } // namespace winrt::Flense::implementation

@@ -21,9 +21,24 @@ namespace winrt::Flense::implementation
             co_return nullptr;
         }
 
+        auto window = m_window.get();
+        if (!window)
+        {
+            throw winrt::hresult_error(
+                E_FAIL, L"DialogService::SetWindow must be called before showing DialogService::ShowAsync");
+        }
+
+        dialog.XamlRoot(window.Content().XamlRoot());
+
         m_showing = true;
         const auto reset = wil::scope_exit([this] { m_showing = false; });
 
         co_return co_await dialog.ShowAsync();
     }
+
+    void DialogService::SetWindow(const Window& window)
+    {
+        m_window = window;
+    }
+
 } // namespace winrt::Flense::implementation

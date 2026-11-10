@@ -26,6 +26,9 @@ namespace winrt::Flense::implementation
 #if defined(_DEBUG)
         AppMenuBar().Items().Append(winrt::Flense::DeveloperMenuBarItem());
 #endif
+
+        auto& dialogService = DialogService::Instance();
+        dialogService.SetWindow(*this);
     }
 
     winrt::Flense::TitleBarService MainWindow::TitleBarService()
@@ -59,7 +62,6 @@ namespace winrt::Flense::implementation
         }
 
         Controls::ContentDialog dialog;
-        dialog.XamlRoot(rootFrame().XamlRoot());
         dialog.Title(box_value(L"Close image analysis?"));
         dialog.Content(box_value(L"You'll return to the main screen."));
         dialog.PrimaryButtonText(L"Close");
