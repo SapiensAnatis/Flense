@@ -37,7 +37,7 @@ namespace
         if (!std::filesystem::exists(path))
         {
             throw std::runtime_error(
-                std::format("{} not found; run TestData/GenerateTestImages.ps1, then rebuild", path.string()));
+                std::format("{} not found; run TestData/GenerateTestData.ps1, then rebuild", path.string()));
         }
 
         return ParseImageArchive(path);
