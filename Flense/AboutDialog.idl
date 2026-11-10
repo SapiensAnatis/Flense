@@ -1,0 +1,13 @@
+import "License.idl";
+
+namespace Flense
+{
+    [default_interface]
+    runtimeclass AboutDialog : Microsoft.UI.Xaml.Controls.ContentDialog
+    {
+        AboutDialog();
+
+        String AppVersion { get; };
+        Windows.Foundation.Collections.IObservableVector<Flense.License> Licenses { get; };
+    }
+}

@@ -6,6 +6,7 @@
 #include "MainWindow.g.cpp"
 #endif
 
+#include "AboutDialog.xaml.h"
 #include "winrt/Flense.h"
 
 using namespace winrt;
@@ -78,5 +79,12 @@ namespace winrt::Flense::implementation
             detailsPage.CancelLoading();
             rootFrame().GoBack();
         }
+    }
+
+    winrt::fire_and_forget MainWindow::About_Click(const IInspectable& /* sender */, const RoutedEventArgs& /* e */)
+    {
+        Flense::AboutDialog dialog;
+
+        auto discard = co_await DialogService::Instance().ShowAsync(dialog);
     }
 } // namespace winrt::Flense::implementation

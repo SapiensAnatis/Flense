@@ -1,0 +1,12 @@
+namespace Flense
+{
+    [bindable]
+    [default_interface]
+    runtimeclass License 
+    {
+        License(String name, String notice);
+        
+        String Name { get; };
+        String Notice { get; };
+    }
+}
