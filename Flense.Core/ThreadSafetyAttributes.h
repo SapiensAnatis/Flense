@@ -1,4 +1,5 @@
-// Sourced from: https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#mutex-h
+// Adapted from https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#mutex-h
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #pragma once
 
