@@ -103,6 +103,9 @@
     <ClInclude Include="StringComparison.h">
       <Filter>Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="AppVersion.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">

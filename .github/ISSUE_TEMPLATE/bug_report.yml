@@ -1,0 +1,65 @@
+name: Bug report
+description: Something in Flense isn't working as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. If you opened this from Flense's "Report a bug" button, the environment fields below are already filled in.
+
+        This issue will be public, so please don't include the names of private images or registries.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What went wrong, and what did you expect to happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open an image saved with `docker save`
+        2. Expand the layer list
+        3. ...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: archive-format
+    attributes:
+      label: Image archive format
+      description: If the bug involves a specific image, how was it saved?
+      options:
+        - Not sure / not applicable
+        - Docker (docker save)
+        - OCI layout
+    validations:
+      required: false
+
+  - type: input
+    id: app-version
+    attributes:
+      label: Flense version
+      placeholder: "1.0.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: os-version
+    attributes:
+      label: Windows version
+      placeholder: "10.0.26200"
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, error messages, or other details.
+    validations:
+      required: false

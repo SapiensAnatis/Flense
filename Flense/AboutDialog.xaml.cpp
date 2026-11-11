@@ -5,6 +5,7 @@
 #include "AboutDialog.g.cpp"
 #endif
 
+#include "AppVersion.h"
 #include "License.h"
 
 import std;
@@ -38,15 +39,7 @@ namespace winrt::Flense::implementation
 
     hstring AboutDialog::AppVersion()
     {
-        static const hstring AppVersion = [] {
-            auto package = winrt::Windows::ApplicationModel::Package::Current();
-            auto version = package.Id().Version();
-
-            return winrt::hstring(
-                std::format(L"{}.{}.{}.{}", version.Major, version.Minor, version.Build, version.Revision));
-        }();
-
-        return AppVersion;
+        return GetAppVersionString();
     }
 
     winrt::fire_and_forget AboutDialog::LoadLicensesAsync()

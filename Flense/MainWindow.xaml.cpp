@@ -7,6 +7,7 @@
 #endif
 
 #include "AboutDialog.xaml.h"
+#include "AppVersion.h"
 #include "winrt/Flense.h"
 
 using namespace winrt;
@@ -86,5 +87,62 @@ namespace winrt::Flense::implementation
         Flense::AboutDialog dialog;
 
         auto discard = co_await DialogService::Instance().ShowAsync(dialog);
+    }
+
+    winrt::fire_and_forget MainWindow::ReportABug_Click(const winrt::Windows::Foundation::IInspectable& /* sender */,
+                                                        const winrt::Microsoft::UI::Xaml::RoutedEventArgs& /* e */)
+    {
+        static const hstring WindowsVersion = [] {
+            using winrt::Windows::System::Profile::AnalyticsInfo;
+
+            const std::string version = winrt::to_string(AnalyticsInfo::VersionInfo().DeviceFamilyVersion());
+
+            std::uint64_t packed = 0;
+            const auto [ptr, ec] =
+                std::from_chars(std::to_address(version.begin()), std::to_address(version.end()), packed);
+
+            if (ec != std::errc{})
+            {
+                return hstring(L"Unknown");
+            }
+
+            return hstring(std::format(L"{}.{}.{}.{}", (packed >> 48) & 0xFFFF, (packed >> 32) & 0xFFFF,
+                                       (packed >> 16) & 0xFFFF, packed & 0xFFFF));
+        }();
+
+        const std::wstring url = std::format(L"https://github.com/SapiensAnatis/Flense/issues/"
+                                             L"new?template=bug_report.yml&app-version={}&os-version={}",
+                                             GetAppVersionString(), WindowsVersion);
+
+        std::optional<hstring> error;
+
+        try
+        {
+            const bool launched =
+                co_await winrt::Windows::System::Launcher::LaunchUriAsync(winrt::Windows::Foundation::Uri{url});
+
+            if (!launched)
+            {
+                error = L"No app was available to open the link.";
+            }
+        }
+        catch (const hresult_error& ex)
+        {
+            error = ex.message();
+        }
+        catch (...)
+        {
+            error = L"Unknown error";
+        }
+
+        if (error)
+        {
+            Controls::ContentDialog dialog;
+            dialog.Title(box_value(L"Couldn't open browser"));
+            dialog.Content(box_value(*error));
+            dialog.CloseButtonText(L"OK");
+
+            co_await DialogService::Instance().ShowAsync(dialog);
+        }
     }
 } // namespace winrt::Flense::implementation
