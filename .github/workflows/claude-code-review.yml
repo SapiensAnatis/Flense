@@ -2,11 +2,23 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
+    types: [opened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
 
 jobs:
   claude-review:
-    if: github.event.pull_request.draft == false
+    # Comments must come from people with access to the repo, since anyone can comment on a public PR and this job
+    # spends the repo's Claude token.
+    if: >-
+      (github.event_name == 'pull_request' && !github.event.pull_request.draft) ||
+      (github.event.issue.pull_request &&
+       contains(github.event.comment.body, '@claude') &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -15,19 +27,20 @@ jobs:
       id-token: write
 
     steps:
+      # issue_comment runs against the default branch, so check out the PR's head explicitly.
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: refs/pull/${{ github.event.pull_request.number || github.event.issue.number }}/head
           fetch-depth: 1
 
       - name: Run Claude Code Review
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          track_progress: true
           prompt: |
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
 
             Review this pull request. Flense is a WinUI 3 app written in C++/WinRT; follow the
             conventions in CLAUDE.md.
@@ -44,5 +57,10 @@ jobs:
 
             Use inline comments for specific issues and a single top-level PR comment for an overall
             summary. Be concise and skip praise or nitpicks that don't affect behaviour.
+
+            If this review was requested by a comment, it is below and may ask you to focus on something specific.
+            It is empty if the review was triggered by the PR being opened.
+
+            ${{ github.event.comment.body }}
           claude_args: |
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"

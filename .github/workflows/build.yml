@@ -51,12 +51,6 @@ jobs:
           restore-keys: |
             vcpkg-${{ runner.os }}-
 
-      # Generate test data now so we don't have to checkout in the test job
-      - name: Generate test data
-        run: |
-          .\TestData\GenerateErrorCases.ps1
-          .\TestData\GenerateHandBuiltImages.ps1
-
       - name: Build
         run: .\Scripts\build-app.ps1 -Configuration ${{ matrix.configuration }} -OutputDirectory C:\build
 
@@ -78,21 +72,42 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Most changes don't touch TestData, so reuse the previous images rather than rebuilding them. This also stops
+      # upstream base image updates from silently changing the test inputs.
+      - name: Cache test images
+        id: images
+        uses: actions/cache@v4
+        with:
+          path: |
+            TestData/Images
+            TestData/ErrorCases
+          key: test-images-${{ hashFiles('TestData/**', '!TestData/Images/**', '!TestData/ErrorCases/**') }}
+
       - name: Set up Docker Buildx
+        if: steps.images.outputs.cache-hit != 'true'
         uses: docker/setup-buildx-action@v3
 
       - name: Set up Go
+        if: steps.images.outputs.cache-hit != 'true'
         uses: actions/setup-go@v5
         with:
           go-version-file: TestData/GoProject/go.mod
           cache: false
 
       - name: Install ko
-        run: go install github.com/google/ko@v0.18.0
+        if: steps.images.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/ko"
+          curl -sSfL https://github.com/ko-build/ko/releases/download/v0.18.0/ko_0.18.0_Linux_x86_64.tar.gz \
+            | tar -xz -C "$RUNNER_TEMP/ko" ko
+          echo "$RUNNER_TEMP/ko" >> "$GITHUB_PATH"
 
       - name: Generate test images
+        if: steps.images.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
+          ./TestData/GenerateErrorCases.ps1
+          ./TestData/GenerateHandBuiltImages.ps1
           ./TestData/GenerateTestImages.ps1
           ./TestData/GenerateKoImage.ps1
 
@@ -100,7 +115,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-images
-          path: TestData/Images
+          # Both paths share TestData as their root, so the artifact holds Images/ and ErrorCases/.
+          path: |
+            TestData/Images
+            TestData/ErrorCases
           if-no-files-found: error
           # The layers are already compressed, and the test job downloads them within minutes.
           compression-level: 0
@@ -127,7 +145,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-images
-          path: ${{ runner.temp }}\Flense.Core.Tests\TestData\Images
+          path: ${{ runner.temp }}\Flense.Core.Tests\TestData
 
       - name: Run Flense.Core.Tests
         # Backstop for the in-process per-test watchdog.
