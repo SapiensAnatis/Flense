@@ -6,7 +6,7 @@
     blobs/sha256 and a manifest.json at the root, and then archived by Write-Image.
 #>
 
-$Tar = Join-Path $env:SystemRoot 'System32\tar.exe'
+$Tar = if ($IsWindows) { Join-Path $env:SystemRoot 'System32\tar.exe' } else { 'tar' }
 $Utf8 = [System.Text.UTF8Encoding]::new($false)
 
 function New-StagingDirectory {
