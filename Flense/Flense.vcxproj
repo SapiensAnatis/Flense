@@ -130,6 +130,7 @@
       <DependentUpon>AboutDialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="AppVersion.h" />
     <ClInclude Include="BindingHelpers.h">
       <DependentUpon>BindingHelpers.idl</DependentUpon>
       <SubType>Code</SubType>

@@ -38,6 +38,7 @@
             </MenuBarItem>
             <MenuBarItem Title="Help">
                 <MenuFlyoutItem Click="About_Click" Text="About" />
+                <MenuFlyoutItem Click="ReportABug_Click" Text="Report a bug" />
             </MenuBarItem>
         </MenuBar>
 

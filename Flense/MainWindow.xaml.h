@@ -26,6 +26,9 @@ namespace winrt::Flense::implementation
                         const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
         winrt::fire_and_forget About_Click(const winrt::Windows::Foundation::IInspectable& sender,
                                            const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
+
+        winrt::fire_and_forget ReportABug_Click(const winrt::Windows::Foundation::IInspectable& sender,
+                                                const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
     };
 } // namespace winrt::Flense::implementation
 
