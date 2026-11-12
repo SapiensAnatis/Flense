@@ -22,11 +22,14 @@ namespace winrt::Flense::implementation
         void CancelLoadingButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
                                        const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
 
+        void LoadFailureBackButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
+                                         const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
+        void LoadFailureBackButton_Loaded(const winrt::Windows::Foundation::IInspectable& sender,
+                                          const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
+
         void CancelLoading();
 
       private:
-        winrt::Windows::Foundation::IAsyncAction ShowLoadFailureAsync(winrt::hstring message, winrt::hstring details);
-
         winrt::Flense::ImageDetailsViewModel m_viewModel;
         winrt::Windows::Foundation::IAsyncAction m_loadAsyncAction{nullptr};
     };

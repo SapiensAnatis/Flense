@@ -11,6 +11,8 @@ namespace Flense
         Windows.Foundation.Collections.IObservableVector<Flense.DockerEngineImage> Images { get; };
         Boolean IsLoading { get; };
         Boolean HasLoaded { get; };
+        Boolean HasFailed { get; };
+        String ErrorMessage { get; };
         String SearchQuery;
 
         Windows.Foundation.IAsyncAction LoadImageList();

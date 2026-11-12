@@ -1,8 +1,6 @@
 #include "pch.h"
 
-#include "DialogService.h"
 #include "ImageDetailsPage.xaml.h"
-#include "LoadFailureDialog.xaml.h"
 #include "TitleBarService.h"
 #if __has_include("ImageDetailsPage.g.cpp")
 #include "ImageDetailsPage.g.cpp"
@@ -61,28 +59,21 @@ namespace winrt::Flense::implementation
             }
         }
 
-        if (const winrt::hstring failure = m_viewModel.ErrorMessage(); !failure.empty())
-        {
-            co_await ShowLoadFailureAsync(failure, m_viewModel.ErrorDetails());
-        }
-
         m_loadAsyncAction = nullptr;
     }
 
-    IAsyncAction ImageDetailsPage::ShowLoadFailureAsync(winrt::hstring message, winrt::hstring details)
+    void ImageDetailsPage::LoadFailureBackButton_Click(const IInspectable& /* sender */, const RoutedEventArgs& /* e */)
     {
-        auto lifetime = get_strong();
-
-        Flense::LoadFailureDialog dialog;
-        dialog.Message(message);
-        dialog.Details(details);
-
-        const auto shown = co_await DialogService::Instance().ShowAsync(dialog) != nullptr;
-
-        if (shown && Frame().CanGoBack())
+        if (Frame().CanGoBack())
         {
             Frame().GoBack();
         }
+    }
+
+    void ImageDetailsPage::LoadFailureBackButton_Loaded(const IInspectable& sender, const RoutedEventArgs& /* e */)
+    {
+        // The Cancel button that may have held focus has just been hidden, so move focus somewhere useful.
+        sender.as<Controls::Button>().Focus(FocusState::Programmatic);
     }
 
     void ImageDetailsPage::OnNavigatedFrom(const NavigationEventArgs& /* e */)

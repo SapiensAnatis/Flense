@@ -34,6 +34,33 @@
                 Content="Cancel" />
         </StackPanel>
 
+        <StackPanel
+            x:Name="LoadFailurePanel"
+            MaxWidth="600"
+            VerticalAlignment="Center"
+            x:Load="{x:Bind ViewModel.HasFailed, Mode=OneWay}"
+            Spacing="20">
+            <TextBlock
+                HorizontalAlignment="Center"
+                Style="{ThemeResource SubtitleTextBlockStyle}"
+                Text="Couldn't load images"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                IsTextSelectionEnabled="True"
+                Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            <Button
+                x:Name="LoadFailureBackButton"
+                MinWidth="100"
+                HorizontalAlignment="Center"
+                Click="CancelButton_Click"
+                Content="Go back"
+                Loaded="LoadFailureBackButton_Loaded" />
+        </StackPanel>
+
         <Grid
             x:Name="ImageListGrid"
             MaxWidth="1400"

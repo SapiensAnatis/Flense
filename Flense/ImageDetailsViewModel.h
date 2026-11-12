@@ -17,7 +17,8 @@ namespace winrt::Flense::implementation
                                       winrt::single_threaded_observable_vector<winrt::Flense::ImageLayerWrapper>()),
               INIT_NOTIFYING_PROPERTY(IsLoading, true), INIT_NOTIFYING_PROPERTY(LoadingProgress, 0.0),
               INIT_NOTIFYING_PROPERTY(StatusMessage, L""), INIT_NOTIFYING_PROPERTY(ErrorMessage, L""),
-              INIT_NOTIFYING_PROPERTY(ErrorDetails, L""), INIT_NOTIFYING_PROPERTY(SearchQuery, L""),
+              INIT_NOTIFYING_PROPERTY(ErrorDetails, L""), INIT_NOTIFYING_PROPERTY(HasFailed, false),
+              INIT_NOTIFYING_PROPERTY(SearchQuery, L""),
               INIT_NOTIFYING_PROPERTY(ShowUnchanged, true), INIT_NOTIFYING_PROPERTY(ShowAdded, true),
               INIT_NOTIFYING_PROPERTY(ShowModified, true), INIT_NOTIFYING_PROPERTY(ShowRemoved, true)
         {
@@ -31,6 +32,7 @@ namespace winrt::Flense::implementation
         wil::single_threaded_notifying_property<winrt::hstring> StatusMessage;
         wil::single_threaded_notifying_property<winrt::hstring> ErrorMessage;
         wil::single_threaded_notifying_property<winrt::hstring> ErrorDetails;
+        wil::single_threaded_notifying_property<bool> HasFailed;
         wil::single_threaded_notifying_property<winrt::hstring> SearchQuery;
         wil::single_threaded_notifying_property<bool> ShowUnchanged;
         wil::single_threaded_notifying_property<bool> ShowAdded;

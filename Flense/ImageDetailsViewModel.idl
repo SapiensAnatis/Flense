@@ -23,6 +23,7 @@ namespace Flense
         Boolean ShowModified;
         Boolean ShowRemoved;
         String ErrorDetails { get; };
+        Boolean HasFailed { get; };
 
         Windows.Foundation.IAsyncAction LoadImageFromTarFileAsync(String tarPath);
         Windows.Foundation.IAsyncAction LoadImageFromEngineAsync(Flense.DockerEngineImage image);
