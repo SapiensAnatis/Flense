@@ -16,4 +16,13 @@ namespace winrt::Flense::implementation
     {
         return value && !negated;
     }
+
+    // This returns Visibility rather than bool because the XAML compiler generates C++ that doesn't compile
+    // when a function binding relies on the implicit bool to Visibility conversion.
+    winrt::Microsoft::UI::Xaml::Visibility BindingHelpers::VisibleIfNotEmpty(const winrt::hstring& value)
+    {
+        using winrt::Microsoft::UI::Xaml::Visibility;
+
+        return value.empty() ? Visibility::Collapsed : Visibility::Visible;
+    }
 } // namespace winrt::Flense::implementation

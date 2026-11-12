@@ -4,5 +4,6 @@ namespace Flense
     {
         static Boolean Not(Boolean value);
         static Boolean AndNot(Boolean value, Boolean negated);
+        static Microsoft.UI.Xaml.Visibility VisibleIfNotEmpty(String value);
     }
 }

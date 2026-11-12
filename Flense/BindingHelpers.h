@@ -8,6 +8,7 @@ namespace winrt::Flense::implementation
     {
         static bool Not(bool value);
         static bool AndNot(bool value, bool negated);
+        static winrt::Microsoft::UI::Xaml::Visibility VisibleIfNotEmpty(const winrt::hstring& value);
     };
 } // namespace winrt::Flense::implementation
 

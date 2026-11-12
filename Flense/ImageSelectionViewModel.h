@@ -19,7 +19,8 @@ namespace winrt::Flense::implementation
               INIT_DEBOUNCED_NOTIFYING_PROPERTY(
                   IsLoading, std::chrono::milliseconds(250),
                   false), // Start false so quick loads don't show the loading indicator at all
-              INIT_NOTIFYING_PROPERTY(HasLoaded, false),
+              INIT_NOTIFYING_PROPERTY(HasLoaded, false), INIT_NOTIFYING_PROPERTY(HasFailed, false),
+              INIT_NOTIFYING_PROPERTY(ErrorMessage, L""),
               m_searchDebouncer([this] { ApplySearchFilter(); }, std::chrono::milliseconds(300))
         {
         }
@@ -33,6 +34,9 @@ namespace winrt::Flense::implementation
         // Keeps the list unloaded until it has data, so a slow first load doesn't show it empty and then replace it
         // with the loading panel.
         wil::single_threaded_notifying_property<bool> HasLoaded;
+
+        wil::single_threaded_notifying_property<bool> HasFailed;
+        wil::single_threaded_notifying_property<winrt::hstring> ErrorMessage;
 
         // Manual search query property - needs to call debouncer on set
         winrt::hstring SearchQuery();

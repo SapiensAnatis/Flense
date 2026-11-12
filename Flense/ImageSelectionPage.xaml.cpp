@@ -1,6 +1,5 @@
 #include "pch.h"
 
-#include "DialogService.h"
 #include "ImageSelectionPage.xaml.h"
 #if __has_include("ImageSelectionPage.g.cpp")
 #include "ImageSelectionPage.g.cpp"
@@ -22,7 +21,6 @@ namespace winrt::Flense::implementation
 
         auto lifetime = get_strong();
 
-        winrt::hstring failure;
         bool cancelled = false;
 
         try
@@ -34,14 +32,6 @@ namespace winrt::Flense::implementation
         {
             cancelled = true;
         }
-        catch (const winrt::hresult_error& e)
-        {
-            failure = e.message();
-        }
-        catch (...)
-        {
-            failure = L"An unknown error occurred while loading images.";
-        }
 
         m_loadAsyncAction = nullptr;
 
@@ -50,26 +40,9 @@ namespace winrt::Flense::implementation
             co_return;
         }
 
-        if (cancelled)
+        if (cancelled && Frame().CanGoBack())
         {
-            if (Frame().CanGoBack())
-            {
-                Frame().GoBack();
-            }
-        }
-        else if (!failure.empty())
-        {
-            Controls::ContentDialog dialog;
-            dialog.Title(box_value(L"Couldn't load images"));
-            dialog.Content(box_value(failure));
-            dialog.CloseButtonText(L"OK");
-
-            const auto shown = co_await DialogService::Instance().ShowAsync(dialog) != nullptr;
-
-            if (shown && Frame().CanGoBack())
-            {
-                Frame().GoBack();
-            }
+            Frame().GoBack();
         }
     }
 
@@ -126,6 +99,13 @@ namespace winrt::Flense::implementation
         {
             SelectImage(selectedItem.as<Flense::DockerEngineImage>());
         }
+    }
+
+    void ImageSelectionPage::LoadFailureBackButton_Loaded(const winrt::Windows::Foundation::IInspectable& sender,
+                                                          const RoutedEventArgs& /* e */)
+    {
+        // The Cancel button that may have held focus has just been hidden, so move focus somewhere useful.
+        sender.as<Controls::Button>().Focus(FocusState::Programmatic);
     }
 
     void ImageSelectionPage::CancelButton_Click(const winrt::Windows::Foundation::IInspectable& /* sender */,

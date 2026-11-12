@@ -9,7 +9,10 @@
     mc:Ignorable="d">
 
     <Grid>
-        <Grid Padding="36" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}">
+        <Grid
+            x:Name="LoadingGrid"
+            Padding="36"
+            x:Load="{x:Bind local:BindingHelpers.AndNot(ViewModel.IsLoading, ViewModel.HasFailed), Mode=OneWay}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
@@ -40,6 +43,46 @@
             </StackPanel>
         </Grid>
 
+        <StackPanel
+            x:Name="LoadFailurePanel"
+            MaxWidth="600"
+            Padding="36"
+            VerticalAlignment="Center"
+            x:Load="{x:Bind ViewModel.HasFailed, Mode=OneWay}"
+            Spacing="20">
+            <TextBlock
+                HorizontalAlignment="Center"
+                Style="{ThemeResource SubtitleTextBlockStyle}"
+                Text="Couldn't open this image"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+
+            <Border
+                Padding="8"
+                HorizontalAlignment="Center"
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                CornerRadius="4"
+                Visibility="{x:Bind local:BindingHelpers.VisibleIfNotEmpty(ViewModel.ErrorDetails), Mode=OneWay}">
+                <TextBlock
+                    FontFamily="Cascadia Mono, Consolas"
+                    IsTextSelectionEnabled="True"
+                    Text="{x:Bind ViewModel.ErrorDetails, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+            </Border>
+
+            <Button
+                x:Name="LoadFailureBackButton"
+                MinWidth="100"
+                HorizontalAlignment="Center"
+                Click="LoadFailureBackButton_Click"
+                Content="Go back"
+                Loaded="LoadFailureBackButton_Loaded" />
+        </StackPanel>
 
         <Grid
             x:Name="ImageDetailsGrid"

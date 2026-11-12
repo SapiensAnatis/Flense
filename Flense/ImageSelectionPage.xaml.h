@@ -31,6 +31,8 @@ namespace winrt::Flense::implementation
                                     const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
         void CancelButton_Click(const winrt::Windows::Foundation::IInspectable& sender,
                                 const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
+        void LoadFailureBackButton_Loaded(const winrt::Windows::Foundation::IInspectable& sender,
+                                          const winrt::Microsoft::UI::Xaml::RoutedEventArgs& e);
 
       private:
         void CancelLoading();

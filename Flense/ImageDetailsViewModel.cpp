@@ -231,10 +231,11 @@ namespace winrt::Flense::implementation
         // reported here, back on the thread that owns the properties.
         co_await wil::resume_foreground(dispatcher);
 
-        // IsLoading deliberately stays true: clearing it swaps in the content grid, and a frame of
-        // empty layer list and empty tree can render before the page navigates away.
+        // IsLoading deliberately stays true, because clearing it would load the content grid with nothing
+        // to show. HasFailed is what swaps the progress panel for the failure panel.
         ErrorDetails(failureDetails);
         ErrorMessage(failure);
+        HasFailed(true);
     }
 
     winrt::Flense::FilesystemChangeVisibility ImageDetailsViewModel::BuildChangeVisibility(bool showUnchanged,

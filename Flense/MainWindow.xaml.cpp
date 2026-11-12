@@ -54,7 +54,7 @@ namespace winrt::Flense::implementation
         auto lifetime = get_strong();
 
         auto detailsPage = rootFrame().Content().try_as<winrt::Flense::ImageDetailsPage>();
-        if (!detailsPage)
+        if (!detailsPage || detailsPage.ViewModel().HasFailed())
         {
             if (rootFrame().CanGoBack())
             {

@@ -27,6 +27,8 @@ namespace winrt::Flense::implementation
         auto lifetime = get_strong();
         auto dispatcher = DispatcherQueue::GetForCurrentThread();
 
+        HasFailed = false;
+        ErrorMessage = L"";
         IsLoading = true;
 
         auto cancellation = co_await get_cancellation_token();
@@ -40,6 +42,8 @@ namespace winrt::Flense::implementation
         ::Flense::Core::DockerClient dockerClient;
 
         std::vector<::Flense::Core::DockerEngineImage> images;
+        winrt::hstring failure;
+
         try
         {
             images = dockerClient.ListImages(stopSource.get_token());
@@ -48,22 +52,42 @@ namespace winrt::Flense::implementation
         {
             throw winrt::hresult_canceled();
         }
+        catch (const winrt::hresult_canceled&)
+        {
+            throw;
+        }
+        catch (const winrt::hresult_error& ex)
+        {
+            failure = ex.message();
+        }
         catch (const std::system_error& ex)
         {
             // The engine's named pipe only exists while the daemon is running.
             if (ex.code() == std::error_code(ERROR_FILE_NOT_FOUND, std::system_category()))
             {
-                throw winrt::hresult_error(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND),
-                                           L"Couldn't connect to Docker. Ensure Docker Desktop is running.");
+                failure = L"Couldn't connect to Docker. Ensure Docker Desktop is running.";
             }
-
-            throw winrt::hresult_error(E_FAIL, winrt::to_hstring(ex.what()));
+            else
+            {
+                failure = winrt::to_hstring(ex.what());
+            }
         }
         catch (const std::exception& ex)
         {
-            // WIL's C++/WinRT integration turns a std::exception escaping a coroutine into a generic
-            // ERROR_UNHANDLED_EXCEPTION and discards its message, so convert it while we still have the text.
-            throw winrt::hresult_error(E_FAIL, winrt::to_hstring(ex.what()));
+            failure = winrt::to_hstring(ex.what());
+        }
+
+        if (!failure.empty())
+        {
+            // A co_await can't appear in a handler, so the failure is carried out of the catch blocks and
+            // reported here, back on the thread that owns the properties.
+            co_await wil::resume_foreground(dispatcher);
+
+            ErrorMessage = failure;
+            HasFailed = true;
+            IsLoading = false;
+
+            co_return;
         }
 
         auto localAllImages = images | std::views::transform([](const auto& image) {
