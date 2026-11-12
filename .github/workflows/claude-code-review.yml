@@ -6,12 +6,14 @@ on:
   issue_comment:
     types: [created]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number }}
-  cancel-in-progress: true
-
 jobs:
   claude-review:
+    # This is set on the job rather than the workflow so that it only applies once the `if` below has passed.
+    # At workflow level, the comments Claude posts during a review start a run that is skipped by the `if`,
+    # but joins the group first and cancels the review that posted them.
+    concurrency:
+      group: claude-review-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: true
     # Comments must come from people with access to the repo, since anyone can comment on a public PR and this job
     # spends the repo's Claude token.
     if: >-
