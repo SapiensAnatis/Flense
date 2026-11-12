@@ -48,7 +48,10 @@ namespace Flense::Core
         /// <returns>A value indicating whether the blob looks like a JSON object.</returns>
         bool LooksLikeJsonObject(const std::string_view prefix)
         {
-            const auto it = std::ranges::find_if(prefix, [](char c) { return !IsSpaceOrTab(c); });
+            static constexpr std::string_view Utf8Bom = "\xEF\xBB\xBF";
+
+            const auto it = std::ranges::find_if(
+                prefix, [](char c) { return !IsSpaceOrTab(c) && c != '\n' && c != '\r' && !Utf8Bom.contains(c); });
             return it != prefix.end() && *it == '{';
         }
 
